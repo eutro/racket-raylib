@@ -545,7 +545,8 @@
 ;; Show trace log messages (LOG_DEBUG, LOG_INFO, LOG_WARNING, LOG_ERROR...)
 (define-raylib TraceLog
   (_fun
-   #:varargs-after 2   [logLevel : _int]
+   #:varargs-after 2
+   [logLevel : _int]
    [text : _string]
    ;; ... varargs
 
@@ -2471,7 +2472,8 @@
 ;; Text formatting with variables (sprintf() style)
 (define-raylib TextFormat
   (_fun
-   #:varargs-after 1   [text : _string]
+   #:varargs-after 1
+   [text : _string]
    ;; ... varargs
 
    -> _string))

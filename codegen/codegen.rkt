@@ -149,7 +149,7 @@
       (printf ";; ~a\n" description))
     (printf "(define-raylib ~a\n  (_fun\n" name)
     (when varargs
-      (printf "   #:varargs-after ~a" (length parameters)))
+      (printf "   #:varargs-after ~a\n" (length parameters)))
     (write-params parameters)
     (when varargs
       (displayln "   ;; ... varargs\n"))
