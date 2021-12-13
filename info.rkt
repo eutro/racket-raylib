@@ -1,5 +1,5 @@
 #lang info
-(define collection "raylib-2dx")
+(define collection "raylib")
 (define deps '("base"))
 (define build-deps '("scribble-lib" "racket-doc" "rackunit-lib"))
 (define scribblings '())

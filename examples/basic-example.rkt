@@ -1,7 +1,7 @@
 #!/usr/bin/env racket
 #lang racket
 
-(require raylib-2dx)
+(require raylib)
 
 #<<EOF
 #include "raylib.h"
