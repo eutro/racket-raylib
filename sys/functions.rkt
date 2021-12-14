@@ -151,6 +151,16 @@
   (_fun
    -> _int))
 
+;; Get current render width (it considers HiDPI)
+(define-raylib GetRenderWidth
+  (_fun
+   -> _int))
+
+;; Get current render height (it considers HiDPI)
+(define-raylib GetRenderHeight
+  (_fun
+   -> _int))
+
 ;; Get number of connected monitors
 (define-raylib GetMonitorCount
   (_fun
