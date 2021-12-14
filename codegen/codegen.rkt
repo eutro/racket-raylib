@@ -73,7 +73,9 @@
         (api-function->binding api-function))))
   (void))
 
-(define raylib-raw-root (make-parameter "https://raw.githubusercontent.com/raysan5/raylib/master"))
+(define raylib-raw-root
+  (make-parameter (or (getenv "RAYLIB_RAW_ROOT")
+                      "https://raw.githubusercontent.com/raysan5/raylib/master")))
 
 (define (fetch-api-url path)
   (define res-url (format "~a/~a" (raylib-raw-root) path))
