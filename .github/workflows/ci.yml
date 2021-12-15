@@ -16,9 +16,9 @@ jobs:
           distribution: full
           variant: ${{ matrix.racket-variant }}
           version: ${{ matrix.racket-version }}
-      - name: Installing racket-raylib-2dx and its dependencies
-        run: raco pkg install --no-docs --auto --name racket-raylib-2dx
-      - name: Compiling racket-raylib-2dx and building its docs
-        run: raco setup --check-pkg-deps --unused-pkg-deps racket-raylib-2dx
-      - name: Testing racket-raylib-2dx
-        run: raco test -x -p racket-raylib-2dx
+      - name: Installing racket-raylib and its dependencies
+        run: raco pkg install --no-docs --auto --name raylib
+      - name: Compiling racket-raylib and building its docs
+        run: raco setup --check-pkg-deps --unused-pkg-deps raylib
+      - name: Testing raylib
+        run: raco test -x -p raylib
