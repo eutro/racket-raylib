@@ -60,7 +60,9 @@
     (define functions-parsed
       (map parse-function (filter pair? (se-path*/list '(Functions) api-xexpr))))
     (when functions-rkt-port
-      (write-function-bindings functions-rkt-port functions-parsed)))
+      (write-function-bindings functions-rkt-port functions-parsed))
+    (when functions-doc-port
+      (write-function-docs functions-doc-port functions-parsed)))
   (void))
 
 (define raylib-raw-root
@@ -160,6 +162,20 @@
     (for ([api-function functions-parsed])
       (newline)
       (api-function->binding api-function))))
+
+(define (api-function->docs parsed)
+  (match-define (api-function name description return-type parameters varargs) parsed)
+  (printf "@defproc[(~a) any?]{\n~a\n}\n" name description))
+
+(define (write-function-docs port functions-parsed)
+  (parameterize ([current-output-port port])
+    (display "#lang scribble/manual\n\n")
+    (display "@(require (for-label raylib/sys/functions ffi/unsafe racket/base))\n\n")
+    (display "@title{Functions}\n")
+    (display "@defmodule[raylib/sys/functions]\n")
+    (for ([api-function functions-parsed])
+      (newline)
+      (api-function->docs api-function))))
 
 ;;; Structs
 
