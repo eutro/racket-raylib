@@ -4,17 +4,20 @@
 
 (provide (all-defined-out))
 
+;; Vector2, 2 components
 (define-cstruct _Vector2
   ([x _float] ; Vector x component
    [y _float] ; Vector y component
    ))
 
+;; Vector3, 3 components
 (define-cstruct _Vector3
   ([x _float] ; Vector x component
    [y _float] ; Vector y component
    [z _float] ; Vector z component
    ))
 
+;; Vector4, 4 components
 (define-cstruct _Vector4
   ([x _float] ; Vector x component
    [y _float] ; Vector y component
@@ -24,6 +27,7 @@
 
 (define _Quaternion _Vector4)
 
+;; Matrix, 4x4 components, column major, OpenGL style, right handed
 (define-cstruct _Matrix
   ([m0 _float] [m4 _float] [m8 _float] [m12 _float] ; Matrix first row (4 components)
    [m1 _float] [m5 _float] [m9 _float] [m13 _float] ; Matrix second row (4 components)
@@ -31,6 +35,7 @@
    [m3 _float] [m7 _float] [m11 _float] [m15 _float] ; Matrix fourth row (4 components)
    ))
 
+;; Color, 4 components, R8G8B8A8 (32bit)
 (define-cstruct _Color
   ([r _ubyte] ; Color red value
    [g _ubyte] ; Color green value
@@ -38,6 +43,7 @@
    [a _ubyte] ; Color alpha value
    ))
 
+;; Rectangle, 4 components
 (define-cstruct _Rectangle
   ([x _float] ; Rectangle top-left corner position x
    [y _float] ; Rectangle top-left corner position y
@@ -45,6 +51,7 @@
    [height _float] ; Rectangle height
    ))
 
+;; Image, pixel data stored in CPU memory (RAM)
 (define-cstruct _Image
   ([data _pointer #;"void *"] ; Image raw data
    [width _int] ; Image base width
@@ -53,6 +60,7 @@
    [format _int] ; Data format (PixelFormat type)
    ))
 
+;; Texture, tex data stored in GPU memory (VRAM)
 (define-cstruct _Texture
   ([id _uint] ; OpenGL texture id
    [width _int] ; Texture base width
@@ -65,6 +73,7 @@
 
 (define _TextureCubemap _Texture)
 
+;; RenderTexture, fbo for texture rendering
 (define-cstruct _RenderTexture
   ([id _uint] ; OpenGL framebuffer object id
    [texture _Texture] ; Color buffer attachment texture
@@ -73,6 +82,7 @@
 
 (define _RenderTexture2D _RenderTexture)
 
+;; NPatchInfo, n-patch layout info
 (define-cstruct _NPatchInfo
   ([source _Rectangle] ; Texture source rectangle
    [left _int] ; Left border offset
@@ -82,6 +92,7 @@
    [layout _int] ; Layout of the n-patch: 3x3, 1x3 or 3x1
    ))
 
+;; GlyphInfo, font characters glyphs info
 (define-cstruct _GlyphInfo
   ([value _int] ; Character value (Unicode)
    [offsetX _int] ; Character offset X when drawing
@@ -90,6 +101,7 @@
    [image _Image] ; Character image data
    ))
 
+;; Font, font texture and GlyphInfo array data
 (define-cstruct _Font
   ([baseSize _int] ; Base size (default chars height)
    [glyphCount _int] ; Number of glyph characters
@@ -99,6 +111,7 @@
    [glyphs _pointer #;"GlyphInfo *"] ; Glyphs info data
    ))
 
+;; Camera, defines position/orientation in 3d space
 (define-cstruct _Camera3D
   ([position _Vector3] ; Camera position
    [target _Vector3] ; Camera target it looks-at
@@ -109,6 +122,7 @@
 
 (define _Camera _Camera3D)
 
+;; Camera2D, defines position/orientation in 2d space
 (define-cstruct _Camera2D
   ([offset _Vector2] ; Camera offset (displacement from target)
    [target _Vector2] ; Camera target (rotation and zoom origin)
@@ -116,6 +130,7 @@
    [zoom _float] ; Camera zoom (scaling), should be 1.0f by default
    ))
 
+;; Mesh, vertex data and vao/vbo
 (define-cstruct _Mesh
   ([vertexCount _int] ; Number of vertices stored in arrays
    [triangleCount _int] ; Number of triangles stored (indexed or not)
@@ -134,34 +149,40 @@
    [vboId _pointer #;"unsigned int *"] ; OpenGL Vertex Buffer Objects id (default vertex data)
    ))
 
+;; Shader
 (define-cstruct _Shader
   ([id _uint] ; Shader program id
    [locs _pointer #;"int *"] ; Shader locations array (RL_MAX_SHADER_LOCATIONS)
    ))
 
+;; MaterialMap
 (define-cstruct _MaterialMap
   ([texture _Texture2D] ; Material map texture
    [color _Color] ; Material map color
    [value _float] ; Material map value
    ))
 
+;; Material, includes shader and maps
 (define-cstruct _Material
   ([shader _Shader] ; Material shader
    [maps _pointer #;"MaterialMap *"] ; Material maps array (MAX_MATERIAL_MAPS)
    [params (_array _float 4)] ; Material generic parameters (if required)
    ))
 
+;; Transform, vectex transformation data
 (define-cstruct _Transform
   ([translation _Vector3] ; Translation
    [rotation _Quaternion] ; Rotation
    [scale _Vector3] ; Scale
    ))
 
+;; Bone, skeletal animation bone
 (define-cstruct _BoneInfo
   ([name (_array _byte 32)] ; Bone name
    [parent _int] ; Bone parent
    ))
 
+;; Model, meshes, materials and animation data
 (define-cstruct _Model
   ([transform _Matrix] ; Local transform matrix
    [meshCount _int] ; Number of meshes
@@ -174,6 +195,7 @@
    [bindPose _pointer #;"Transform *"] ; Bones base transformation (pose)
    ))
 
+;; ModelAnimation
 (define-cstruct _ModelAnimation
   ([boneCount _int] ; Number of bones
    [frameCount _int] ; Number of animation frames
@@ -181,11 +203,13 @@
    [framePoses _pointer #;"Transform **"] ; Poses array by frame
    ))
 
+;; Ray, ray for raycasting
 (define-cstruct _Ray
   ([position _Vector3] ; Ray position (origin)
    [direction _Vector3] ; Ray direction
    ))
 
+;; RayCollision, ray hit information
 (define-cstruct _RayCollision
   ([hit _bool] ; Did the ray hit something?
    [distance _float] ; Distance to nearest hit
@@ -193,11 +217,13 @@
    [normal _Vector3] ; Surface normal of hit
    ))
 
+;; BoundingBox
 (define-cstruct _BoundingBox
   ([min _Vector3] ; Minimum vertex box-corner
    [max _Vector3] ; Maximum vertex box-corner
    ))
 
+;; Wave, audio wave data
 (define-cstruct _Wave
   ([frameCount _uint] ; Total number of frames (considering channels)
    [sampleRate _uint] ; Frequency (samples per second)
@@ -206,6 +232,7 @@
    [data _pointer #;"void *"] ; Buffer data pointer
    ))
 
+;; AudioStream, custom audio stream
 (define-cstruct _AudioStream
   ([buffer _pointer #;"rAudioBuffer *"] ; Pointer to internal data used by the audio system
    [sampleRate _uint] ; Frequency (samples per second)
@@ -213,11 +240,13 @@
    [channels _uint] ; Number of channels (1-mono, 2-stereo, ...)
    ))
 
+;; Sound
 (define-cstruct _Sound
   ([stream _AudioStream] ; Audio stream
    [frameCount _uint] ; Total number of frames (considering channels)
    ))
 
+;; Music, audio stream, anything longer than ~10 seconds should be streamed
 (define-cstruct _Music
   ([stream _AudioStream] ; Audio stream
    [frameCount _uint] ; Total number of frames (considering channels)
@@ -226,6 +255,7 @@
    [ctxData _pointer #;"void *"] ; Audio context data, depends on type
    ))
 
+;; VrDeviceInfo, Head-Mounted-Display device parameters
 (define-cstruct _VrDeviceInfo
   ([hResolution _int] ; Horizontal resolution in pixels
    [vResolution _int] ; Vertical resolution in pixels
@@ -239,6 +269,7 @@
    [chromaAbCorrection (_array _float 4)] ; Chromatic aberration correction parameters
    ))
 
+;; VrStereoConfig, VR stereo rendering configuration for simulator
 (define-cstruct _VrStereoConfig
   ([projection (_array _Matrix 2)] ; VR projection matrices (per eye)
    [viewOffset (_array _Matrix 2)] ; VR view offset matrices (per eye)
@@ -255,7 +286,7 @@
    [logLevel : _int]
    [text : _string]
    [args : _byte #;"va_list"]
-   -> _void ))
+   -> _void))
 
 (define _LoadFileDataCallback
   (_fun
@@ -268,7 +299,7 @@
    [fileName : _string]
    [data : _pointer #;"void *"]
    [bytesToWrite : _uint]
-   -> _bool ))
+   -> _bool))
 
 (define _LoadFileTextCallback
   (_fun
@@ -279,4 +310,4 @@
   (_fun
    [fileName : _string]
    [text : _pointer #;"char *"]
-   -> _bool ))
+   -> _bool))
