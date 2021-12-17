@@ -53,7 +53,9 @@
   (when (or enums-rkt-port enums-doc-port)
     (define enums-parsed (map parse-enum (hash-ref api-json 'enums)))
     (when enums-rkt-port
-      (write-enum-bindings enums-rkt-port enums-parsed)))
+      (write-enum-bindings enums-rkt-port enums-parsed))
+    (when enums-doc-port
+      (write-enum-docs enums-doc-port enums-parsed)))
   (when (or functions-rkt-port functions-doc-port)
     (define functions-parsed
       (map parse-function (filter pair? (se-path*/list '(Functions) api-xexpr))))
@@ -325,7 +327,7 @@
                            function-typedefs-parsed)
   (parameterize ([current-output-port port])
     (display "#lang scribble/manual\n\n")
-    (display "@(require (for-label raylib/sys/structs ffi/unsafe))\n\n")
+    (display "@(require (for-label raylib/sys/structs ffi/unsafe racket/base))\n\n")
     (display "@title{Structs}\n")
     (display "@defmodule[raylib/sys/structs]\n")
     (for ([api-struct structs-parsed])
@@ -367,10 +369,15 @@
   (for ([enum-value enum-values])
     (match-define (api-enum-value name enum-desc enum-int-value) enum-value)
     (printf "~a = ~a" name enum-int-value)
-    (when enum-desc
-      (printf " ; ~a" enum-desc))
     (printf "\n           "))
-  (display ")))\n"))
+  (display ")))")
+  (for ([enum-value enum-values])
+    (match-define (api-enum-value name enum-desc enum-int-value) enum-value)
+    (newline)
+    (printf "(define ~a ~a)" name enum-int-value)
+    (when enum-desc
+      (printf " ; ~a" enum-desc)))
+  (newline))
 
 (define (write-enum-bindings port enums-parsed)
   (parameterize ([current-output-port port])
@@ -378,3 +385,23 @@
     (for ([api-enum enums-parsed])
       (newline)
       (api-enum->binding api-enum))))
+
+(define (api-enum->docs parsed)
+  (match-define (api-enum name description enum-values) parsed)
+  (printf "@section{~a}\n" description)
+  (printf "@defthing[_~a ctype?]{~a}" name description)
+  (for ([enum-value enum-values])
+    (match-define (api-enum-value name enum-desc enum-int-value) enum-value)
+    (newline)
+    (printf "@defthing[~a exact-integer? #:value ~a ~s]" name enum-int-value enum-desc))
+  (newline))
+
+(define (write-enum-docs port enums-parsed)
+  (parameterize ([current-output-port port])
+    (display "#lang scribble/manual\n\n")
+    (display "@(require (for-label raylib/sys/enums ffi/unsafe racket/base))\n\n")
+    (display "@title{Enums}\n")
+    (display "@defmodule[raylib/sys/enums]\n")
+    (for ([api-enum enums-parsed])
+      (newline)
+      (api-enum->docs api-enum))))

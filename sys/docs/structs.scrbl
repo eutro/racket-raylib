@@ -1,6 +1,6 @@
 #lang scribble/manual
 
-@(require (for-label raylib/sys/structs ffi/unsafe))
+@(require (for-label raylib/sys/structs ffi/unsafe racket/base))
 
 @title{Structs}
 @defmodule[raylib/sys/structs]
