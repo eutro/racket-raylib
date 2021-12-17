@@ -1,1962 +1,3506 @@
 #lang scribble/manual
 
-@(require (for-label raylib/sys/functions ffi/unsafe racket/base))
+@(require (for-label raylib/sys/functions raylib/sys/structs ffi/unsafe racket/base))
 
 @title{Functions}
 @defmodule[raylib/sys/functions]
 
-@defproc[(InitWindow) any?]{
+@defproc[(InitWindow
+          [width _int]
+          [height _int]
+          [title _string])
+         _void]{
 Initialize window and OpenGL context
 }
 
-@defproc[(WindowShouldClose) any?]{
+@defproc[(WindowShouldClose)
+         _bool]{
 Check if KEY_ESCAPE pressed or Close icon pressed
 }
 
-@defproc[(CloseWindow) any?]{
+@defproc[(CloseWindow)
+         _void]{
 Close window and unload OpenGL context
 }
 
-@defproc[(IsWindowReady) any?]{
+@defproc[(IsWindowReady)
+         _bool]{
 Check if window has been initialized successfully
 }
 
-@defproc[(IsWindowFullscreen) any?]{
+@defproc[(IsWindowFullscreen)
+         _bool]{
 Check if window is currently fullscreen
 }
 
-@defproc[(IsWindowHidden) any?]{
+@defproc[(IsWindowHidden)
+         _bool]{
 Check if window is currently hidden (only PLATFORM_DESKTOP)
 }
 
-@defproc[(IsWindowMinimized) any?]{
+@defproc[(IsWindowMinimized)
+         _bool]{
 Check if window is currently minimized (only PLATFORM_DESKTOP)
 }
 
-@defproc[(IsWindowMaximized) any?]{
+@defproc[(IsWindowMaximized)
+         _bool]{
 Check if window is currently maximized (only PLATFORM_DESKTOP)
 }
 
-@defproc[(IsWindowFocused) any?]{
+@defproc[(IsWindowFocused)
+         _bool]{
 Check if window is currently focused (only PLATFORM_DESKTOP)
 }
 
-@defproc[(IsWindowResized) any?]{
+@defproc[(IsWindowResized)
+         _bool]{
 Check if window has been resized last frame
 }
 
-@defproc[(IsWindowState) any?]{
+@defproc[(IsWindowState
+          [flag _uint])
+         _bool]{
 Check if one specific window flag is enabled
 }
 
-@defproc[(SetWindowState) any?]{
+@defproc[(SetWindowState
+          [flags _uint])
+         _void]{
 Set window configuration state using flags
 }
 
-@defproc[(ClearWindowState) any?]{
+@defproc[(ClearWindowState
+          [flags _uint])
+         _void]{
 Clear window configuration state flags
 }
 
-@defproc[(ToggleFullscreen) any?]{
+@defproc[(ToggleFullscreen)
+         _void]{
 Toggle window state: fullscreen/windowed (only PLATFORM_DESKTOP)
 }
 
-@defproc[(MaximizeWindow) any?]{
+@defproc[(MaximizeWindow)
+         _void]{
 Set window state: maximized, if resizable (only PLATFORM_DESKTOP)
 }
 
-@defproc[(MinimizeWindow) any?]{
+@defproc[(MinimizeWindow)
+         _void]{
 Set window state: minimized, if resizable (only PLATFORM_DESKTOP)
 }
 
-@defproc[(RestoreWindow) any?]{
+@defproc[(RestoreWindow)
+         _void]{
 Set window state: not minimized/maximized (only PLATFORM_DESKTOP)
 }
 
-@defproc[(SetWindowIcon) any?]{
+@defproc[(SetWindowIcon
+          [image _Image])
+         _void]{
 Set icon for window (only PLATFORM_DESKTOP)
 }
 
-@defproc[(SetWindowTitle) any?]{
+@defproc[(SetWindowTitle
+          [title _string])
+         _void]{
 Set title for window (only PLATFORM_DESKTOP)
 }
 
-@defproc[(SetWindowPosition) any?]{
+@defproc[(SetWindowPosition
+          [x _int]
+          [y _int])
+         _void]{
 Set window position on screen (only PLATFORM_DESKTOP)
 }
 
-@defproc[(SetWindowMonitor) any?]{
+@defproc[(SetWindowMonitor
+          [monitor _int])
+         _void]{
 Set monitor for the current window (fullscreen mode)
 }
 
-@defproc[(SetWindowMinSize) any?]{
+@defproc[(SetWindowMinSize
+          [width _int]
+          [height _int])
+         _void]{
 Set window minimum dimensions (for FLAG_WINDOW_RESIZABLE)
 }
 
-@defproc[(SetWindowSize) any?]{
+@defproc[(SetWindowSize
+          [width _int]
+          [height _int])
+         _void]{
 Set window dimensions
 }
 
-@defproc[(GetWindowHandle) any?]{
+@defproc[(GetWindowHandle)
+         _pointer #;"void *"]{
 Get native window handle
 }
 
-@defproc[(GetScreenWidth) any?]{
+@defproc[(GetScreenWidth)
+         _int]{
 Get current screen width
 }
 
-@defproc[(GetScreenHeight) any?]{
+@defproc[(GetScreenHeight)
+         _int]{
 Get current screen height
 }
 
-@defproc[(GetRenderWidth) any?]{
+@defproc[(GetRenderWidth)
+         _int]{
 Get current render width (it considers HiDPI)
 }
 
-@defproc[(GetRenderHeight) any?]{
+@defproc[(GetRenderHeight)
+         _int]{
 Get current render height (it considers HiDPI)
 }
 
-@defproc[(GetMonitorCount) any?]{
+@defproc[(GetMonitorCount)
+         _int]{
 Get number of connected monitors
 }
 
-@defproc[(GetCurrentMonitor) any?]{
+@defproc[(GetCurrentMonitor)
+         _int]{
 Get current connected monitor
 }
 
-@defproc[(GetMonitorPosition) any?]{
+@defproc[(GetMonitorPosition
+          [monitor _int])
+         _Vector2]{
 Get specified monitor position
 }
 
-@defproc[(GetMonitorWidth) any?]{
+@defproc[(GetMonitorWidth
+          [monitor _int])
+         _int]{
 Get specified monitor width (max available by monitor)
 }
 
-@defproc[(GetMonitorHeight) any?]{
+@defproc[(GetMonitorHeight
+          [monitor _int])
+         _int]{
 Get specified monitor height (max available by monitor)
 }
 
-@defproc[(GetMonitorPhysicalWidth) any?]{
+@defproc[(GetMonitorPhysicalWidth
+          [monitor _int])
+         _int]{
 Get specified monitor physical width in millimetres
 }
 
-@defproc[(GetMonitorPhysicalHeight) any?]{
+@defproc[(GetMonitorPhysicalHeight
+          [monitor _int])
+         _int]{
 Get specified monitor physical height in millimetres
 }
 
-@defproc[(GetMonitorRefreshRate) any?]{
+@defproc[(GetMonitorRefreshRate
+          [monitor _int])
+         _int]{
 Get specified monitor refresh rate
 }
 
-@defproc[(GetWindowPosition) any?]{
+@defproc[(GetWindowPosition)
+         _Vector2]{
 Get window position XY on monitor
 }
 
-@defproc[(GetWindowScaleDPI) any?]{
+@defproc[(GetWindowScaleDPI)
+         _Vector2]{
 Get window scale DPI factor
 }
 
-@defproc[(GetMonitorName) any?]{
+@defproc[(GetMonitorName
+          [monitor _int])
+         _string]{
 Get the human-readable, UTF-8 encoded name of the primary monitor
 }
 
-@defproc[(SetClipboardText) any?]{
+@defproc[(SetClipboardText
+          [text _string])
+         _void]{
 Set clipboard text content
 }
 
-@defproc[(GetClipboardText) any?]{
+@defproc[(GetClipboardText)
+         _string]{
 Get clipboard text content
 }
 
-@defproc[(SwapScreenBuffer) any?]{
+@defproc[(SwapScreenBuffer)
+         _void]{
 Swap back buffer with front buffer (screen drawing)
 }
 
-@defproc[(PollInputEvents) any?]{
+@defproc[(PollInputEvents)
+         _void]{
 Register all input events
 }
 
-@defproc[(WaitTime) any?]{
+@defproc[(WaitTime
+          [ms _float])
+         _void]{
 Wait for some milliseconds (halt program execution)
 }
 
-@defproc[(ShowCursor) any?]{
+@defproc[(ShowCursor)
+         _void]{
 Shows cursor
 }
 
-@defproc[(HideCursor) any?]{
+@defproc[(HideCursor)
+         _void]{
 Hides cursor
 }
 
-@defproc[(IsCursorHidden) any?]{
+@defproc[(IsCursorHidden)
+         _bool]{
 Check if cursor is not visible
 }
 
-@defproc[(EnableCursor) any?]{
+@defproc[(EnableCursor)
+         _void]{
 Enables cursor (unlock cursor)
 }
 
-@defproc[(DisableCursor) any?]{
+@defproc[(DisableCursor)
+         _void]{
 Disables cursor (lock cursor)
 }
 
-@defproc[(IsCursorOnScreen) any?]{
+@defproc[(IsCursorOnScreen)
+         _bool]{
 Check if cursor is on the screen
 }
 
-@defproc[(ClearBackground) any?]{
+@defproc[(ClearBackground
+          [color _Color])
+         _void]{
 Set background color (framebuffer clear color)
 }
 
-@defproc[(BeginDrawing) any?]{
+@defproc[(BeginDrawing)
+         _void]{
 Setup canvas (framebuffer) to start drawing
 }
 
-@defproc[(EndDrawing) any?]{
+@defproc[(EndDrawing)
+         _void]{
 End canvas drawing and swap buffers (double buffering)
 }
 
-@defproc[(BeginMode2D) any?]{
+@defproc[(BeginMode2D
+          [camera _Camera2D])
+         _void]{
 Begin 2D mode with custom camera (2D)
 }
 
-@defproc[(EndMode2D) any?]{
+@defproc[(EndMode2D)
+         _void]{
 Ends 2D mode with custom camera
 }
 
-@defproc[(BeginMode3D) any?]{
+@defproc[(BeginMode3D
+          [camera _Camera3D])
+         _void]{
 Begin 3D mode with custom camera (3D)
 }
 
-@defproc[(EndMode3D) any?]{
+@defproc[(EndMode3D)
+         _void]{
 Ends 3D mode and returns to default 2D orthographic mode
 }
 
-@defproc[(BeginTextureMode) any?]{
+@defproc[(BeginTextureMode
+          [target _RenderTexture2D])
+         _void]{
 Begin drawing to render texture
 }
 
-@defproc[(EndTextureMode) any?]{
+@defproc[(EndTextureMode)
+         _void]{
 Ends drawing to render texture
 }
 
-@defproc[(BeginShaderMode) any?]{
+@defproc[(BeginShaderMode
+          [shader _Shader])
+         _void]{
 Begin custom shader drawing
 }
 
-@defproc[(EndShaderMode) any?]{
+@defproc[(EndShaderMode)
+         _void]{
 End custom shader drawing (use default shader)
 }
 
-@defproc[(BeginBlendMode) any?]{
+@defproc[(BeginBlendMode
+          [mode _int])
+         _void]{
 Begin blending mode (alpha, additive, multiplied, subtract, custom)
 }
 
-@defproc[(EndBlendMode) any?]{
+@defproc[(EndBlendMode)
+         _void]{
 End blending mode (reset to default: alpha blending)
 }
 
-@defproc[(BeginScissorMode) any?]{
+@defproc[(BeginScissorMode
+          [x _int]
+          [y _int]
+          [width _int]
+          [height _int])
+         _void]{
 Begin scissor mode (define screen area for following drawing)
 }
 
-@defproc[(EndScissorMode) any?]{
+@defproc[(EndScissorMode)
+         _void]{
 End scissor mode
 }
 
-@defproc[(BeginVrStereoMode) any?]{
+@defproc[(BeginVrStereoMode
+          [config _VrStereoConfig])
+         _void]{
 Begin stereo rendering (requires VR simulator)
 }
 
-@defproc[(EndVrStereoMode) any?]{
+@defproc[(EndVrStereoMode)
+         _void]{
 End stereo rendering (requires VR simulator)
 }
 
-@defproc[(LoadVrStereoConfig) any?]{
+@defproc[(LoadVrStereoConfig
+          [device _VrDeviceInfo])
+         _VrStereoConfig]{
 Load VR stereo config for VR simulator device parameters
 }
 
-@defproc[(UnloadVrStereoConfig) any?]{
+@defproc[(UnloadVrStereoConfig
+          [config _VrStereoConfig])
+         _void]{
 Unload VR stereo config
 }
 
-@defproc[(LoadShader) any?]{
+@defproc[(LoadShader
+          [vsFileName _string]
+          [fsFileName _string])
+         _Shader]{
 Load shader from files and bind default locations
 }
 
-@defproc[(LoadShaderFromMemory) any?]{
+@defproc[(LoadShaderFromMemory
+          [vsCode _string]
+          [fsCode _string])
+         _Shader]{
 Load shader from code strings and bind default locations
 }
 
-@defproc[(GetShaderLocation) any?]{
+@defproc[(GetShaderLocation
+          [shader _Shader]
+          [uniformName _string])
+         _int]{
 Get shader uniform location
 }
 
-@defproc[(GetShaderLocationAttrib) any?]{
+@defproc[(GetShaderLocationAttrib
+          [shader _Shader]
+          [attribName _string])
+         _int]{
 Get shader attribute location
 }
 
-@defproc[(SetShaderValue) any?]{
+@defproc[(SetShaderValue
+          [shader _Shader]
+          [locIndex _int]
+          [value _pointer #;"const void *"]
+          [uniformType _int])
+         _void]{
 Set shader uniform value
 }
 
-@defproc[(SetShaderValueV) any?]{
+@defproc[(SetShaderValueV
+          [shader _Shader]
+          [locIndex _int]
+          [value _pointer #;"const void *"]
+          [uniformType _int]
+          [count _int])
+         _void]{
 Set shader uniform value vector
 }
 
-@defproc[(SetShaderValueMatrix) any?]{
+@defproc[(SetShaderValueMatrix
+          [shader _Shader]
+          [locIndex _int]
+          [mat _Matrix])
+         _void]{
 Set shader uniform value (matrix 4x4)
 }
 
-@defproc[(SetShaderValueTexture) any?]{
+@defproc[(SetShaderValueTexture
+          [shader _Shader]
+          [locIndex _int]
+          [texture _Texture2D])
+         _void]{
 Set shader uniform value for texture (sampler2d)
 }
 
-@defproc[(UnloadShader) any?]{
+@defproc[(UnloadShader
+          [shader _Shader])
+         _void]{
 Unload shader from GPU memory (VRAM)
 }
 
-@defproc[(GetMouseRay) any?]{
+@defproc[(GetMouseRay
+          [mousePosition _Vector2]
+          [camera _Camera])
+         _Ray]{
 Get a ray trace from mouse position
 }
 
-@defproc[(GetCameraMatrix) any?]{
+@defproc[(GetCameraMatrix
+          [camera _Camera])
+         _Matrix]{
 Get camera transform matrix (view matrix)
 }
 
-@defproc[(GetCameraMatrix2D) any?]{
+@defproc[(GetCameraMatrix2D
+          [camera _Camera2D])
+         _Matrix]{
 Get camera 2d transform matrix
 }
 
-@defproc[(GetWorldToScreen) any?]{
+@defproc[(GetWorldToScreen
+          [position _Vector3]
+          [camera _Camera])
+         _Vector2]{
 Get the screen space position for a 3d world space position
 }
 
-@defproc[(GetWorldToScreenEx) any?]{
+@defproc[(GetWorldToScreenEx
+          [position _Vector3]
+          [camera _Camera]
+          [width _int]
+          [height _int])
+         _Vector2]{
 Get size position for a 3d world space position
 }
 
-@defproc[(GetWorldToScreen2D) any?]{
+@defproc[(GetWorldToScreen2D
+          [position _Vector2]
+          [camera _Camera2D])
+         _Vector2]{
 Get the screen space position for a 2d camera world space position
 }
 
-@defproc[(GetScreenToWorld2D) any?]{
+@defproc[(GetScreenToWorld2D
+          [position _Vector2]
+          [camera _Camera2D])
+         _Vector2]{
 Get the world space position for a 2d camera screen space position
 }
 
-@defproc[(SetTargetFPS) any?]{
+@defproc[(SetTargetFPS
+          [fps _int])
+         _void]{
 Set target FPS (maximum)
 }
 
-@defproc[(GetFPS) any?]{
+@defproc[(GetFPS)
+         _int]{
 Get current FPS
 }
 
-@defproc[(GetFrameTime) any?]{
+@defproc[(GetFrameTime)
+         _float]{
 Get time in seconds for last frame drawn (delta time)
 }
 
-@defproc[(GetTime) any?]{
+@defproc[(GetTime)
+         _double]{
 Get elapsed time in seconds since InitWindow()
 }
 
-@defproc[(GetRandomValue) any?]{
+@defproc[(GetRandomValue
+          [min _int]
+          [max _int])
+         _int]{
 Get a random value between min and max (both included)
 }
 
-@defproc[(SetRandomSeed) any?]{
+@defproc[(SetRandomSeed
+          [seed _uint])
+         _void]{
 Set the seed for the random number generator
 }
 
-@defproc[(TakeScreenshot) any?]{
+@defproc[(TakeScreenshot
+          [fileName _string])
+         _void]{
 Takes a screenshot of current screen (filename extension defines format)
 }
 
-@defproc[(SetConfigFlags) any?]{
+@defproc[(SetConfigFlags
+          [flags _uint])
+         _void]{
 Setup init configuration flags (view FLAGS)
 }
 
-@defproc[(TraceLog) any?]{
+@defproc[(TraceLog
+          [logLevel _int]
+          [text _string])
+         _void]{
 Show trace log messages (LOG_DEBUG, LOG_INFO, LOG_WARNING, LOG_ERROR...)
 }
 
-@defproc[(SetTraceLogLevel) any?]{
+@defproc[(SetTraceLogLevel
+          [logLevel _int])
+         _void]{
 Set the current threshold (minimum) log level
 }
 
-@defproc[(MemAlloc) any?]{
+@defproc[(MemAlloc
+          [size _int])
+         _pointer #;"void *"]{
 Internal memory allocator
 }
 
-@defproc[(MemRealloc) any?]{
+@defproc[(MemRealloc
+          [ptr _pointer #;"void *"]
+          [size _int])
+         _pointer #;"void *"]{
 Internal memory reallocator
 }
 
-@defproc[(MemFree) any?]{
+@defproc[(MemFree
+          [ptr _pointer #;"void *"])
+         _void]{
 Internal memory free
 }
 
-@defproc[(SetTraceLogCallback) any?]{
+@defproc[(SetTraceLogCallback
+          [callback _TraceLogCallback])
+         _void]{
 Set custom trace log
 }
 
-@defproc[(SetLoadFileDataCallback) any?]{
+@defproc[(SetLoadFileDataCallback
+          [callback _LoadFileDataCallback])
+         _void]{
 Set custom file binary data loader
 }
 
-@defproc[(SetSaveFileDataCallback) any?]{
+@defproc[(SetSaveFileDataCallback
+          [callback _SaveFileDataCallback])
+         _void]{
 Set custom file binary data saver
 }
 
-@defproc[(SetLoadFileTextCallback) any?]{
+@defproc[(SetLoadFileTextCallback
+          [callback _LoadFileTextCallback])
+         _void]{
 Set custom file text data loader
 }
 
-@defproc[(SetSaveFileTextCallback) any?]{
+@defproc[(SetSaveFileTextCallback
+          [callback _SaveFileTextCallback])
+         _void]{
 Set custom file text data saver
 }
 
-@defproc[(LoadFileData) any?]{
+@defproc[(LoadFileData
+          [fileName _string]
+          [bytesRead _pointer #;"unsigned int *"])
+         _pointer #;"unsigned char *"]{
 Load file data as byte array (read)
 }
 
-@defproc[(UnloadFileData) any?]{
+@defproc[(UnloadFileData
+          [data _pointer #;"unsigned char *"])
+         _void]{
 Unload file data allocated by LoadFileData()
 }
 
-@defproc[(SaveFileData) any?]{
+@defproc[(SaveFileData
+          [fileName _string]
+          [data _pointer #;"void *"]
+          [bytesToWrite _uint])
+         _bool]{
 Save data to file from byte array (write), returns true on success
 }
 
-@defproc[(LoadFileText) any?]{
+@defproc[(LoadFileText
+          [fileName _string])
+         _pointer #;"char *"]{
 Load text data from file (read), returns a '\0' terminated string
 }
 
-@defproc[(UnloadFileText) any?]{
+@defproc[(UnloadFileText
+          [text _pointer #;"char *"])
+         _void]{
 Unload file text data allocated by LoadFileText()
 }
 
-@defproc[(SaveFileText) any?]{
+@defproc[(SaveFileText
+          [fileName _string]
+          [text _pointer #;"char *"])
+         _bool]{
 Save text data to file (write), string must be '\0' terminated, returns true on success
 }
 
-@defproc[(FileExists) any?]{
+@defproc[(FileExists
+          [fileName _string])
+         _bool]{
 Check if file exists
 }
 
-@defproc[(DirectoryExists) any?]{
+@defproc[(DirectoryExists
+          [dirPath _string])
+         _bool]{
 Check if a directory path exists
 }
 
-@defproc[(IsFileExtension) any?]{
+@defproc[(IsFileExtension
+          [fileName _string]
+          [ext _string])
+         _bool]{
 Check file extension (including point: .png, .wav)
 }
 
-@defproc[(GetFileExtension) any?]{
+@defproc[(GetFileExtension
+          [fileName _string])
+         _string]{
 Get pointer to extension for a filename string (includes dot: '.png')
 }
 
-@defproc[(GetFileName) any?]{
+@defproc[(GetFileName
+          [filePath _string])
+         _string]{
 Get pointer to filename for a path string
 }
 
-@defproc[(GetFileNameWithoutExt) any?]{
+@defproc[(GetFileNameWithoutExt
+          [filePath _string])
+         _string]{
 Get filename string without extension (uses static string)
 }
 
-@defproc[(GetDirectoryPath) any?]{
+@defproc[(GetDirectoryPath
+          [filePath _string])
+         _string]{
 Get full path for a given fileName with path (uses static string)
 }
 
-@defproc[(GetPrevDirectoryPath) any?]{
+@defproc[(GetPrevDirectoryPath
+          [dirPath _string])
+         _string]{
 Get previous directory path for a given path (uses static string)
 }
 
-@defproc[(GetWorkingDirectory) any?]{
+@defproc[(GetWorkingDirectory)
+         _string]{
 Get current working directory (uses static string)
 }
 
-@defproc[(GetDirectoryFiles) any?]{
+@defproc[(GetDirectoryFiles
+          [dirPath _string]
+          [count _pointer #;"int *"])
+         _pointer #;"char **"]{
 Get filenames in a directory path (memory should be freed)
 }
 
-@defproc[(ClearDirectoryFiles) any?]{
+@defproc[(ClearDirectoryFiles)
+         _void]{
 Clear directory files paths buffers (free memory)
 }
 
-@defproc[(ChangeDirectory) any?]{
+@defproc[(ChangeDirectory
+          [dir _string])
+         _bool]{
 Change working directory, return true on success
 }
 
-@defproc[(IsFileDropped) any?]{
+@defproc[(IsFileDropped)
+         _bool]{
 Check if a file has been dropped into window
 }
 
-@defproc[(GetDroppedFiles) any?]{
+@defproc[(GetDroppedFiles
+          [count _pointer #;"int *"])
+         _pointer #;"char **"]{
 Get dropped files names (memory should be freed)
 }
 
-@defproc[(ClearDroppedFiles) any?]{
+@defproc[(ClearDroppedFiles)
+         _void]{
 Clear dropped files paths buffer (free memory)
 }
 
-@defproc[(GetFileModTime) any?]{
+@defproc[(GetFileModTime
+          [fileName _string])
+         _long]{
 Get file modification time (last write time)
 }
 
-@defproc[(CompressData) any?]{
+@defproc[(CompressData
+          [data _pointer #;"unsigned char *"]
+          [dataLength _int]
+          [compDataLength _pointer #;"int *"])
+         _pointer #;"unsigned char *"]{
 Compress data (DEFLATE algorithm)
 }
 
-@defproc[(DecompressData) any?]{
+@defproc[(DecompressData
+          [compData _pointer #;"unsigned char *"]
+          [compDataLength _int]
+          [dataLength _pointer #;"int *"])
+         _pointer #;"unsigned char *"]{
 Decompress data (DEFLATE algorithm)
 }
 
-@defproc[(EncodeDataBase64) any?]{
+@defproc[(EncodeDataBase64
+          [data _pointer #;"const unsigned char *"]
+          [dataLength _int]
+          [outputLength _pointer #;"int *"])
+         _pointer #;"char *"]{
 Encode data to Base64 string
 }
 
-@defproc[(DecodeDataBase64) any?]{
+@defproc[(DecodeDataBase64
+          [data _pointer #;"unsigned char *"]
+          [outputLength _pointer #;"int *"])
+         _pointer #;"unsigned char *"]{
 Decode Base64 string data
 }
 
-@defproc[(SaveStorageValue) any?]{
+@defproc[(SaveStorageValue
+          [position _uint]
+          [value _int])
+         _bool]{
 Save integer value to storage file (to defined position), returns true on success
 }
 
-@defproc[(LoadStorageValue) any?]{
+@defproc[(LoadStorageValue
+          [position _uint])
+         _int]{
 Load integer value from storage file (from defined position)
 }
 
-@defproc[(OpenURL) any?]{
+@defproc[(OpenURL
+          [url _string])
+         _void]{
 Open URL with default system browser (if available)
 }
 
-@defproc[(IsKeyPressed) any?]{
+@defproc[(IsKeyPressed
+          [key _int])
+         _bool]{
 Check if a key has been pressed once
 }
 
-@defproc[(IsKeyDown) any?]{
+@defproc[(IsKeyDown
+          [key _int])
+         _bool]{
 Check if a key is being pressed
 }
 
-@defproc[(IsKeyReleased) any?]{
+@defproc[(IsKeyReleased
+          [key _int])
+         _bool]{
 Check if a key has been released once
 }
 
-@defproc[(IsKeyUp) any?]{
+@defproc[(IsKeyUp
+          [key _int])
+         _bool]{
 Check if a key is NOT being pressed
 }
 
-@defproc[(SetExitKey) any?]{
+@defproc[(SetExitKey
+          [key _int])
+         _void]{
 Set a custom key to exit program (default is ESC)
 }
 
-@defproc[(GetKeyPressed) any?]{
+@defproc[(GetKeyPressed)
+         _int]{
 Get key pressed (keycode), call it multiple times for keys queued, returns 0 when the queue is empty
 }
 
-@defproc[(GetCharPressed) any?]{
+@defproc[(GetCharPressed)
+         _int]{
 Get char pressed (unicode), call it multiple times for chars queued, returns 0 when the queue is empty
 }
 
-@defproc[(IsGamepadAvailable) any?]{
+@defproc[(IsGamepadAvailable
+          [gamepad _int])
+         _bool]{
 Check if a gamepad is available
 }
 
-@defproc[(GetGamepadName) any?]{
+@defproc[(GetGamepadName
+          [gamepad _int])
+         _string]{
 Get gamepad internal name id
 }
 
-@defproc[(IsGamepadButtonPressed) any?]{
+@defproc[(IsGamepadButtonPressed
+          [gamepad _int]
+          [button _int])
+         _bool]{
 Check if a gamepad button has been pressed once
 }
 
-@defproc[(IsGamepadButtonDown) any?]{
+@defproc[(IsGamepadButtonDown
+          [gamepad _int]
+          [button _int])
+         _bool]{
 Check if a gamepad button is being pressed
 }
 
-@defproc[(IsGamepadButtonReleased) any?]{
+@defproc[(IsGamepadButtonReleased
+          [gamepad _int]
+          [button _int])
+         _bool]{
 Check if a gamepad button has been released once
 }
 
-@defproc[(IsGamepadButtonUp) any?]{
+@defproc[(IsGamepadButtonUp
+          [gamepad _int]
+          [button _int])
+         _bool]{
 Check if a gamepad button is NOT being pressed
 }
 
-@defproc[(GetGamepadButtonPressed) any?]{
+@defproc[(GetGamepadButtonPressed)
+         _int]{
 Get the last gamepad button pressed
 }
 
-@defproc[(GetGamepadAxisCount) any?]{
+@defproc[(GetGamepadAxisCount
+          [gamepad _int])
+         _int]{
 Get gamepad axis count for a gamepad
 }
 
-@defproc[(GetGamepadAxisMovement) any?]{
+@defproc[(GetGamepadAxisMovement
+          [gamepad _int]
+          [axis _int])
+         _float]{
 Get axis movement value for a gamepad axis
 }
 
-@defproc[(SetGamepadMappings) any?]{
+@defproc[(SetGamepadMappings
+          [mappings _string])
+         _int]{
 Set internal gamepad mappings (SDL_GameControllerDB)
 }
 
-@defproc[(IsMouseButtonPressed) any?]{
+@defproc[(IsMouseButtonPressed
+          [button _int])
+         _bool]{
 Check if a mouse button has been pressed once
 }
 
-@defproc[(IsMouseButtonDown) any?]{
+@defproc[(IsMouseButtonDown
+          [button _int])
+         _bool]{
 Check if a mouse button is being pressed
 }
 
-@defproc[(IsMouseButtonReleased) any?]{
+@defproc[(IsMouseButtonReleased
+          [button _int])
+         _bool]{
 Check if a mouse button has been released once
 }
 
-@defproc[(IsMouseButtonUp) any?]{
+@defproc[(IsMouseButtonUp
+          [button _int])
+         _bool]{
 Check if a mouse button is NOT being pressed
 }
 
-@defproc[(GetMouseX) any?]{
+@defproc[(GetMouseX)
+         _int]{
 Get mouse position X
 }
 
-@defproc[(GetMouseY) any?]{
+@defproc[(GetMouseY)
+         _int]{
 Get mouse position Y
 }
 
-@defproc[(GetMousePosition) any?]{
+@defproc[(GetMousePosition)
+         _Vector2]{
 Get mouse position XY
 }
 
-@defproc[(GetMouseDelta) any?]{
+@defproc[(GetMouseDelta)
+         _Vector2]{
 Get mouse delta between frames
 }
 
-@defproc[(SetMousePosition) any?]{
+@defproc[(SetMousePosition
+          [x _int]
+          [y _int])
+         _void]{
 Set mouse position XY
 }
 
-@defproc[(SetMouseOffset) any?]{
+@defproc[(SetMouseOffset
+          [offsetX _int]
+          [offsetY _int])
+         _void]{
 Set mouse offset
 }
 
-@defproc[(SetMouseScale) any?]{
+@defproc[(SetMouseScale
+          [scaleX _float]
+          [scaleY _float])
+         _void]{
 Set mouse scaling
 }
 
-@defproc[(GetMouseWheelMove) any?]{
+@defproc[(GetMouseWheelMove)
+         _float]{
 Get mouse wheel movement Y
 }
 
-@defproc[(SetMouseCursor) any?]{
+@defproc[(SetMouseCursor
+          [cursor _int])
+         _void]{
 Set mouse cursor
 }
 
-@defproc[(GetTouchX) any?]{
+@defproc[(GetTouchX)
+         _int]{
 Get touch position X for touch point 0 (relative to screen size)
 }
 
-@defproc[(GetTouchY) any?]{
+@defproc[(GetTouchY)
+         _int]{
 Get touch position Y for touch point 0 (relative to screen size)
 }
 
-@defproc[(GetTouchPosition) any?]{
+@defproc[(GetTouchPosition
+          [index _int])
+         _Vector2]{
 Get touch position XY for a touch point index (relative to screen size)
 }
 
-@defproc[(GetTouchPointId) any?]{
+@defproc[(GetTouchPointId
+          [index _int])
+         _int]{
 Get touch point identifier for given index
 }
 
-@defproc[(GetTouchPointCount) any?]{
+@defproc[(GetTouchPointCount)
+         _int]{
 Get number of touch points
 }
 
-@defproc[(SetGesturesEnabled) any?]{
+@defproc[(SetGesturesEnabled
+          [flags _uint])
+         _void]{
 Enable a set of gestures using flags
 }
 
-@defproc[(IsGestureDetected) any?]{
+@defproc[(IsGestureDetected
+          [gesture _int])
+         _bool]{
 Check if a gesture have been detected
 }
 
-@defproc[(GetGestureDetected) any?]{
+@defproc[(GetGestureDetected)
+         _int]{
 Get latest detected gesture
 }
 
-@defproc[(GetGestureHoldDuration) any?]{
+@defproc[(GetGestureHoldDuration)
+         _float]{
 Get gesture hold time in milliseconds
 }
 
-@defproc[(GetGestureDragVector) any?]{
+@defproc[(GetGestureDragVector)
+         _Vector2]{
 Get gesture drag vector
 }
 
-@defproc[(GetGestureDragAngle) any?]{
+@defproc[(GetGestureDragAngle)
+         _float]{
 Get gesture drag angle
 }
 
-@defproc[(GetGesturePinchVector) any?]{
+@defproc[(GetGesturePinchVector)
+         _Vector2]{
 Get gesture pinch delta
 }
 
-@defproc[(GetGesturePinchAngle) any?]{
+@defproc[(GetGesturePinchAngle)
+         _float]{
 Get gesture pinch angle
 }
 
-@defproc[(SetCameraMode) any?]{
+@defproc[(SetCameraMode
+          [camera _Camera]
+          [mode _int])
+         _void]{
 Set camera mode (multiple camera modes available)
 }
 
-@defproc[(UpdateCamera) any?]{
+@defproc[(UpdateCamera
+          [camera _pointer #;"Camera *"])
+         _void]{
 Update camera position for selected mode
 }
 
-@defproc[(SetCameraPanControl) any?]{
+@defproc[(SetCameraPanControl
+          [keyPan _int])
+         _void]{
 Set camera pan key to combine with mouse movement (free camera)
 }
 
-@defproc[(SetCameraAltControl) any?]{
+@defproc[(SetCameraAltControl
+          [keyAlt _int])
+         _void]{
 Set camera alt key to combine with mouse movement (free camera)
 }
 
-@defproc[(SetCameraSmoothZoomControl) any?]{
+@defproc[(SetCameraSmoothZoomControl
+          [keySmoothZoom _int])
+         _void]{
 Set camera smooth zoom key to combine with mouse (free camera)
 }
 
-@defproc[(SetCameraMoveControls) any?]{
+@defproc[(SetCameraMoveControls
+          [keyFront _int]
+          [keyBack _int]
+          [keyRight _int]
+          [keyLeft _int]
+          [keyUp _int]
+          [keyDown _int])
+         _void]{
 Set camera move controls (1st person and 3rd person cameras)
 }
 
-@defproc[(SetShapesTexture) any?]{
+@defproc[(SetShapesTexture
+          [texture _Texture2D]
+          [source _Rectangle])
+         _void]{
 Set texture and rectangle to be used on shapes drawing
 }
 
-@defproc[(DrawPixel) any?]{
+@defproc[(DrawPixel
+          [posX _int]
+          [posY _int]
+          [color _Color])
+         _void]{
 Draw a pixel
 }
 
-@defproc[(DrawPixelV) any?]{
+@defproc[(DrawPixelV
+          [position _Vector2]
+          [color _Color])
+         _void]{
 Draw a pixel (Vector version)
 }
 
-@defproc[(DrawLine) any?]{
+@defproc[(DrawLine
+          [startPosX _int]
+          [startPosY _int]
+          [endPosX _int]
+          [endPosY _int]
+          [color _Color])
+         _void]{
 Draw a line
 }
 
-@defproc[(DrawLineV) any?]{
+@defproc[(DrawLineV
+          [startPos _Vector2]
+          [endPos _Vector2]
+          [color _Color])
+         _void]{
 Draw a line (Vector version)
 }
 
-@defproc[(DrawLineEx) any?]{
+@defproc[(DrawLineEx
+          [startPos _Vector2]
+          [endPos _Vector2]
+          [thick _float]
+          [color _Color])
+         _void]{
 Draw a line defining thickness
 }
 
-@defproc[(DrawLineBezier) any?]{
+@defproc[(DrawLineBezier
+          [startPos _Vector2]
+          [endPos _Vector2]
+          [thick _float]
+          [color _Color])
+         _void]{
 Draw a line using cubic-bezier curves in-out
 }
 
-@defproc[(DrawLineBezierQuad) any?]{
+@defproc[(DrawLineBezierQuad
+          [startPos _Vector2]
+          [endPos _Vector2]
+          [controlPos _Vector2]
+          [thick _float]
+          [color _Color])
+         _void]{
 Draw line using quadratic bezier curves with a control point
 }
 
-@defproc[(DrawLineBezierCubic) any?]{
+@defproc[(DrawLineBezierCubic
+          [startPos _Vector2]
+          [endPos _Vector2]
+          [startControlPos _Vector2]
+          [endControlPos _Vector2]
+          [thick _float]
+          [color _Color])
+         _void]{
 Draw line using cubic bezier curves with 2 control points
 }
 
-@defproc[(DrawLineStrip) any?]{
+@defproc[(DrawLineStrip
+          [points _pointer #;"Vector2 *"]
+          [pointCount _int]
+          [color _Color])
+         _void]{
 Draw lines sequence
 }
 
-@defproc[(DrawCircle) any?]{
+@defproc[(DrawCircle
+          [centerX _int]
+          [centerY _int]
+          [radius _float]
+          [color _Color])
+         _void]{
 Draw a color-filled circle
 }
 
-@defproc[(DrawCircleSector) any?]{
+@defproc[(DrawCircleSector
+          [center _Vector2]
+          [radius _float]
+          [startAngle _float]
+          [endAngle _float]
+          [segments _int]
+          [color _Color])
+         _void]{
 Draw a piece of a circle
 }
 
-@defproc[(DrawCircleSectorLines) any?]{
+@defproc[(DrawCircleSectorLines
+          [center _Vector2]
+          [radius _float]
+          [startAngle _float]
+          [endAngle _float]
+          [segments _int]
+          [color _Color])
+         _void]{
 Draw circle sector outline
 }
 
-@defproc[(DrawCircleGradient) any?]{
+@defproc[(DrawCircleGradient
+          [centerX _int]
+          [centerY _int]
+          [radius _float]
+          [color1 _Color]
+          [color2 _Color])
+         _void]{
 Draw a gradient-filled circle
 }
 
-@defproc[(DrawCircleV) any?]{
+@defproc[(DrawCircleV
+          [center _Vector2]
+          [radius _float]
+          [color _Color])
+         _void]{
 Draw a color-filled circle (Vector version)
 }
 
-@defproc[(DrawCircleLines) any?]{
+@defproc[(DrawCircleLines
+          [centerX _int]
+          [centerY _int]
+          [radius _float]
+          [color _Color])
+         _void]{
 Draw circle outline
 }
 
-@defproc[(DrawEllipse) any?]{
+@defproc[(DrawEllipse
+          [centerX _int]
+          [centerY _int]
+          [radiusH _float]
+          [radiusV _float]
+          [color _Color])
+         _void]{
 Draw ellipse
 }
 
-@defproc[(DrawEllipseLines) any?]{
+@defproc[(DrawEllipseLines
+          [centerX _int]
+          [centerY _int]
+          [radiusH _float]
+          [radiusV _float]
+          [color _Color])
+         _void]{
 Draw ellipse outline
 }
 
-@defproc[(DrawRing) any?]{
+@defproc[(DrawRing
+          [center _Vector2]
+          [innerRadius _float]
+          [outerRadius _float]
+          [startAngle _float]
+          [endAngle _float]
+          [segments _int]
+          [color _Color])
+         _void]{
 Draw ring
 }
 
-@defproc[(DrawRingLines) any?]{
+@defproc[(DrawRingLines
+          [center _Vector2]
+          [innerRadius _float]
+          [outerRadius _float]
+          [startAngle _float]
+          [endAngle _float]
+          [segments _int]
+          [color _Color])
+         _void]{
 Draw ring outline
 }
 
-@defproc[(DrawRectangle) any?]{
+@defproc[(DrawRectangle
+          [posX _int]
+          [posY _int]
+          [width _int]
+          [height _int]
+          [color _Color])
+         _void]{
 Draw a color-filled rectangle
 }
 
-@defproc[(DrawRectangleV) any?]{
+@defproc[(DrawRectangleV
+          [position _Vector2]
+          [size _Vector2]
+          [color _Color])
+         _void]{
 Draw a color-filled rectangle (Vector version)
 }
 
-@defproc[(DrawRectangleRec) any?]{
+@defproc[(DrawRectangleRec
+          [rec _Rectangle]
+          [color _Color])
+         _void]{
 Draw a color-filled rectangle
 }
 
-@defproc[(DrawRectanglePro) any?]{
+@defproc[(DrawRectanglePro
+          [rec _Rectangle]
+          [origin _Vector2]
+          [rotation _float]
+          [color _Color])
+         _void]{
 Draw a color-filled rectangle with pro parameters
 }
 
-@defproc[(DrawRectangleGradientV) any?]{
+@defproc[(DrawRectangleGradientV
+          [posX _int]
+          [posY _int]
+          [width _int]
+          [height _int]
+          [color1 _Color]
+          [color2 _Color])
+         _void]{
 Draw a vertical-gradient-filled rectangle
 }
 
-@defproc[(DrawRectangleGradientH) any?]{
+@defproc[(DrawRectangleGradientH
+          [posX _int]
+          [posY _int]
+          [width _int]
+          [height _int]
+          [color1 _Color]
+          [color2 _Color])
+         _void]{
 Draw a horizontal-gradient-filled rectangle
 }
 
-@defproc[(DrawRectangleGradientEx) any?]{
+@defproc[(DrawRectangleGradientEx
+          [rec _Rectangle]
+          [col1 _Color]
+          [col2 _Color]
+          [col3 _Color]
+          [col4 _Color])
+         _void]{
 Draw a gradient-filled rectangle with custom vertex colors
 }
 
-@defproc[(DrawRectangleLines) any?]{
+@defproc[(DrawRectangleLines
+          [posX _int]
+          [posY _int]
+          [width _int]
+          [height _int]
+          [color _Color])
+         _void]{
 Draw rectangle outline
 }
 
-@defproc[(DrawRectangleLinesEx) any?]{
+@defproc[(DrawRectangleLinesEx
+          [rec _Rectangle]
+          [lineThick _float]
+          [color _Color])
+         _void]{
 Draw rectangle outline with extended parameters
 }
 
-@defproc[(DrawRectangleRounded) any?]{
+@defproc[(DrawRectangleRounded
+          [rec _Rectangle]
+          [roundness _float]
+          [segments _int]
+          [color _Color])
+         _void]{
 Draw rectangle with rounded edges
 }
 
-@defproc[(DrawRectangleRoundedLines) any?]{
+@defproc[(DrawRectangleRoundedLines
+          [rec _Rectangle]
+          [roundness _float]
+          [segments _int]
+          [lineThick _float]
+          [color _Color])
+         _void]{
 Draw rectangle with rounded edges outline
 }
 
-@defproc[(DrawTriangle) any?]{
+@defproc[(DrawTriangle
+          [v1 _Vector2]
+          [v2 _Vector2]
+          [v3 _Vector2]
+          [color _Color])
+         _void]{
 Draw a color-filled triangle (vertex in counter-clockwise order!)
 }
 
-@defproc[(DrawTriangleLines) any?]{
+@defproc[(DrawTriangleLines
+          [v1 _Vector2]
+          [v2 _Vector2]
+          [v3 _Vector2]
+          [color _Color])
+         _void]{
 Draw triangle outline (vertex in counter-clockwise order!)
 }
 
-@defproc[(DrawTriangleFan) any?]{
+@defproc[(DrawTriangleFan
+          [points _pointer #;"Vector2 *"]
+          [pointCount _int]
+          [color _Color])
+         _void]{
 Draw a triangle fan defined by points (first vertex is the center)
 }
 
-@defproc[(DrawTriangleStrip) any?]{
+@defproc[(DrawTriangleStrip
+          [points _pointer #;"Vector2 *"]
+          [pointCount _int]
+          [color _Color])
+         _void]{
 Draw a triangle strip defined by points
 }
 
-@defproc[(DrawPoly) any?]{
+@defproc[(DrawPoly
+          [center _Vector2]
+          [sides _int]
+          [radius _float]
+          [rotation _float]
+          [color _Color])
+         _void]{
 Draw a regular polygon (Vector version)
 }
 
-@defproc[(DrawPolyLines) any?]{
+@defproc[(DrawPolyLines
+          [center _Vector2]
+          [sides _int]
+          [radius _float]
+          [rotation _float]
+          [color _Color])
+         _void]{
 Draw a polygon outline of n sides
 }
 
-@defproc[(DrawPolyLinesEx) any?]{
+@defproc[(DrawPolyLinesEx
+          [center _Vector2]
+          [sides _int]
+          [radius _float]
+          [rotation _float]
+          [lineThick _float]
+          [color _Color])
+         _void]{
 Draw a polygon outline of n sides with extended parameters
 }
 
-@defproc[(CheckCollisionRecs) any?]{
+@defproc[(CheckCollisionRecs
+          [rec1 _Rectangle]
+          [rec2 _Rectangle])
+         _bool]{
 Check collision between two rectangles
 }
 
-@defproc[(CheckCollisionCircles) any?]{
+@defproc[(CheckCollisionCircles
+          [center1 _Vector2]
+          [radius1 _float]
+          [center2 _Vector2]
+          [radius2 _float])
+         _bool]{
 Check collision between two circles
 }
 
-@defproc[(CheckCollisionCircleRec) any?]{
+@defproc[(CheckCollisionCircleRec
+          [center _Vector2]
+          [radius _float]
+          [rec _Rectangle])
+         _bool]{
 Check collision between circle and rectangle
 }
 
-@defproc[(CheckCollisionPointRec) any?]{
+@defproc[(CheckCollisionPointRec
+          [point _Vector2]
+          [rec _Rectangle])
+         _bool]{
 Check if point is inside rectangle
 }
 
-@defproc[(CheckCollisionPointCircle) any?]{
+@defproc[(CheckCollisionPointCircle
+          [point _Vector2]
+          [center _Vector2]
+          [radius _float])
+         _bool]{
 Check if point is inside circle
 }
 
-@defproc[(CheckCollisionPointTriangle) any?]{
+@defproc[(CheckCollisionPointTriangle
+          [point _Vector2]
+          [p1 _Vector2]
+          [p2 _Vector2]
+          [p3 _Vector2])
+         _bool]{
 Check if point is inside a triangle
 }
 
-@defproc[(CheckCollisionLines) any?]{
+@defproc[(CheckCollisionLines
+          [startPos1 _Vector2]
+          [endPos1 _Vector2]
+          [startPos2 _Vector2]
+          [endPos2 _Vector2]
+          [collisionPoint _pointer #;"Vector2 *"])
+         _bool]{
 Check the collision between two lines defined by two points each, returns collision point by reference
 }
 
-@defproc[(CheckCollisionPointLine) any?]{
+@defproc[(CheckCollisionPointLine
+          [point _Vector2]
+          [p1 _Vector2]
+          [p2 _Vector2]
+          [threshold _int])
+         _bool]{
 Check if point belongs to line created between two points [p1] and [p2] with defined margin in pixels [threshold]
 }
 
-@defproc[(GetCollisionRec) any?]{
+@defproc[(GetCollisionRec
+          [rec1 _Rectangle]
+          [rec2 _Rectangle])
+         _Rectangle]{
 Get collision rectangle for two rectangles collision
 }
 
-@defproc[(LoadImage) any?]{
+@defproc[(LoadImage
+          [fileName _string])
+         _Image]{
 Load image from file into CPU memory (RAM)
 }
 
-@defproc[(LoadImageRaw) any?]{
+@defproc[(LoadImageRaw
+          [fileName _string]
+          [width _int]
+          [height _int]
+          [format _int]
+          [headerSize _int])
+         _Image]{
 Load image from RAW file data
 }
 
-@defproc[(LoadImageAnim) any?]{
+@defproc[(LoadImageAnim
+          [fileName _string]
+          [frames _pointer #;"int *"])
+         _Image]{
 Load image sequence from file (frames appended to image.data)
 }
 
-@defproc[(LoadImageFromMemory) any?]{
+@defproc[(LoadImageFromMemory
+          [fileType _string]
+          [fileData _pointer #;"const unsigned char *"]
+          [dataSize _int])
+         _Image]{
 Load image from memory buffer, fileType refers to extension: i.e. '.png'
 }
 
-@defproc[(LoadImageFromTexture) any?]{
+@defproc[(LoadImageFromTexture
+          [texture _Texture2D])
+         _Image]{
 Load image from GPU texture data
 }
 
-@defproc[(LoadImageFromScreen) any?]{
+@defproc[(LoadImageFromScreen)
+         _Image]{
 Load image from screen buffer and (screenshot)
 }
 
-@defproc[(UnloadImage) any?]{
+@defproc[(UnloadImage
+          [image _Image])
+         _void]{
 Unload image from CPU memory (RAM)
 }
 
-@defproc[(ExportImage) any?]{
+@defproc[(ExportImage
+          [image _Image]
+          [fileName _string])
+         _bool]{
 Export image data to file, returns true on success
 }
 
-@defproc[(ExportImageAsCode) any?]{
+@defproc[(ExportImageAsCode
+          [image _Image]
+          [fileName _string])
+         _bool]{
 Export image as code file defining an array of bytes, returns true on success
 }
 
-@defproc[(GenImageColor) any?]{
+@defproc[(GenImageColor
+          [width _int]
+          [height _int]
+          [color _Color])
+         _Image]{
 Generate image: plain color
 }
 
-@defproc[(GenImageGradientV) any?]{
+@defproc[(GenImageGradientV
+          [width _int]
+          [height _int]
+          [top _Color]
+          [bottom _Color])
+         _Image]{
 Generate image: vertical gradient
 }
 
-@defproc[(GenImageGradientH) any?]{
+@defproc[(GenImageGradientH
+          [width _int]
+          [height _int]
+          [left _Color]
+          [right _Color])
+         _Image]{
 Generate image: horizontal gradient
 }
 
-@defproc[(GenImageGradientRadial) any?]{
+@defproc[(GenImageGradientRadial
+          [width _int]
+          [height _int]
+          [density _float]
+          [inner _Color]
+          [outer _Color])
+         _Image]{
 Generate image: radial gradient
 }
 
-@defproc[(GenImageChecked) any?]{
+@defproc[(GenImageChecked
+          [width _int]
+          [height _int]
+          [checksX _int]
+          [checksY _int]
+          [col1 _Color]
+          [col2 _Color])
+         _Image]{
 Generate image: checked
 }
 
-@defproc[(GenImageWhiteNoise) any?]{
+@defproc[(GenImageWhiteNoise
+          [width _int]
+          [height _int]
+          [factor _float])
+         _Image]{
 Generate image: white noise
 }
 
-@defproc[(GenImageCellular) any?]{
+@defproc[(GenImageCellular
+          [width _int]
+          [height _int]
+          [tileSize _int])
+         _Image]{
 Generate image: cellular algorithm, bigger tileSize means bigger cells
 }
 
-@defproc[(ImageCopy) any?]{
+@defproc[(ImageCopy
+          [image _Image])
+         _Image]{
 Create an image duplicate (useful for transformations)
 }
 
-@defproc[(ImageFromImage) any?]{
+@defproc[(ImageFromImage
+          [image _Image]
+          [rec _Rectangle])
+         _Image]{
 Create an image from another image piece
 }
 
-@defproc[(ImageText) any?]{
+@defproc[(ImageText
+          [text _string]
+          [fontSize _int]
+          [color _Color])
+         _Image]{
 Create an image from text (default font)
 }
 
-@defproc[(ImageTextEx) any?]{
+@defproc[(ImageTextEx
+          [font _Font]
+          [text _string]
+          [fontSize _float]
+          [spacing _float]
+          [tint _Color])
+         _Image]{
 Create an image from text (custom sprite font)
 }
 
-@defproc[(ImageFormat) any?]{
+@defproc[(ImageFormat
+          [image _pointer #;"Image *"]
+          [newFormat _int])
+         _void]{
 Convert image data to desired format
 }
 
-@defproc[(ImageToPOT) any?]{
+@defproc[(ImageToPOT
+          [image _pointer #;"Image *"]
+          [fill _Color])
+         _void]{
 Convert image to POT (power-of-two)
 }
 
-@defproc[(ImageCrop) any?]{
+@defproc[(ImageCrop
+          [image _pointer #;"Image *"]
+          [crop _Rectangle])
+         _void]{
 Crop an image to a defined rectangle
 }
 
-@defproc[(ImageAlphaCrop) any?]{
+@defproc[(ImageAlphaCrop
+          [image _pointer #;"Image *"]
+          [threshold _float])
+         _void]{
 Crop image depending on alpha value
 }
 
-@defproc[(ImageAlphaClear) any?]{
+@defproc[(ImageAlphaClear
+          [image _pointer #;"Image *"]
+          [color _Color]
+          [threshold _float])
+         _void]{
 Clear alpha channel to desired color
 }
 
-@defproc[(ImageAlphaMask) any?]{
+@defproc[(ImageAlphaMask
+          [image _pointer #;"Image *"]
+          [alphaMask _Image])
+         _void]{
 Apply alpha mask to image
 }
 
-@defproc[(ImageAlphaPremultiply) any?]{
+@defproc[(ImageAlphaPremultiply
+          [image _pointer #;"Image *"])
+         _void]{
 Premultiply alpha channel
 }
 
-@defproc[(ImageResize) any?]{
+@defproc[(ImageResize
+          [image _pointer #;"Image *"]
+          [newWidth _int]
+          [newHeight _int])
+         _void]{
 Resize image (Bicubic scaling algorithm)
 }
 
-@defproc[(ImageResizeNN) any?]{
+@defproc[(ImageResizeNN
+          [image _pointer #;"Image *"]
+          [newWidth _int]
+          [newHeight _int])
+         _void]{
 Resize image (Nearest-Neighbor scaling algorithm)
 }
 
-@defproc[(ImageResizeCanvas) any?]{
+@defproc[(ImageResizeCanvas
+          [image _pointer #;"Image *"]
+          [newWidth _int]
+          [newHeight _int]
+          [offsetX _int]
+          [offsetY _int]
+          [fill _Color])
+         _void]{
 Resize canvas and fill with color
 }
 
-@defproc[(ImageMipmaps) any?]{
+@defproc[(ImageMipmaps
+          [image _pointer #;"Image *"])
+         _void]{
 Compute all mipmap levels for a provided image
 }
 
-@defproc[(ImageDither) any?]{
+@defproc[(ImageDither
+          [image _pointer #;"Image *"]
+          [rBpp _int]
+          [gBpp _int]
+          [bBpp _int]
+          [aBpp _int])
+         _void]{
 Dither image data to 16bpp or lower (Floyd-Steinberg dithering)
 }
 
-@defproc[(ImageFlipVertical) any?]{
+@defproc[(ImageFlipVertical
+          [image _pointer #;"Image *"])
+         _void]{
 Flip image vertically
 }
 
-@defproc[(ImageFlipHorizontal) any?]{
+@defproc[(ImageFlipHorizontal
+          [image _pointer #;"Image *"])
+         _void]{
 Flip image horizontally
 }
 
-@defproc[(ImageRotateCW) any?]{
+@defproc[(ImageRotateCW
+          [image _pointer #;"Image *"])
+         _void]{
 Rotate image clockwise 90deg
 }
 
-@defproc[(ImageRotateCCW) any?]{
+@defproc[(ImageRotateCCW
+          [image _pointer #;"Image *"])
+         _void]{
 Rotate image counter-clockwise 90deg
 }
 
-@defproc[(ImageColorTint) any?]{
+@defproc[(ImageColorTint
+          [image _pointer #;"Image *"]
+          [color _Color])
+         _void]{
 Modify image color: tint
 }
 
-@defproc[(ImageColorInvert) any?]{
+@defproc[(ImageColorInvert
+          [image _pointer #;"Image *"])
+         _void]{
 Modify image color: invert
 }
 
-@defproc[(ImageColorGrayscale) any?]{
+@defproc[(ImageColorGrayscale
+          [image _pointer #;"Image *"])
+         _void]{
 Modify image color: grayscale
 }
 
-@defproc[(ImageColorContrast) any?]{
+@defproc[(ImageColorContrast
+          [image _pointer #;"Image *"]
+          [contrast _float])
+         _void]{
 Modify image color: contrast (-100 to 100)
 }
 
-@defproc[(ImageColorBrightness) any?]{
+@defproc[(ImageColorBrightness
+          [image _pointer #;"Image *"]
+          [brightness _int])
+         _void]{
 Modify image color: brightness (-255 to 255)
 }
 
-@defproc[(ImageColorReplace) any?]{
+@defproc[(ImageColorReplace
+          [image _pointer #;"Image *"]
+          [color _Color]
+          [replace _Color])
+         _void]{
 Modify image color: replace color
 }
 
-@defproc[(LoadImageColors) any?]{
+@defproc[(LoadImageColors
+          [image _Image])
+         _pointer #;"Color *"]{
 Load color data from image as a Color array (RGBA - 32bit)
 }
 
-@defproc[(LoadImagePalette) any?]{
+@defproc[(LoadImagePalette
+          [image _Image]
+          [maxPaletteSize _int]
+          [colorCount _pointer #;"int *"])
+         _pointer #;"Color *"]{
 Load colors palette from image as a Color array (RGBA - 32bit)
 }
 
-@defproc[(UnloadImageColors) any?]{
+@defproc[(UnloadImageColors
+          [colors _pointer #;"Color *"])
+         _void]{
 Unload color data loaded with LoadImageColors()
 }
 
-@defproc[(UnloadImagePalette) any?]{
+@defproc[(UnloadImagePalette
+          [colors _pointer #;"Color *"])
+         _void]{
 Unload colors palette loaded with LoadImagePalette()
 }
 
-@defproc[(GetImageAlphaBorder) any?]{
+@defproc[(GetImageAlphaBorder
+          [image _Image]
+          [threshold _float])
+         _Rectangle]{
 Get image alpha border rectangle
 }
 
-@defproc[(GetImageColor) any?]{
+@defproc[(GetImageColor
+          [image _Image]
+          [x _int]
+          [y _int])
+         _Color]{
 Get image pixel color at (x, y) position
 }
 
-@defproc[(ImageClearBackground) any?]{
+@defproc[(ImageClearBackground
+          [dst _pointer #;"Image *"]
+          [color _Color])
+         _void]{
 Clear image background with given color
 }
 
-@defproc[(ImageDrawPixel) any?]{
+@defproc[(ImageDrawPixel
+          [dst _pointer #;"Image *"]
+          [posX _int]
+          [posY _int]
+          [color _Color])
+         _void]{
 Draw pixel within an image
 }
 
-@defproc[(ImageDrawPixelV) any?]{
+@defproc[(ImageDrawPixelV
+          [dst _pointer #;"Image *"]
+          [position _Vector2]
+          [color _Color])
+         _void]{
 Draw pixel within an image (Vector version)
 }
 
-@defproc[(ImageDrawLine) any?]{
+@defproc[(ImageDrawLine
+          [dst _pointer #;"Image *"]
+          [startPosX _int]
+          [startPosY _int]
+          [endPosX _int]
+          [endPosY _int]
+          [color _Color])
+         _void]{
 Draw line within an image
 }
 
-@defproc[(ImageDrawLineV) any?]{
+@defproc[(ImageDrawLineV
+          [dst _pointer #;"Image *"]
+          [start _Vector2]
+          [end _Vector2]
+          [color _Color])
+         _void]{
 Draw line within an image (Vector version)
 }
 
-@defproc[(ImageDrawCircle) any?]{
+@defproc[(ImageDrawCircle
+          [dst _pointer #;"Image *"]
+          [centerX _int]
+          [centerY _int]
+          [radius _int]
+          [color _Color])
+         _void]{
 Draw circle within an image
 }
 
-@defproc[(ImageDrawCircleV) any?]{
+@defproc[(ImageDrawCircleV
+          [dst _pointer #;"Image *"]
+          [center _Vector2]
+          [radius _int]
+          [color _Color])
+         _void]{
 Draw circle within an image (Vector version)
 }
 
-@defproc[(ImageDrawRectangle) any?]{
+@defproc[(ImageDrawRectangle
+          [dst _pointer #;"Image *"]
+          [posX _int]
+          [posY _int]
+          [width _int]
+          [height _int]
+          [color _Color])
+         _void]{
 Draw rectangle within an image
 }
 
-@defproc[(ImageDrawRectangleV) any?]{
+@defproc[(ImageDrawRectangleV
+          [dst _pointer #;"Image *"]
+          [position _Vector2]
+          [size _Vector2]
+          [color _Color])
+         _void]{
 Draw rectangle within an image (Vector version)
 }
 
-@defproc[(ImageDrawRectangleRec) any?]{
+@defproc[(ImageDrawRectangleRec
+          [dst _pointer #;"Image *"]
+          [rec _Rectangle]
+          [color _Color])
+         _void]{
 Draw rectangle within an image
 }
 
-@defproc[(ImageDrawRectangleLines) any?]{
+@defproc[(ImageDrawRectangleLines
+          [dst _pointer #;"Image *"]
+          [rec _Rectangle]
+          [thick _int]
+          [color _Color])
+         _void]{
 Draw rectangle lines within an image
 }
 
-@defproc[(ImageDraw) any?]{
+@defproc[(ImageDraw
+          [dst _pointer #;"Image *"]
+          [src _Image]
+          [srcRec _Rectangle]
+          [dstRec _Rectangle]
+          [tint _Color])
+         _void]{
 Draw a source image within a destination image (tint applied to source)
 }
 
-@defproc[(ImageDrawText) any?]{
+@defproc[(ImageDrawText
+          [dst _pointer #;"Image *"]
+          [text _string]
+          [posX _int]
+          [posY _int]
+          [fontSize _int]
+          [color _Color])
+         _void]{
 Draw text (using default font) within an image (destination)
 }
 
-@defproc[(ImageDrawTextEx) any?]{
+@defproc[(ImageDrawTextEx
+          [dst _pointer #;"Image *"]
+          [font _Font]
+          [text _string]
+          [position _Vector2]
+          [fontSize _float]
+          [spacing _float]
+          [tint _Color])
+         _void]{
 Draw text (custom sprite font) within an image (destination)
 }
 
-@defproc[(LoadTexture) any?]{
+@defproc[(LoadTexture
+          [fileName _string])
+         _Texture2D]{
 Load texture from file into GPU memory (VRAM)
 }
 
-@defproc[(LoadTextureFromImage) any?]{
+@defproc[(LoadTextureFromImage
+          [image _Image])
+         _Texture2D]{
 Load texture from image data
 }
 
-@defproc[(LoadTextureCubemap) any?]{
+@defproc[(LoadTextureCubemap
+          [image _Image]
+          [layout _int])
+         _TextureCubemap]{
 Load cubemap from image, multiple image cubemap layouts supported
 }
 
-@defproc[(LoadRenderTexture) any?]{
+@defproc[(LoadRenderTexture
+          [width _int]
+          [height _int])
+         _RenderTexture2D]{
 Load texture for rendering (framebuffer)
 }
 
-@defproc[(UnloadTexture) any?]{
+@defproc[(UnloadTexture
+          [texture _Texture2D])
+         _void]{
 Unload texture from GPU memory (VRAM)
 }
 
-@defproc[(UnloadRenderTexture) any?]{
+@defproc[(UnloadRenderTexture
+          [target _RenderTexture2D])
+         _void]{
 Unload render texture from GPU memory (VRAM)
 }
 
-@defproc[(UpdateTexture) any?]{
+@defproc[(UpdateTexture
+          [texture _Texture2D]
+          [pixels _pointer #;"const void *"])
+         _void]{
 Update GPU texture with new data
 }
 
-@defproc[(UpdateTextureRec) any?]{
+@defproc[(UpdateTextureRec
+          [texture _Texture2D]
+          [rec _Rectangle]
+          [pixels _pointer #;"const void *"])
+         _void]{
 Update GPU texture rectangle with new data
 }
 
-@defproc[(GenTextureMipmaps) any?]{
+@defproc[(GenTextureMipmaps
+          [texture _pointer #;"Texture2D *"])
+         _void]{
 Generate GPU mipmaps for a texture
 }
 
-@defproc[(SetTextureFilter) any?]{
+@defproc[(SetTextureFilter
+          [texture _Texture2D]
+          [filter _int])
+         _void]{
 Set texture scaling filter mode
 }
 
-@defproc[(SetTextureWrap) any?]{
+@defproc[(SetTextureWrap
+          [texture _Texture2D]
+          [wrap _int])
+         _void]{
 Set texture wrapping mode
 }
 
-@defproc[(DrawTexture) any?]{
+@defproc[(DrawTexture
+          [texture _Texture2D]
+          [posX _int]
+          [posY _int]
+          [tint _Color])
+         _void]{
 Draw a Texture2D
 }
 
-@defproc[(DrawTextureV) any?]{
+@defproc[(DrawTextureV
+          [texture _Texture2D]
+          [position _Vector2]
+          [tint _Color])
+         _void]{
 Draw a Texture2D with position defined as Vector2
 }
 
-@defproc[(DrawTextureEx) any?]{
+@defproc[(DrawTextureEx
+          [texture _Texture2D]
+          [position _Vector2]
+          [rotation _float]
+          [scale _float]
+          [tint _Color])
+         _void]{
 Draw a Texture2D with extended parameters
 }
 
-@defproc[(DrawTextureRec) any?]{
+@defproc[(DrawTextureRec
+          [texture _Texture2D]
+          [source _Rectangle]
+          [position _Vector2]
+          [tint _Color])
+         _void]{
 Draw a part of a texture defined by a rectangle
 }
 
-@defproc[(DrawTextureQuad) any?]{
+@defproc[(DrawTextureQuad
+          [texture _Texture2D]
+          [tiling _Vector2]
+          [offset _Vector2]
+          [quad _Rectangle]
+          [tint _Color])
+         _void]{
 Draw texture quad with tiling and offset parameters
 }
 
-@defproc[(DrawTextureTiled) any?]{
+@defproc[(DrawTextureTiled
+          [texture _Texture2D]
+          [source _Rectangle]
+          [dest _Rectangle]
+          [origin _Vector2]
+          [rotation _float]
+          [scale _float]
+          [tint _Color])
+         _void]{
 Draw part of a texture (defined by a rectangle) with rotation and scale tiled into dest.
 }
 
-@defproc[(DrawTexturePro) any?]{
+@defproc[(DrawTexturePro
+          [texture _Texture2D]
+          [source _Rectangle]
+          [dest _Rectangle]
+          [origin _Vector2]
+          [rotation _float]
+          [tint _Color])
+         _void]{
 Draw a part of a texture defined by a rectangle with 'pro' parameters
 }
 
-@defproc[(DrawTextureNPatch) any?]{
+@defproc[(DrawTextureNPatch
+          [texture _Texture2D]
+          [nPatchInfo _NPatchInfo]
+          [dest _Rectangle]
+          [origin _Vector2]
+          [rotation _float]
+          [tint _Color])
+         _void]{
 Draws a texture (or part of it) that stretches or shrinks nicely
 }
 
-@defproc[(DrawTexturePoly) any?]{
+@defproc[(DrawTexturePoly
+          [texture _Texture2D]
+          [center _Vector2]
+          [points _pointer #;"Vector2 *"]
+          [texcoords _pointer #;"Vector2 *"]
+          [pointCount _int]
+          [tint _Color])
+         _void]{
 Draw a textured polygon
 }
 
-@defproc[(Fade) any?]{
+@defproc[(Fade
+          [color _Color]
+          [alpha _float])
+         _Color]{
 Get color with alpha applied, alpha goes from 0.0f to 1.0f
 }
 
-@defproc[(ColorToInt) any?]{
+@defproc[(ColorToInt
+          [color _Color])
+         _int]{
 Get hexadecimal value for a Color
 }
 
-@defproc[(ColorNormalize) any?]{
+@defproc[(ColorNormalize
+          [color _Color])
+         _Vector4]{
 Get Color normalized as float [0..1]
 }
 
-@defproc[(ColorFromNormalized) any?]{
+@defproc[(ColorFromNormalized
+          [normalized _Vector4])
+         _Color]{
 Get Color from normalized values [0..1]
 }
 
-@defproc[(ColorToHSV) any?]{
+@defproc[(ColorToHSV
+          [color _Color])
+         _Vector3]{
 Get HSV values for a Color, hue [0..360], saturation/value [0..1]
 }
 
-@defproc[(ColorFromHSV) any?]{
+@defproc[(ColorFromHSV
+          [hue _float]
+          [saturation _float]
+          [value _float])
+         _Color]{
 Get a Color from HSV values, hue [0..360], saturation/value [0..1]
 }
 
-@defproc[(ColorAlpha) any?]{
+@defproc[(ColorAlpha
+          [color _Color]
+          [alpha _float])
+         _Color]{
 Get color with alpha applied, alpha goes from 0.0f to 1.0f
 }
 
-@defproc[(ColorAlphaBlend) any?]{
+@defproc[(ColorAlphaBlend
+          [dst _Color]
+          [src _Color]
+          [tint _Color])
+         _Color]{
 Get src alpha-blended into dst color with tint
 }
 
-@defproc[(GetColor) any?]{
+@defproc[(GetColor
+          [hexValue _uint])
+         _Color]{
 Get Color structure from hexadecimal value
 }
 
-@defproc[(GetPixelColor) any?]{
+@defproc[(GetPixelColor
+          [srcPtr _pointer #;"void *"]
+          [format _int])
+         _Color]{
 Get Color from a source pixel pointer of certain format
 }
 
-@defproc[(SetPixelColor) any?]{
+@defproc[(SetPixelColor
+          [dstPtr _pointer #;"void *"]
+          [color _Color]
+          [format _int])
+         _void]{
 Set color formatted into destination pixel pointer
 }
 
-@defproc[(GetPixelDataSize) any?]{
+@defproc[(GetPixelDataSize
+          [width _int]
+          [height _int]
+          [format _int])
+         _int]{
 Get pixel data size in bytes for certain format
 }
 
-@defproc[(GetFontDefault) any?]{
+@defproc[(GetFontDefault)
+         _Font]{
 Get the default Font
 }
 
-@defproc[(LoadFont) any?]{
+@defproc[(LoadFont
+          [fileName _string])
+         _Font]{
 Load font from file into GPU memory (VRAM)
 }
 
-@defproc[(LoadFontEx) any?]{
+@defproc[(LoadFontEx
+          [fileName _string]
+          [fontSize _int]
+          [fontChars _pointer #;"int *"]
+          [glyphCount _int])
+         _Font]{
 Load font from file with extended parameters
 }
 
-@defproc[(LoadFontFromImage) any?]{
+@defproc[(LoadFontFromImage
+          [image _Image]
+          [key _Color]
+          [firstChar _int])
+         _Font]{
 Load font from Image (XNA style)
 }
 
-@defproc[(LoadFontFromMemory) any?]{
+@defproc[(LoadFontFromMemory
+          [fileType _string]
+          [fileData _pointer #;"const unsigned char *"]
+          [dataSize _int]
+          [fontSize _int]
+          [fontChars _pointer #;"int *"]
+          [glyphCount _int])
+         _Font]{
 Load font from memory buffer, fileType refers to extension: i.e. '.ttf'
 }
 
-@defproc[(LoadFontData) any?]{
+@defproc[(LoadFontData
+          [fileData _pointer #;"const unsigned char *"]
+          [dataSize _int]
+          [fontSize _int]
+          [fontChars _pointer #;"int *"]
+          [glyphCount _int]
+          [type _int])
+         _pointer #;"GlyphInfo *"]{
 Load font data for further use
 }
 
-@defproc[(GenImageFontAtlas) any?]{
+@defproc[(GenImageFontAtlas
+          [chars _pointer #;"const GlyphInfo *"]
+          [recs _pointer #;"Rectangle **"]
+          [glyphCount _int]
+          [fontSize _int]
+          [padding _int]
+          [packMethod _int])
+         _Image]{
 Generate image font atlas using chars info
 }
 
-@defproc[(UnloadFontData) any?]{
+@defproc[(UnloadFontData
+          [chars _pointer #;"GlyphInfo *"]
+          [glyphCount _int])
+         _void]{
 Unload font chars info data (RAM)
 }
 
-@defproc[(UnloadFont) any?]{
+@defproc[(UnloadFont
+          [font _Font])
+         _void]{
 Unload Font from GPU memory (VRAM)
 }
 
-@defproc[(DrawFPS) any?]{
+@defproc[(DrawFPS
+          [posX _int]
+          [posY _int])
+         _void]{
 Draw current FPS
 }
 
-@defproc[(DrawText) any?]{
+@defproc[(DrawText
+          [text _string]
+          [posX _int]
+          [posY _int]
+          [fontSize _int]
+          [color _Color])
+         _void]{
 Draw text (using default font)
 }
 
-@defproc[(DrawTextEx) any?]{
+@defproc[(DrawTextEx
+          [font _Font]
+          [text _string]
+          [position _Vector2]
+          [fontSize _float]
+          [spacing _float]
+          [tint _Color])
+         _void]{
 Draw text using font and additional parameters
 }
 
-@defproc[(DrawTextPro) any?]{
+@defproc[(DrawTextPro
+          [font _Font]
+          [text _string]
+          [position _Vector2]
+          [origin _Vector2]
+          [rotation _float]
+          [fontSize _float]
+          [spacing _float]
+          [tint _Color])
+         _void]{
 Draw text using Font and pro parameters (rotation)
 }
 
-@defproc[(DrawTextCodepoint) any?]{
+@defproc[(DrawTextCodepoint
+          [font _Font]
+          [codepoint _int]
+          [position _Vector2]
+          [fontSize _float]
+          [tint _Color])
+         _void]{
 Draw one character (codepoint)
 }
 
-@defproc[(MeasureText) any?]{
+@defproc[(MeasureText
+          [text _string]
+          [fontSize _int])
+         _int]{
 Measure string width for default font
 }
 
-@defproc[(MeasureTextEx) any?]{
+@defproc[(MeasureTextEx
+          [font _Font]
+          [text _string]
+          [fontSize _float]
+          [spacing _float])
+         _Vector2]{
 Measure string size for Font
 }
 
-@defproc[(GetGlyphIndex) any?]{
+@defproc[(GetGlyphIndex
+          [font _Font]
+          [codepoint _int])
+         _int]{
 Get glyph index position in font for a codepoint (unicode character), fallback to '?' if not found
 }
 
-@defproc[(GetGlyphInfo) any?]{
+@defproc[(GetGlyphInfo
+          [font _Font]
+          [codepoint _int])
+         _GlyphInfo]{
 Get glyph font info data for a codepoint (unicode character), fallback to '?' if not found
 }
 
-@defproc[(GetGlyphAtlasRec) any?]{
+@defproc[(GetGlyphAtlasRec
+          [font _Font]
+          [codepoint _int])
+         _Rectangle]{
 Get glyph rectangle in font atlas for a codepoint (unicode character), fallback to '?' if not found
 }
 
-@defproc[(LoadCodepoints) any?]{
+@defproc[(LoadCodepoints
+          [text _string]
+          [count _pointer #;"int *"])
+         _pointer #;"int *"]{
 Load all codepoints from a UTF-8 text string, codepoints count returned by parameter
 }
 
-@defproc[(UnloadCodepoints) any?]{
+@defproc[(UnloadCodepoints
+          [codepoints _pointer #;"int *"])
+         _void]{
 Unload codepoints data from memory
 }
 
-@defproc[(GetCodepointCount) any?]{
+@defproc[(GetCodepointCount
+          [text _string])
+         _int]{
 Get total number of codepoints in a UTF-8 encoded string
 }
 
-@defproc[(GetCodepoint) any?]{
+@defproc[(GetCodepoint
+          [text _string]
+          [bytesProcessed _pointer #;"int *"])
+         _int]{
 Get next codepoint in a UTF-8 encoded string, 0x3f('?') is returned on failure
 }
 
-@defproc[(CodepointToUTF8) any?]{
+@defproc[(CodepointToUTF8
+          [codepoint _int]
+          [byteSize _pointer #;"int *"])
+         _string]{
 Encode one codepoint into UTF-8 byte array (array length returned as parameter)
 }
 
-@defproc[(TextCodepointsToUTF8) any?]{
+@defproc[(TextCodepointsToUTF8
+          [codepoints _pointer #;"int *"]
+          [length _int])
+         _pointer #;"char *"]{
 Encode text as codepoints array into UTF-8 text string (WARNING: memory must be freed!)
 }
 
-@defproc[(TextCopy) any?]{
+@defproc[(TextCopy
+          [dst _pointer #;"char *"]
+          [src _string])
+         _int]{
 Copy one string to another, returns bytes copied
 }
 
-@defproc[(TextIsEqual) any?]{
+@defproc[(TextIsEqual
+          [text1 _string]
+          [text2 _string])
+         _bool]{
 Check if two text string are equal
 }
 
-@defproc[(TextLength) any?]{
+@defproc[(TextLength
+          [text _string])
+         _uint]{
 Get text length, checks for '\0' ending
 }
 
-@defproc[(TextFormat) any?]{
+@defproc[(TextFormat
+          [text _string])
+         _string]{
 Text formatting with variables (sprintf() style)
 }
 
-@defproc[(TextSubtext) any?]{
+@defproc[(TextSubtext
+          [text _string]
+          [position _int]
+          [length _int])
+         _string]{
 Get a piece of a text string
 }
 
-@defproc[(TextReplace) any?]{
+@defproc[(TextReplace
+          [text _pointer #;"char *"]
+          [replace _string]
+          [by _string])
+         _pointer #;"char *"]{
 Replace text string (WARNING: memory must be freed!)
 }
 
-@defproc[(TextInsert) any?]{
+@defproc[(TextInsert
+          [text _string]
+          [insert _string]
+          [position _int])
+         _pointer #;"char *"]{
 Insert text in a position (WARNING: memory must be freed!)
 }
 
-@defproc[(TextJoin) any?]{
+@defproc[(TextJoin
+          [textList _pointer #;"const char **"]
+          [count _int]
+          [delimiter _string])
+         _string]{
 Join text strings with delimiter
 }
 
-@defproc[(TextSplit) any?]{
+@defproc[(TextSplit
+          [text _string]
+          [delimiter _byte]
+          [count _pointer #;"int *"])
+         _pointer #;"const char **"]{
 Split text into multiple strings
 }
 
-@defproc[(TextAppend) any?]{
+@defproc[(TextAppend
+          [text _pointer #;"char *"]
+          [append _string]
+          [position _pointer #;"int *"])
+         _void]{
 Append text at specific position and move cursor!
 }
 
-@defproc[(TextFindIndex) any?]{
+@defproc[(TextFindIndex
+          [text _string]
+          [find _string])
+         _int]{
 Find first text occurrence within a string
 }
 
-@defproc[(TextToUpper) any?]{
+@defproc[(TextToUpper
+          [text _string])
+         _string]{
 Get upper case version of provided string
 }
 
-@defproc[(TextToLower) any?]{
+@defproc[(TextToLower
+          [text _string])
+         _string]{
 Get lower case version of provided string
 }
 
-@defproc[(TextToPascal) any?]{
+@defproc[(TextToPascal
+          [text _string])
+         _string]{
 Get Pascal case notation version of provided string
 }
 
-@defproc[(TextToInteger) any?]{
+@defproc[(TextToInteger
+          [text _string])
+         _int]{
 Get integer value from text (negative values not supported)
 }
 
-@defproc[(DrawLine3D) any?]{
+@defproc[(DrawLine3D
+          [startPos _Vector3]
+          [endPos _Vector3]
+          [color _Color])
+         _void]{
 Draw a line in 3D world space
 }
 
-@defproc[(DrawPoint3D) any?]{
+@defproc[(DrawPoint3D
+          [position _Vector3]
+          [color _Color])
+         _void]{
 Draw a point in 3D space, actually a small line
 }
 
-@defproc[(DrawCircle3D) any?]{
+@defproc[(DrawCircle3D
+          [center _Vector3]
+          [radius _float]
+          [rotationAxis _Vector3]
+          [rotationAngle _float]
+          [color _Color])
+         _void]{
 Draw a circle in 3D world space
 }
 
-@defproc[(DrawTriangle3D) any?]{
+@defproc[(DrawTriangle3D
+          [v1 _Vector3]
+          [v2 _Vector3]
+          [v3 _Vector3]
+          [color _Color])
+         _void]{
 Draw a color-filled triangle (vertex in counter-clockwise order!)
 }
 
-@defproc[(DrawTriangleStrip3D) any?]{
+@defproc[(DrawTriangleStrip3D
+          [points _pointer #;"Vector3 *"]
+          [pointCount _int]
+          [color _Color])
+         _void]{
 Draw a triangle strip defined by points
 }
 
-@defproc[(DrawCube) any?]{
+@defproc[(DrawCube
+          [position _Vector3]
+          [width _float]
+          [height _float]
+          [length _float]
+          [color _Color])
+         _void]{
 Draw cube
 }
 
-@defproc[(DrawCubeV) any?]{
+@defproc[(DrawCubeV
+          [position _Vector3]
+          [size _Vector3]
+          [color _Color])
+         _void]{
 Draw cube (Vector version)
 }
 
-@defproc[(DrawCubeWires) any?]{
+@defproc[(DrawCubeWires
+          [position _Vector3]
+          [width _float]
+          [height _float]
+          [length _float]
+          [color _Color])
+         _void]{
 Draw cube wires
 }
 
-@defproc[(DrawCubeWiresV) any?]{
+@defproc[(DrawCubeWiresV
+          [position _Vector3]
+          [size _Vector3]
+          [color _Color])
+         _void]{
 Draw cube wires (Vector version)
 }
 
-@defproc[(DrawCubeTexture) any?]{
+@defproc[(DrawCubeTexture
+          [texture _Texture2D]
+          [position _Vector3]
+          [width _float]
+          [height _float]
+          [length _float]
+          [color _Color])
+         _void]{
 Draw cube textured
 }
 
-@defproc[(DrawCubeTextureRec) any?]{
+@defproc[(DrawCubeTextureRec
+          [texture _Texture2D]
+          [source _Rectangle]
+          [position _Vector3]
+          [width _float]
+          [height _float]
+          [length _float]
+          [color _Color])
+         _void]{
 Draw cube with a region of a texture
 }
 
-@defproc[(DrawSphere) any?]{
+@defproc[(DrawSphere
+          [centerPos _Vector3]
+          [radius _float]
+          [color _Color])
+         _void]{
 Draw sphere
 }
 
-@defproc[(DrawSphereEx) any?]{
+@defproc[(DrawSphereEx
+          [centerPos _Vector3]
+          [radius _float]
+          [rings _int]
+          [slices _int]
+          [color _Color])
+         _void]{
 Draw sphere with extended parameters
 }
 
-@defproc[(DrawSphereWires) any?]{
+@defproc[(DrawSphereWires
+          [centerPos _Vector3]
+          [radius _float]
+          [rings _int]
+          [slices _int]
+          [color _Color])
+         _void]{
 Draw sphere wires
 }
 
-@defproc[(DrawCylinder) any?]{
+@defproc[(DrawCylinder
+          [position _Vector3]
+          [radiusTop _float]
+          [radiusBottom _float]
+          [height _float]
+          [slices _int]
+          [color _Color])
+         _void]{
 Draw a cylinder/cone
 }
 
-@defproc[(DrawCylinderEx) any?]{
+@defproc[(DrawCylinderEx
+          [startPos _Vector3]
+          [endPos _Vector3]
+          [startRadius _float]
+          [endRadius _float]
+          [sides _int]
+          [color _Color])
+         _void]{
 Draw a cylinder with base at startPos and top at endPos
 }
 
-@defproc[(DrawCylinderWires) any?]{
+@defproc[(DrawCylinderWires
+          [position _Vector3]
+          [radiusTop _float]
+          [radiusBottom _float]
+          [height _float]
+          [slices _int]
+          [color _Color])
+         _void]{
 Draw a cylinder/cone wires
 }
 
-@defproc[(DrawCylinderWiresEx) any?]{
+@defproc[(DrawCylinderWiresEx
+          [startPos _Vector3]
+          [endPos _Vector3]
+          [startRadius _float]
+          [endRadius _float]
+          [sides _int]
+          [color _Color])
+         _void]{
 Draw a cylinder wires with base at startPos and top at endPos
 }
 
-@defproc[(DrawPlane) any?]{
+@defproc[(DrawPlane
+          [centerPos _Vector3]
+          [size _Vector2]
+          [color _Color])
+         _void]{
 Draw a plane XZ
 }
 
-@defproc[(DrawRay) any?]{
+@defproc[(DrawRay
+          [ray _Ray]
+          [color _Color])
+         _void]{
 Draw a ray line
 }
 
-@defproc[(DrawGrid) any?]{
+@defproc[(DrawGrid
+          [slices _int]
+          [spacing _float])
+         _void]{
 Draw a grid (centered at (0, 0, 0))
 }
 
-@defproc[(LoadModel) any?]{
+@defproc[(LoadModel
+          [fileName _string])
+         _Model]{
 Load model from files (meshes and materials)
 }
 
-@defproc[(LoadModelFromMesh) any?]{
+@defproc[(LoadModelFromMesh
+          [mesh _Mesh])
+         _Model]{
 Load model from generated mesh (default material)
 }
 
-@defproc[(UnloadModel) any?]{
+@defproc[(UnloadModel
+          [model _Model])
+         _void]{
 Unload model (including meshes) from memory (RAM and/or VRAM)
 }
 
-@defproc[(UnloadModelKeepMeshes) any?]{
+@defproc[(UnloadModelKeepMeshes
+          [model _Model])
+         _void]{
 Unload model (but not meshes) from memory (RAM and/or VRAM)
 }
 
-@defproc[(GetModelBoundingBox) any?]{
+@defproc[(GetModelBoundingBox
+          [model _Model])
+         _BoundingBox]{
 Compute model bounding box limits (considers all meshes)
 }
 
-@defproc[(DrawModel) any?]{
+@defproc[(DrawModel
+          [model _Model]
+          [position _Vector3]
+          [scale _float]
+          [tint _Color])
+         _void]{
 Draw a model (with texture if set)
 }
 
-@defproc[(DrawModelEx) any?]{
+@defproc[(DrawModelEx
+          [model _Model]
+          [position _Vector3]
+          [rotationAxis _Vector3]
+          [rotationAngle _float]
+          [scale _Vector3]
+          [tint _Color])
+         _void]{
 Draw a model with extended parameters
 }
 
-@defproc[(DrawModelWires) any?]{
+@defproc[(DrawModelWires
+          [model _Model]
+          [position _Vector3]
+          [scale _float]
+          [tint _Color])
+         _void]{
 Draw a model wires (with texture if set)
 }
 
-@defproc[(DrawModelWiresEx) any?]{
+@defproc[(DrawModelWiresEx
+          [model _Model]
+          [position _Vector3]
+          [rotationAxis _Vector3]
+          [rotationAngle _float]
+          [scale _Vector3]
+          [tint _Color])
+         _void]{
 Draw a model wires (with texture if set) with extended parameters
 }
 
-@defproc[(DrawBoundingBox) any?]{
+@defproc[(DrawBoundingBox
+          [box _BoundingBox]
+          [color _Color])
+         _void]{
 Draw bounding box (wires)
 }
 
-@defproc[(DrawBillboard) any?]{
+@defproc[(DrawBillboard
+          [camera _Camera]
+          [texture _Texture2D]
+          [position _Vector3]
+          [size _float]
+          [tint _Color])
+         _void]{
 Draw a billboard texture
 }
 
-@defproc[(DrawBillboardRec) any?]{
+@defproc[(DrawBillboardRec
+          [camera _Camera]
+          [texture _Texture2D]
+          [source _Rectangle]
+          [position _Vector3]
+          [size _Vector2]
+          [tint _Color])
+         _void]{
 Draw a billboard texture defined by source
 }
 
-@defproc[(DrawBillboardPro) any?]{
+@defproc[(DrawBillboardPro
+          [camera _Camera]
+          [texture _Texture2D]
+          [source _Rectangle]
+          [position _Vector3]
+          [up _Vector3]
+          [size _Vector2]
+          [origin _Vector2]
+          [rotation _float]
+          [tint _Color])
+         _void]{
 Draw a billboard texture defined by source and rotation
 }
 
-@defproc[(UploadMesh) any?]{
+@defproc[(UploadMesh
+          [mesh _pointer #;"Mesh *"]
+          [dynamic _bool])
+         _void]{
 Upload mesh vertex data in GPU and provide VAO/VBO ids
 }
 
-@defproc[(UpdateMeshBuffer) any?]{
+@defproc[(UpdateMeshBuffer
+          [mesh _Mesh]
+          [index _int]
+          [data _pointer #;"void *"]
+          [dataSize _int]
+          [offset _int])
+         _void]{
 Update mesh vertex data in GPU for a specific buffer index
 }
 
-@defproc[(UnloadMesh) any?]{
+@defproc[(UnloadMesh
+          [mesh _Mesh])
+         _void]{
 Unload mesh data from CPU and GPU
 }
 
-@defproc[(DrawMesh) any?]{
+@defproc[(DrawMesh
+          [mesh _Mesh]
+          [material _Material]
+          [transform _Matrix])
+         _void]{
 Draw a 3d mesh with material and transform
 }
 
-@defproc[(DrawMeshInstanced) any?]{
+@defproc[(DrawMeshInstanced
+          [mesh _Mesh]
+          [material _Material]
+          [transforms _pointer #;"Matrix *"]
+          [instances _int])
+         _void]{
 Draw multiple mesh instances with material and different transforms
 }
 
-@defproc[(ExportMesh) any?]{
+@defproc[(ExportMesh
+          [mesh _Mesh]
+          [fileName _string])
+         _bool]{
 Export mesh data to file, returns true on success
 }
 
-@defproc[(GetMeshBoundingBox) any?]{
+@defproc[(GetMeshBoundingBox
+          [mesh _Mesh])
+         _BoundingBox]{
 Compute mesh bounding box limits
 }
 
-@defproc[(GenMeshTangents) any?]{
+@defproc[(GenMeshTangents
+          [mesh _pointer #;"Mesh *"])
+         _void]{
 Compute mesh tangents
 }
 
-@defproc[(GenMeshBinormals) any?]{
+@defproc[(GenMeshBinormals
+          [mesh _pointer #;"Mesh *"])
+         _void]{
 Compute mesh binormals
 }
 
-@defproc[(GenMeshPoly) any?]{
+@defproc[(GenMeshPoly
+          [sides _int]
+          [radius _float])
+         _Mesh]{
 Generate polygonal mesh
 }
 
-@defproc[(GenMeshPlane) any?]{
+@defproc[(GenMeshPlane
+          [width _float]
+          [length _float]
+          [resX _int]
+          [resZ _int])
+         _Mesh]{
 Generate plane mesh (with subdivisions)
 }
 
-@defproc[(GenMeshCube) any?]{
+@defproc[(GenMeshCube
+          [width _float]
+          [height _float]
+          [length _float])
+         _Mesh]{
 Generate cuboid mesh
 }
 
-@defproc[(GenMeshSphere) any?]{
+@defproc[(GenMeshSphere
+          [radius _float]
+          [rings _int]
+          [slices _int])
+         _Mesh]{
 Generate sphere mesh (standard sphere)
 }
 
-@defproc[(GenMeshHemiSphere) any?]{
+@defproc[(GenMeshHemiSphere
+          [radius _float]
+          [rings _int]
+          [slices _int])
+         _Mesh]{
 Generate half-sphere mesh (no bottom cap)
 }
 
-@defproc[(GenMeshCylinder) any?]{
+@defproc[(GenMeshCylinder
+          [radius _float]
+          [height _float]
+          [slices _int])
+         _Mesh]{
 Generate cylinder mesh
 }
 
-@defproc[(GenMeshCone) any?]{
+@defproc[(GenMeshCone
+          [radius _float]
+          [height _float]
+          [slices _int])
+         _Mesh]{
 Generate cone/pyramid mesh
 }
 
-@defproc[(GenMeshTorus) any?]{
+@defproc[(GenMeshTorus
+          [radius _float]
+          [size _float]
+          [radSeg _int]
+          [sides _int])
+         _Mesh]{
 Generate torus mesh
 }
 
-@defproc[(GenMeshKnot) any?]{
+@defproc[(GenMeshKnot
+          [radius _float]
+          [size _float]
+          [radSeg _int]
+          [sides _int])
+         _Mesh]{
 Generate trefoil knot mesh
 }
 
-@defproc[(GenMeshHeightmap) any?]{
+@defproc[(GenMeshHeightmap
+          [heightmap _Image]
+          [size _Vector3])
+         _Mesh]{
 Generate heightmap mesh from image data
 }
 
-@defproc[(GenMeshCubicmap) any?]{
+@defproc[(GenMeshCubicmap
+          [cubicmap _Image]
+          [cubeSize _Vector3])
+         _Mesh]{
 Generate cubes-based map mesh from image data
 }
 
-@defproc[(LoadMaterials) any?]{
+@defproc[(LoadMaterials
+          [fileName _string]
+          [materialCount _pointer #;"int *"])
+         _pointer #;"Material *"]{
 Load materials from model file
 }
 
-@defproc[(LoadMaterialDefault) any?]{
+@defproc[(LoadMaterialDefault)
+         _Material]{
 Load default material (Supports: DIFFUSE, SPECULAR, NORMAL maps)
 }
 
-@defproc[(UnloadMaterial) any?]{
+@defproc[(UnloadMaterial
+          [material _Material])
+         _void]{
 Unload material from GPU memory (VRAM)
 }
 
-@defproc[(SetMaterialTexture) any?]{
+@defproc[(SetMaterialTexture
+          [material _pointer #;"Material *"]
+          [mapType _int]
+          [texture _Texture2D])
+         _void]{
 Set texture for a material map type (MATERIAL_MAP_DIFFUSE, MATERIAL_MAP_SPECULAR...)
 }
 
-@defproc[(SetModelMeshMaterial) any?]{
+@defproc[(SetModelMeshMaterial
+          [model _pointer #;"Model *"]
+          [meshId _int]
+          [materialId _int])
+         _void]{
 Set material for a mesh
 }
 
-@defproc[(LoadModelAnimations) any?]{
+@defproc[(LoadModelAnimations
+          [fileName _string]
+          [animCount _pointer #;"unsigned int *"])
+         _pointer #;"ModelAnimation *"]{
 Load model animations from file
 }
 
-@defproc[(UpdateModelAnimation) any?]{
+@defproc[(UpdateModelAnimation
+          [model _Model]
+          [anim _ModelAnimation]
+          [frame _int])
+         _void]{
 Update model animation pose
 }
 
-@defproc[(UnloadModelAnimation) any?]{
+@defproc[(UnloadModelAnimation
+          [anim _ModelAnimation])
+         _void]{
 Unload animation data
 }
 
-@defproc[(UnloadModelAnimations) any?]{
+@defproc[(UnloadModelAnimations
+          [animations _pointer #;"ModelAnimation*"]
+          [count _uint])
+         _void]{
 Unload animation array data
 }
 
-@defproc[(IsModelAnimationValid) any?]{
+@defproc[(IsModelAnimationValid
+          [model _Model]
+          [anim _ModelAnimation])
+         _bool]{
 Check model animation skeleton match
 }
 
-@defproc[(CheckCollisionSpheres) any?]{
+@defproc[(CheckCollisionSpheres
+          [center1 _Vector3]
+          [radius1 _float]
+          [center2 _Vector3]
+          [radius2 _float])
+         _bool]{
 Check collision between two spheres
 }
 
-@defproc[(CheckCollisionBoxes) any?]{
+@defproc[(CheckCollisionBoxes
+          [box1 _BoundingBox]
+          [box2 _BoundingBox])
+         _bool]{
 Check collision between two bounding boxes
 }
 
-@defproc[(CheckCollisionBoxSphere) any?]{
+@defproc[(CheckCollisionBoxSphere
+          [box _BoundingBox]
+          [center _Vector3]
+          [radius _float])
+         _bool]{
 Check collision between box and sphere
 }
 
-@defproc[(GetRayCollisionSphere) any?]{
+@defproc[(GetRayCollisionSphere
+          [ray _Ray]
+          [center _Vector3]
+          [radius _float])
+         _RayCollision]{
 Get collision info between ray and sphere
 }
 
-@defproc[(GetRayCollisionBox) any?]{
+@defproc[(GetRayCollisionBox
+          [ray _Ray]
+          [box _BoundingBox])
+         _RayCollision]{
 Get collision info between ray and box
 }
 
-@defproc[(GetRayCollisionModel) any?]{
+@defproc[(GetRayCollisionModel
+          [ray _Ray]
+          [model _Model])
+         _RayCollision]{
 Get collision info between ray and model
 }
 
-@defproc[(GetRayCollisionMesh) any?]{
+@defproc[(GetRayCollisionMesh
+          [ray _Ray]
+          [mesh _Mesh]
+          [transform _Matrix])
+         _RayCollision]{
 Get collision info between ray and mesh
 }
 
-@defproc[(GetRayCollisionTriangle) any?]{
+@defproc[(GetRayCollisionTriangle
+          [ray _Ray]
+          [p1 _Vector3]
+          [p2 _Vector3]
+          [p3 _Vector3])
+         _RayCollision]{
 Get collision info between ray and triangle
 }
 
-@defproc[(GetRayCollisionQuad) any?]{
+@defproc[(GetRayCollisionQuad
+          [ray _Ray]
+          [p1 _Vector3]
+          [p2 _Vector3]
+          [p3 _Vector3]
+          [p4 _Vector3])
+         _RayCollision]{
 Get collision info between ray and quad
 }
 
-@defproc[(InitAudioDevice) any?]{
+@defproc[(InitAudioDevice)
+         _void]{
 Initialize audio device and context
 }
 
-@defproc[(CloseAudioDevice) any?]{
+@defproc[(CloseAudioDevice)
+         _void]{
 Close the audio device and context
 }
 
-@defproc[(IsAudioDeviceReady) any?]{
+@defproc[(IsAudioDeviceReady)
+         _bool]{
 Check if audio device has been initialized successfully
 }
 
-@defproc[(SetMasterVolume) any?]{
+@defproc[(SetMasterVolume
+          [volume _float])
+         _void]{
 Set master volume (listener)
 }
 
-@defproc[(LoadWave) any?]{
+@defproc[(LoadWave
+          [fileName _string])
+         _Wave]{
 Load wave data from file
 }
 
-@defproc[(LoadWaveFromMemory) any?]{
+@defproc[(LoadWaveFromMemory
+          [fileType _string]
+          [fileData _pointer #;"const unsigned char *"]
+          [dataSize _int])
+         _Wave]{
 Load wave from memory buffer, fileType refers to extension: i.e. '.wav'
 }
 
-@defproc[(LoadSound) any?]{
+@defproc[(LoadSound
+          [fileName _string])
+         _Sound]{
 Load sound from file
 }
 
-@defproc[(LoadSoundFromWave) any?]{
+@defproc[(LoadSoundFromWave
+          [wave _Wave])
+         _Sound]{
 Load sound from wave data
 }
 
-@defproc[(UpdateSound) any?]{
+@defproc[(UpdateSound
+          [sound _Sound]
+          [data _pointer #;"const void *"]
+          [sampleCount _int])
+         _void]{
 Update sound buffer with new data
 }
 
-@defproc[(UnloadWave) any?]{
+@defproc[(UnloadWave
+          [wave _Wave])
+         _void]{
 Unload wave data
 }
 
-@defproc[(UnloadSound) any?]{
+@defproc[(UnloadSound
+          [sound _Sound])
+         _void]{
 Unload sound
 }
 
-@defproc[(ExportWave) any?]{
+@defproc[(ExportWave
+          [wave _Wave]
+          [fileName _string])
+         _bool]{
 Export wave data to file, returns true on success
 }
 
-@defproc[(ExportWaveAsCode) any?]{
+@defproc[(ExportWaveAsCode
+          [wave _Wave]
+          [fileName _string])
+         _bool]{
 Export wave sample data to code (.h), returns true on success
 }
 
-@defproc[(PlaySound) any?]{
+@defproc[(PlaySound
+          [sound _Sound])
+         _void]{
 Play a sound
 }
 
-@defproc[(StopSound) any?]{
+@defproc[(StopSound
+          [sound _Sound])
+         _void]{
 Stop playing a sound
 }
 
-@defproc[(PauseSound) any?]{
+@defproc[(PauseSound
+          [sound _Sound])
+         _void]{
 Pause a sound
 }
 
-@defproc[(ResumeSound) any?]{
+@defproc[(ResumeSound
+          [sound _Sound])
+         _void]{
 Resume a paused sound
 }
 
-@defproc[(PlaySoundMulti) any?]{
+@defproc[(PlaySoundMulti
+          [sound _Sound])
+         _void]{
 Play a sound (using multichannel buffer pool)
 }
 
-@defproc[(StopSoundMulti) any?]{
+@defproc[(StopSoundMulti)
+         _void]{
 Stop any sound playing (using multichannel buffer pool)
 }
 
-@defproc[(GetSoundsPlaying) any?]{
+@defproc[(GetSoundsPlaying)
+         _int]{
 Get number of sounds playing in the multichannel
 }
 
-@defproc[(IsSoundPlaying) any?]{
+@defproc[(IsSoundPlaying
+          [sound _Sound])
+         _bool]{
 Check if a sound is currently playing
 }
 
-@defproc[(SetSoundVolume) any?]{
+@defproc[(SetSoundVolume
+          [sound _Sound]
+          [volume _float])
+         _void]{
 Set volume for a sound (1.0 is max level)
 }
 
-@defproc[(SetSoundPitch) any?]{
+@defproc[(SetSoundPitch
+          [sound _Sound]
+          [pitch _float])
+         _void]{
 Set pitch for a sound (1.0 is base level)
 }
 
-@defproc[(WaveFormat) any?]{
+@defproc[(WaveFormat
+          [wave _pointer #;"Wave *"]
+          [sampleRate _int]
+          [sampleSize _int]
+          [channels _int])
+         _void]{
 Convert wave data to desired format
 }
 
-@defproc[(WaveCopy) any?]{
+@defproc[(WaveCopy
+          [wave _Wave])
+         _Wave]{
 Copy a wave to a new wave
 }
 
-@defproc[(WaveCrop) any?]{
+@defproc[(WaveCrop
+          [wave _pointer #;"Wave *"]
+          [initSample _int]
+          [finalSample _int])
+         _void]{
 Crop a wave to defined samples range
 }
 
-@defproc[(LoadWaveSamples) any?]{
+@defproc[(LoadWaveSamples
+          [wave _Wave])
+         _pointer #;"float *"]{
 Load samples data from wave as a floats array
 }
 
-@defproc[(UnloadWaveSamples) any?]{
+@defproc[(UnloadWaveSamples
+          [samples _pointer #;"float *"])
+         _void]{
 Unload samples data loaded with LoadWaveSamples()
 }
 
-@defproc[(LoadMusicStream) any?]{
+@defproc[(LoadMusicStream
+          [fileName _string])
+         _Music]{
 Load music stream from file
 }
 
-@defproc[(LoadMusicStreamFromMemory) any?]{
+@defproc[(LoadMusicStreamFromMemory
+          [fileType _string]
+          [data _pointer #;"unsigned char *"]
+          [dataSize _int])
+         _Music]{
 Load music stream from data
 }
 
-@defproc[(UnloadMusicStream) any?]{
+@defproc[(UnloadMusicStream
+          [music _Music])
+         _void]{
 Unload music stream
 }
 
-@defproc[(PlayMusicStream) any?]{
+@defproc[(PlayMusicStream
+          [music _Music])
+         _void]{
 Start music playing
 }
 
-@defproc[(IsMusicStreamPlaying) any?]{
+@defproc[(IsMusicStreamPlaying
+          [music _Music])
+         _bool]{
 Check if music is playing
 }
 
-@defproc[(UpdateMusicStream) any?]{
+@defproc[(UpdateMusicStream
+          [music _Music])
+         _void]{
 Updates buffers for music streaming
 }
 
-@defproc[(StopMusicStream) any?]{
+@defproc[(StopMusicStream
+          [music _Music])
+         _void]{
 Stop music playing
 }
 
-@defproc[(PauseMusicStream) any?]{
+@defproc[(PauseMusicStream
+          [music _Music])
+         _void]{
 Pause music playing
 }
 
-@defproc[(ResumeMusicStream) any?]{
+@defproc[(ResumeMusicStream
+          [music _Music])
+         _void]{
 Resume playing paused music
 }
 
-@defproc[(SeekMusicStream) any?]{
+@defproc[(SeekMusicStream
+          [music _Music]
+          [position _float])
+         _void]{
 Seek music to a position (in seconds)
 }
 
-@defproc[(SetMusicVolume) any?]{
+@defproc[(SetMusicVolume
+          [music _Music]
+          [volume _float])
+         _void]{
 Set volume for music (1.0 is max level)
 }
 
-@defproc[(SetMusicPitch) any?]{
+@defproc[(SetMusicPitch
+          [music _Music]
+          [pitch _float])
+         _void]{
 Set pitch for a music (1.0 is base level)
 }
 
-@defproc[(GetMusicTimeLength) any?]{
+@defproc[(GetMusicTimeLength
+          [music _Music])
+         _float]{
 Get music time length (in seconds)
 }
 
-@defproc[(GetMusicTimePlayed) any?]{
+@defproc[(GetMusicTimePlayed
+          [music _Music])
+         _float]{
 Get current music time played (in seconds)
 }
 
-@defproc[(LoadAudioStream) any?]{
+@defproc[(LoadAudioStream
+          [sampleRate _uint]
+          [sampleSize _uint]
+          [channels _uint])
+         _AudioStream]{
 Load audio stream (to stream raw audio pcm data)
 }
 
-@defproc[(UnloadAudioStream) any?]{
+@defproc[(UnloadAudioStream
+          [stream _AudioStream])
+         _void]{
 Unload audio stream and free memory
 }
 
-@defproc[(UpdateAudioStream) any?]{
+@defproc[(UpdateAudioStream
+          [stream _AudioStream]
+          [data _pointer #;"const void *"]
+          [frameCount _int])
+         _void]{
 Update audio stream buffers with data
 }
 
-@defproc[(IsAudioStreamProcessed) any?]{
+@defproc[(IsAudioStreamProcessed
+          [stream _AudioStream])
+         _bool]{
 Check if any audio stream buffers requires refill
 }
 
-@defproc[(PlayAudioStream) any?]{
+@defproc[(PlayAudioStream
+          [stream _AudioStream])
+         _void]{
 Play audio stream
 }
 
-@defproc[(PauseAudioStream) any?]{
+@defproc[(PauseAudioStream
+          [stream _AudioStream])
+         _void]{
 Pause audio stream
 }
 
-@defproc[(ResumeAudioStream) any?]{
+@defproc[(ResumeAudioStream
+          [stream _AudioStream])
+         _void]{
 Resume audio stream
 }
 
-@defproc[(IsAudioStreamPlaying) any?]{
+@defproc[(IsAudioStreamPlaying
+          [stream _AudioStream])
+         _bool]{
 Check if audio stream is playing
 }
 
-@defproc[(StopAudioStream) any?]{
+@defproc[(StopAudioStream
+          [stream _AudioStream])
+         _void]{
 Stop audio stream
 }
 
-@defproc[(SetAudioStreamVolume) any?]{
+@defproc[(SetAudioStreamVolume
+          [stream _AudioStream]
+          [volume _float])
+         _void]{
 Set volume for audio stream (1.0 is max level)
 }
 
-@defproc[(SetAudioStreamPitch) any?]{
+@defproc[(SetAudioStreamPitch
+          [stream _AudioStream]
+          [pitch _float])
+         _void]{
 Set pitch for audio stream (1.0 is base level)
 }
 
-@defproc[(SetAudioStreamBufferSizeDefault) any?]{
+@defproc[(SetAudioStreamBufferSizeDefault
+          [size _int])
+         _void]{
 Default size for new audio streams
 }
