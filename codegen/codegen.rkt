@@ -8,16 +8,16 @@
          syntax/datum)
 
 (define (generate-bindings-in [dir (current-directory)])
-  (define structs-rkt-port (open-output-file (build-path dir "structs.rkt") #:exists 'replace))
-  (define enums-rkt-port (open-output-file (build-path dir "enums.rkt") #:exists 'replace))
-  (define functions-rkt-port (open-output-file (build-path dir "functions.rkt") #:exists 'replace))
-  (generate-bindings
-   structs-rkt-port #f
-   enums-rkt-port #f
-   functions-rkt-port #f)
-  (close-output-port structs-rkt-port)
-  (close-output-port enums-rkt-port)
-  (close-output-port functions-rkt-port))
+  (define ports
+    (append*
+     (for/list ([name (in-list '("structs" "enums" "functions"))])
+       (list
+        (open-output-file (build-path dir (format "~a.rkt" name)) #:exists 'replace)
+        (open-output-file (build-path dir "docs" (format "~a.scrbl" name)) #:exists 'replace)))))
+  (dynamic-wind
+    void
+    (thunk (apply generate-bindings ports))
+    (thunk (for-each close-output-port ports))))
 
 (module+ main
   (generate-bindings-in))
@@ -29,48 +29,36 @@
       (or/c #f output-port?) (or/c #f output-port?)
       (or/c #f output-port?) (or/c #f output-port?)
       void?)
-  (define api-json (read-json (open-input-string (fetch-api-url "parser/raylib_api.json"))))
+  (define api-json ((compose1 read-json
+                              open-input-string
+                              fetch-api-url)
+                    "parser/raylib_api.json"))
   (define api-header (fetch-api-url "src/raylib.h"))
+  (define api-xexpr ((compose1 xml->xexpr
+                               document-element
+                               read-xml
+                               open-input-string
+                               fetch-api-url)
+                     "parser/raylib_api.xml"))
   (when (or structs-rkt-port structs-doc-port)
     (define structs-parsed (map parse-struct (hash-ref api-json 'structs)))
-    (define typedefs (parse-typedefs api-header))
-    (define function-typedefs (parse-function-typedefs api-header))
+    (define typedefs-parsed (parse-typedefs api-header))
+    (define function-typedefs-parsed (parse-function-typedefs api-header))
     (when structs-rkt-port
-      (parameterize ([current-output-port structs-rkt-port])
-        (display "#lang racket/base\n\n(require ffi/unsafe)\n\n(provide (all-defined-out))\n")
-        (for ([api-struct structs-parsed])
-          (newline)
-          (api-struct->binding api-struct)
-          (for ([typedef (filter (λ (td)
-                                   (string=? (api-struct-name api-struct)
-                                             (api-typedef-type td)))
-                                 typedefs)])
-            (newline)
-            (api-typedef->binding typedef)))
-        (for ([fn-typedef function-typedefs])
-          (newline)
-          (api-function-typedef->binding fn-typedef)))))
+      (write-struct-bindings
+       structs-rkt-port structs-parsed typedefs-parsed function-typedefs-parsed))
+    (when structs-doc-port
+      (write-struct-docs
+       structs-doc-port structs-parsed typedefs-parsed function-typedefs-parsed)))
   (when (or enums-rkt-port enums-doc-port)
     (define enums-parsed (map parse-enum (hash-ref api-json 'enums)))
-    (parameterize ([current-output-port enums-rkt-port])
-      (display "#lang racket/base\n\n(require ffi/unsafe)\n\n(provide (all-defined-out))\n")
-      (for ([api-enum enums-parsed])
-        (newline)
-        (api-enum->binding api-enum))))
+    (when enums-rkt-port
+      (write-enum-bindings enums-rkt-port enums-parsed)))
   (when (or functions-rkt-port functions-doc-port)
-    (define api-xml (read-xml (open-input-string (fetch-api-url "parser/raylib_api.xml"))))
-    (define api-xexpr (xml->xexpr (document-element api-xml)))
-    (define api-functions (filter pair? (se-path*/list '(Functions) api-xexpr)))
-    (define functions-parsed (map parse-function api-functions))
-    (parameterize ([current-output-port functions-rkt-port])
-      (display "#lang racket/base\n\n")
-      (display "(require ffi/unsafe ffi/unsafe/define \"structs.rkt\" \"enums.rkt\")\n\n")
-      (display "(define-ffi-definer define-raylib (ffi-lib \"libraylib\")\n")
-      (display "  #:provide provide-protected\n")
-      (display "  #:default-make-fail make-not-available)\n")
-      (for ([api-function functions-parsed])
-        (newline)
-        (api-function->binding api-function))))
+    (define functions-parsed
+      (map parse-function (filter pair? (se-path*/list '(Functions) api-xexpr))))
+    (when functions-rkt-port
+      (write-function-bindings functions-rkt-port functions-parsed)))
   (void))
 
 (define raylib-raw-root
@@ -134,28 +122,42 @@
        params*
        varargs))]))
 
-(define (write-params parameters)
+(define (write-params parameters [indent 3])
+  (define indent-str (build-string indent (const #\space)))
   (for ([param parameters])
     (match-define (cons pname ptype) param)
     (define-values (pname* ptype*) (parse-type pname ptype))
-    (printf "   [~a : ~a]\n" pname* ptype*)))
+    (display indent-str)
+    (printf "[~a : ~a]\n" pname* ptype*)))
 
-(define (write-return-type return-type)
+(define (write-return-type return-type [indent 3])
   (define-values (_n parsed-return) (parse-type "" return-type))
-  (printf "   -> ~a))\n" parsed-return))
+  (display (build-string indent (const #\space)))
+  (printf "-> ~a)" parsed-return))
 
-(define (api-function->binding parsed [port (current-output-port)])
+(define (api-function->binding parsed)
+  (match-define (api-function name description return-type parameters varargs) parsed)
+  (when description
+    (printf ";; ~a\n" description))
+  (printf "(define-raylib ~a\n  (_fun\n" name)
+  (when varargs
+    (printf "   #:varargs-after ~a\n" (length parameters)))
+  (write-params parameters)
+  (when varargs
+    (displayln "   ;; ... varargs\n"))
+  (write-return-type return-type)
+  (display ")\n"))
+
+(define (write-function-bindings port functions-parsed)
   (parameterize ([current-output-port port])
-    (match-define (api-function name description return-type parameters varargs) parsed)
-    (when description
-      (printf ";; ~a\n" description))
-    (printf "(define-raylib ~a\n  (_fun\n" name)
-    (when varargs
-      (printf "   #:varargs-after ~a\n" (length parameters)))
-    (write-params parameters)
-    (when varargs
-      (displayln "   ;; ... varargs\n"))
-    (write-return-type return-type)))
+    (display "#lang racket/base\n\n")
+    (display "(require ffi/unsafe ffi/unsafe/define \"structs.rkt\" \"enums.rkt\")\n\n")
+    (display "(define-ffi-definer define-raylib (ffi-lib \"libraylib\")\n")
+    (display "  #:provide provide-protected\n")
+    (display "  #:default-make-fail make-not-available)\n")
+    (for ([api-function functions-parsed])
+      (newline)
+      (api-function->binding api-function))))
 
 ;;; Structs
 
@@ -195,10 +197,9 @@
     (match-define (list _ aliased-type alias-name) typedef)
     (make-api-typedef alias-name aliased-type)))
 
-(define (api-typedef->binding parsed [port (current-output-port)])
-  (parameterize ([current-output-port port])
-    (define-values (name type) (parse-type (api-typedef-name parsed) (api-typedef-type parsed)))
-    (printf "(define _~a ~a)\n" name type)))
+(define (api-typedef->binding parsed)
+  (define-values (name type) (parse-type (api-typedef-name parsed) (api-typedef-type parsed)))
+  (printf "(define _~a ~a)\n" name type))
 
 (define (parse-function-typedefs header)
   (define typedef-lines
@@ -212,15 +213,15 @@
       (cons name (string-trim type)))
     (make-api-callback-typedef
      name
-     ret-type
+     (string-trim ret-type)
      (map split-param param-list))))
 
-(define (api-function-typedef->binding parsed [port (current-output-port)])
-  (parameterize ([current-output-port port])
-    (match-define (api-callback-typedef name ret-type params) parsed)
-    (printf "(define _~a\n  (_fun\n" name)
-    (write-params params)
-    (write-return-type ret-type)))
+(define (api-function-typedef->binding parsed)
+  (match-define (api-callback-typedef name ret-type params) parsed)
+  (printf "(define _~a\n  (_fun\n" name)
+  (write-params params)
+  (write-return-type ret-type)
+  (display ")\n"))
 
 (define (parse-struct struct-json)
   (define (parse-struct-field field-json)
@@ -233,25 +234,105 @@
    (nonempty-or-false (hash-ref struct-json 'description))
    (map parse-struct-field (hash-ref struct-json 'fields))))
 
-(define (api-struct->binding parsed [port (current-output-port)])
+(define (api-struct->binding parsed)
+  (match-define (api-struct name description fields) parsed)
+  (when description
+    (printf ";; ~a\n" description))
+  (printf "(define-cstruct _~a\n  (" name)
+  (for ([struct-field fields])
+    (match-define (api-field names field-desc field-type) struct-field)
+    (define field-strings
+      (string-join
+       (for/list ([name names])
+         (define-values (name* type) (parse-type name field-type))
+         (format "[~a ~a]" name* type))
+       " "))
+    (display field-strings)
+    (when field-desc
+      (printf " ; ~a" field-desc))
+    (printf "\n   "))
+  (display "))\n"))
+
+(define (write-struct-bindings port
+                               structs-parsed
+                               typedefs-parsed
+                               function-typedefs-parsed)
   (parameterize ([current-output-port port])
-    (match-define (api-struct name description fields) parsed)
-    (when description
-      (printf ";; ~a\n" description))
-    (printf "(define-cstruct _~a\n  (" name)
-    (for ([struct-field fields])
-      (match-define (api-field names field-desc field-type) struct-field)
-      (define field-strings
-        (string-join
-         (for/list ([name names])
-           (define-values (name* type) (parse-type name field-type))
-           (format "[~a ~a]" name* type))
-         " "))
-      (printf field-strings)
-      (when field-desc
-        (printf " ; ~a" field-desc))
-      (printf "\n   "))
-    (display "))\n")))
+    (display "#lang racket/base\n\n(require ffi/unsafe)\n\n(provide (all-defined-out))\n")
+    (for ([api-struct structs-parsed])
+      (newline)
+      (api-struct->binding api-struct)
+      (for ([typedef
+             (filter (λ (td)
+                       (string=? (api-struct-name api-struct)
+                                 (api-typedef-type td)))
+                     typedefs-parsed)])
+        (newline)
+        (api-typedef->binding typedef)))
+    (for ([fn-typedef function-typedefs-parsed])
+      (newline)
+      (api-function-typedef->binding fn-typedef))))
+
+(define (api-struct->docs struct-parsed)
+  (match-define (api-struct name desc fields) struct-parsed)
+  (printf "@deftogether[(@defthing[_~a ctype?]\n" name)
+  (printf "              @defstruct[~a\n" name)
+  (printf "                         (~a)\n"
+          (string-join
+           (for/list ([struct-field fields])
+             (match-define (api-field names _field-desc field-type) struct-field)
+             (string-join
+              (for/list ([name names])
+                (define-values (name* type) (parse-type name field-type))
+                (format "[~a ~a]" name* type))
+              " "))
+           "\n                          "))
+  (printf "                         #:constructor-name make-~a])]" name)
+  (printf "{\n~a\n}\n" (or desc "")))
+
+(define (api-typedefs->docs typedefs-parsed)
+  (newline)
+  (display "@deftogether")
+  (printf "[(~a)]{\nType aliases.\n}\n"
+          (string-join
+           (for/list ([typedef-parsed typedefs-parsed])
+             (match-define (api-typedef name type) typedef-parsed)
+             (format "@defthing[_~a ctype? #:value _~a]" name type))
+           "\n              ")))
+
+(define (api-function-typedefs->docs functions-parsed)
+  (newline)
+  (display "@deftogether")
+  (printf
+   "[(~a)]{\nCallback function types.\n}\n"
+   (string-join
+    (for/list ([function-parsed functions-parsed])
+      (match-define (api-callback-typedef name ret-type params) function-parsed)
+      (string-append
+       (format "@defthing[_~a ctype?\n" name)
+       (format "                        #:value\n")
+       (format "                        (_fun\n")
+       (with-output-to-string
+         (thunk
+          (write-params params 25)
+          (write-return-type ret-type 25)))
+       "]"))
+    "\n              ")))
+
+(define (write-struct-docs port
+                           structs-parsed
+                           typedefs-parsed
+                           function-typedefs-parsed)
+  (parameterize ([current-output-port port])
+    (display "#lang scribble/manual\n\n")
+    (display "@(require (for-label raylib/sys/structs ffi/unsafe))\n\n")
+    (display "@title{Structs}\n")
+    (display "@defmodule[raylib/sys/structs]\n")
+    (for ([api-struct structs-parsed])
+      (newline)
+      (api-struct->docs api-struct))
+    (api-typedefs->docs typedefs-parsed)
+    (api-function-typedefs->docs function-typedefs-parsed)))
 
 ;;; Enums
 
@@ -278,16 +359,22 @@
    (nonempty-or-false (hash-ref enum-json 'description))
    (map parse-enum-value (hash-ref enum-json 'values))))
 
-(define (api-enum->binding parsed [port (current-output-port)])
+(define (api-enum->binding parsed)
+  (match-define (api-enum name description enum-values) parsed)
+  (when description
+    (printf ";; ~a\n" description))
+  (printf "(define _~a\n  (_enum '(" name)
+  (for ([enum-value enum-values])
+    (match-define (api-enum-value name enum-desc enum-int-value) enum-value)
+    (printf "~a = ~a" name enum-int-value)
+    (when enum-desc
+      (printf " ; ~a" enum-desc))
+    (printf "\n           "))
+  (display ")))\n"))
+
+(define (write-enum-bindings port enums-parsed)
   (parameterize ([current-output-port port])
-    (match-define (api-enum name description enum-values) parsed)
-    (when description
-      (printf ";; ~a\n" description))
-    (printf "(define _~a\n  (_enum '(" name)
-    (for ([enum-value enum-values])
-      (match-define (api-enum-value name enum-desc enum-int-value) enum-value)
-      (printf "~a = ~a" name enum-int-value)
-      (when enum-desc
-        (printf " ; ~a" enum-desc))
-      (printf "\n           "))
-    (display ")))\n")))
+    (display "#lang racket/base\n\n(require ffi/unsafe)\n\n(provide (all-defined-out))\n")
+    (for ([api-enum enums-parsed])
+      (newline)
+      (api-enum->binding api-enum))))
