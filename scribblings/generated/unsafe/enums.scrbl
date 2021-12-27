@@ -1,9 +1,11 @@
 #lang scribble/manual
 
-@(require (for-label raylib/sys/enums ffi/unsafe racket/base))
+@(require (for-label raylib/generated/unsafe/enums ffi/unsafe racket/base))
+
+@table-of-contents[]
 
 @title{Enums}
-@defmodule[raylib/sys/enums]
+@defmodule[raylib/generated/unsafe/enums]
 
 @section{System/Window config flags}
 @defthing[_ConfigFlags ctype?]{System/Window config flags}

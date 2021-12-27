@@ -1,31 +1,82 @@
 #!/usr/bin/env racket
-#lang racket
+#lang racket/base
 
 (require json
          xml
          xml/path
          net/url
-         syntax/datum)
+         syntax/datum
 
-(define (generate-bindings-in [dir (current-directory)])
+         racket/file
+         racket/list
+         racket/string
+         racket/port
+         racket/match
+         racket/function
+         racket/contract/base
+         racket/contract/region)
+
+(define-logger codegen)
+
+(define (generate-bindings-in root-dir)
+  (log-codegen-info "Generating bindings in ~s" (path->string root-dir))
+  (define code-dir (build-path root-dir "generated"))
+  (define docs-dir (build-path root-dir "scribblings" "generated"))
+  (for-each make-directory* (list code-dir docs-dir))
   (define ports
-    (append*
-     (for/list ([name (in-list '("structs" "enums" "functions"))])
-       (list
-        (open-output-file (build-path dir (format "~a.rkt" name)) #:exists 'replace)
-        (open-output-file (build-path dir "docs" (format "~a.scrbl" name)) #:exists 'replace)))))
+    (append
+     (append*
+      (for/list ([name (in-list '(("unsafe" "structs")
+                                  ("unsafe" "enums")
+                                  ("unsafe" "functions")))])
+        (define first-part (drop-right name 1))
+        (define last-part (last name))
+        (for/list ([root (in-list (list code-dir docs-dir))]
+                   [fmt (in-list '("~a.rkt" "~a.scrbl"))])
+          (define file-dir (apply build-path root first-part))
+          (make-directory* file-dir)
+          (open-output-file (build-path file-dir (format fmt last-part))
+                            #:exists 'replace))))
+     (list
+      (open-output-file (build-path code-dir "unsafe.rkt") #:exists 'replace)
+      (open-output-file (build-path docs-dir "raylib-generated.scrbl") #:exists 'replace))))
   (dynamic-wind
     void
     (thunk (apply generate-bindings ports))
     (thunk (for-each close-output-port ports))))
 
 (module+ main
-  (generate-bindings-in))
+  (require racket/runtime-path)
+  (define-runtime-path root-dir "..")
+  (define kill-logger (make-semaphore))
+  (define logger-thread
+    (thread
+     (let ()
+       (define receiver (make-log-receiver codegen-logger 'debug))
+       (define (do-logging msg)
+         (printf "[~a] ~a\n"
+                 (vector-ref msg 0)
+                 (vector-ref msg 1)))
+       (define (loop)
+         (define msg (sync receiver kill-logger))
+         (unless (semaphore? msg) (do-logging msg) (loop)))
+       (define (finish-logging)
+         (define msg (sync/timeout 0 receiver))
+         (when msg (do-logging msg) (finish-logging)))
+       (thunk
+        (parameterize ([current-output-port (current-error-port)])
+          (loop)
+          (finish-logging))))))
+  (generate-bindings-in root-dir)
+  (semaphore-post kill-logger)
+  (thread-wait logger-thread))
 
 (define/contract (generate-bindings structs-rkt-port structs-doc-port
                                     enums-rkt-port enums-doc-port
-                                    functions-rkt-port functions-doc-port)
+                                    functions-rkt-port functions-doc-port
+                                    root-rkt-port root-doc-port)
   (-> (or/c #f output-port?) (or/c #f output-port?)
+      (or/c #f output-port?) (or/c #f output-port?)
       (or/c #f output-port?) (or/c #f output-port?)
       (or/c #f output-port?) (or/c #f output-port?)
       void?)
@@ -41,28 +92,43 @@
                                fetch-api-url)
                      "parser/raylib_api.xml"))
   (when (or structs-rkt-port structs-doc-port)
+    (log-codegen-info "Parsing structs")
     (define structs-parsed (map parse-struct (hash-ref api-json 'structs)))
     (define typedefs-parsed (parse-typedefs api-header))
     (define function-typedefs-parsed (parse-function-typedefs api-header))
     (when structs-rkt-port
+      (log-codegen-info "Writing struct bindings")
       (write-struct-bindings
        structs-rkt-port structs-parsed typedefs-parsed function-typedefs-parsed))
     (when structs-doc-port
+      (log-codegen-info "Writing struct docs")
       (write-struct-docs
        structs-doc-port structs-parsed typedefs-parsed function-typedefs-parsed)))
   (when (or enums-rkt-port enums-doc-port)
+    (log-codegen-info "Parsing enums")
     (define enums-parsed (map parse-enum (hash-ref api-json 'enums)))
     (when enums-rkt-port
+      (log-codegen-info "Writing enum bindings")
       (write-enum-bindings enums-rkt-port enums-parsed))
     (when enums-doc-port
+      (log-codegen-info "Writing enum docs")
       (write-enum-docs enums-doc-port enums-parsed)))
   (when (or functions-rkt-port functions-doc-port)
+    (log-codegen-info "Parsing functions")
     (define functions-parsed
       (map parse-function (filter pair? (se-path*/list '(Functions) api-xexpr))))
     (when functions-rkt-port
+      (log-codegen-info "Writing function bindings")
       (write-function-bindings functions-rkt-port functions-parsed))
     (when functions-doc-port
+      (log-codegen-info "Writing function docs")
       (write-function-docs functions-doc-port functions-parsed)))
+  (when root-rkt-port
+    (log-codegen-info "Writing root module")
+    (write-root-bindings root-rkt-port))
+  (when root-doc-port
+    (log-codegen-info "Writing root bindings")
+    (write-root-docs root-doc-port))
   (void))
 
 (define raylib-raw-root
@@ -71,6 +137,7 @@
 
 (define (fetch-api-url path)
   (define res-url (format "~a/~a" (raylib-raw-root) path))
+  (log-codegen-debug "Fetching ~s" res-url)
   (port->string (get-pure-port (string->url res-url))))
 
 ;;; Utilities
@@ -97,6 +164,36 @@
         [("char") "_byte"]
         [("unsigned char") "_ubyte"]
         [else (format "_~a" ty-str)]))]))
+
+;;; Root
+
+(define (write-root-bindings port)
+  (parameterize ([current-output-port port])
+    (displayln "#lang racket/base")
+    (newline)
+    (displayln "(require \"unsafe/functions.rkt\"")
+    (displayln "         \"unsafe/structs.rkt\"")
+    (displayln "         \"unsafe/enums.rkt\")")
+    (newline)
+    (displayln "(provide (all-from-out \"unsafe/functions.rkt\"")
+    (displayln "                       \"unsafe/structs.rkt\"")
+    (displayln "                       \"unsafe/enums.rkt\"))")))
+
+(define (write-root-docs port)
+  (parameterize ([current-output-port port])
+    (displayln "#lang scribble/manual\n")
+    (newline)
+    (displayln "@title{Generated Raylib Bindings}")
+    (displayln "Unsafe, automatically generated, bindings for Raylib.")
+    (newline)
+    (displayln "@table-of-contents[]")
+    (newline)
+    (displayln "@defmodule[raylib/generated/unsafe]")
+    (displayln "Reexports all of @racket[raylib/generated/unsafe/*].")
+    (newline)
+    (displayln "@include-section[\"unsafe/functions.scrbl\"]")
+    (displayln "@include-section[\"unsafe/structs.scrbl\"]")
+    (displayln "@include-section[\"unsafe/enums.scrbl\"]")))
 
 ;;; Functions
 
@@ -177,9 +274,13 @@
 (define (write-function-docs port functions-parsed)
   (parameterize ([current-output-port port])
     (display "#lang scribble/manual\n\n")
-    (display "@(require (for-label raylib/sys/functions raylib/sys/structs ffi/unsafe racket/base))\n\n")
+    (display "@(require (for-label raylib/generated/unsafe/functions\n")
+    (display "                     raylib/generated/unsafe/structs\n")
+    (display "                     ffi/unsafe")
+    (display "                     racket/base))\n\n")
+    (display "@table-of-contents[]\n\n")
     (display "@title{Functions}\n")
-    (display "@defmodule[raylib/sys/functions]\n")
+    (display "@defmodule[raylib/generated/unsafe/functions]\n")
     (for ([api-function functions-parsed])
       (newline)
       (api-function->docs api-function))))
@@ -317,8 +418,9 @@
 
 (define (api-typedefs->docs typedefs-parsed)
   (newline)
+  (display "@section{Type aliases}\n")
   (display "@deftogether")
-  (printf "[(~a)]{\nType aliases.\n}\n"
+  (printf "[(~a)]{\nAliases for some struct types.\n}\n"
           (string-join
            (for/list ([typedef-parsed typedefs-parsed])
              (match-define (api-typedef name type) typedef-parsed)
@@ -327,9 +429,10 @@
 
 (define (api-function-typedefs->docs functions-parsed)
   (newline)
+  (display "@section{Callback function types}\n")
   (display "@deftogether")
   (printf
-   "[(~a)]{\nCallback function types.\n}\n"
+   "[(~a)]{\nTypes for certain callback functions.\n}\n"
    (string-join
     (for/list ([function-parsed functions-parsed])
       (match-define (api-callback-typedef name ret-type params) function-parsed)
@@ -350,9 +453,11 @@
                            function-typedefs-parsed)
   (parameterize ([current-output-port port])
     (display "#lang scribble/manual\n\n")
-    (display "@(require (for-label raylib/sys/structs ffi/unsafe racket/base))\n\n")
+    (display "@(require (for-label raylib/generated/unsafe/structs ffi/unsafe racket/base))\n\n")
+    (display "@table-of-contents[]\n\n")
     (display "@title{Structs}\n")
-    (display "@defmodule[raylib/sys/structs]\n")
+    (display "@defmodule[raylib/generated/unsafe/structs]\n")
+    (display "@section{Struct types}\n")
     (for ([api-struct structs-parsed])
       (newline)
       (api-struct->docs api-struct))
@@ -422,9 +527,10 @@
 (define (write-enum-docs port enums-parsed)
   (parameterize ([current-output-port port])
     (display "#lang scribble/manual\n\n")
-    (display "@(require (for-label raylib/sys/enums ffi/unsafe racket/base))\n\n")
+    (display "@(require (for-label raylib/generated/unsafe/enums ffi/unsafe racket/base))\n\n")
+    (display "@table-of-contents[]\n\n")
     (display "@title{Enums}\n")
-    (display "@defmodule[raylib/sys/enums]\n")
+    (display "@defmodule[raylib/generated/unsafe/enums]\n")
     (for ([api-enum enums-parsed])
       (newline)
       (api-enum->docs api-enum))))

@@ -1,7 +1,7 @@
 #!/usr/bin/env racket
 #lang racket
 
-(require raylib)
+(require raylib/generated/unsafe)
 
 #<<EOF
 #include "raylib.h"

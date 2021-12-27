@@ -1,9 +1,12 @@
 #lang scribble/manual
 
-@(require (for-label raylib/sys/structs ffi/unsafe racket/base))
+@(require (for-label raylib/generated/unsafe/structs ffi/unsafe racket/base))
+
+@table-of-contents[]
 
 @title{Structs}
-@defmodule[raylib/sys/structs]
+@defmodule[raylib/generated/unsafe/structs]
+@section{Struct types}
 
 @deftogether[(@defthing[_Vector2 ctype?]
               @defstruct[Vector2
@@ -334,14 +337,16 @@ VrDeviceInfo, Head-Mounted-Display device parameters
 VrStereoConfig, VR stereo rendering configuration for simulator
 }
 
+@section{Type aliases}
 @deftogether[(@defthing[_Quaternion ctype? #:value _Vector4]
               @defthing[_Texture2D ctype? #:value _Texture]
               @defthing[_TextureCubemap ctype? #:value _Texture]
               @defthing[_RenderTexture2D ctype? #:value _RenderTexture]
               @defthing[_Camera ctype? #:value _Camera3D])]{
-Type aliases.
+Aliases for some struct types.
 }
 
+@section{Callback function types}
 @deftogether[(@defthing[_TraceLogCallback ctype?
                         #:value
                         (_fun
@@ -373,5 +378,5 @@ Type aliases.
                          [fileName : _string]
                          [text : _pointer #;"char *"]
                          -> _bool)])]{
-Callback function types.
+Types for certain callback functions.
 }
