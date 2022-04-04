@@ -1,0 +1,18 @@
+{
+  "filters": [
+    {
+      "for": ["enums", "constants"],
+      "include": [".*"]
+    },
+    {
+      "for": ["functions"],
+      "include": []
+    },
+    {
+      "for": ["structs"],
+      "include": [
+        "Color"
+      ]
+    }
+  ]
+}

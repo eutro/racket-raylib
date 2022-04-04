@@ -77,6 +77,11 @@
       url
       "Set the base request URL (default: https://raw.githubusercontent.com/raysan5/raylib/master)"
       (raylib-raw-root url)]
+     #:once-each
+     [("--config")
+      config-source
+      "Set the config file"
+      (current-config (parse-config (with-input-from-file config-source read-json)))]
      #:args (generated-path)
      (generate-bindings-in (string->path generated-path)))
 
@@ -96,20 +101,25 @@
       (or/c #f output-port?) (or/c #f output-port?)
       (or/c #f output-port?) (or/c #f output-port?)
       void?)
-  (define api-json ((compose1 read-json
-                              open-input-string
-                              fetch-api-url)
-                    "parser/raylib_api.json"))
+  (define api-json
+    ((compose1 read-json
+               open-input-string
+               fetch-api-url)
+     "parser/raylib_api.json"))
   (define api-header (fetch-api-url "src/raylib.h"))
-  (define api-xexpr ((compose1 xml->xexpr
-                               document-element
-                               read-xml
-                               open-input-string
-                               fetch-api-url)
-                     "parser/raylib_api.xml"))
+  (define api-xexpr
+    ((compose1 xml->xexpr
+               document-element
+               read-xml
+               open-input-string
+               fetch-api-url)
+     "parser/raylib_api.xml"))
   (when (or structs-rkt-port structs-doc-port)
     (log-codegen-info "Parsing structs")
-    (define structs-parsed (map parse-struct (hash-ref api-json 'structs)))
+    (define structs-parsed
+      (filter (include-object? "structs")
+              (map parse-struct
+                   (hash-ref api-json 'structs))))
     (define typedefs-parsed (parse-typedefs api-header))
     (define function-typedefs-parsed (parse-function-typedefs api-header))
     (when structs-rkt-port
@@ -122,7 +132,10 @@
        structs-doc-port structs-parsed typedefs-parsed function-typedefs-parsed)))
   (when (or enums-rkt-port enums-doc-port)
     (log-codegen-info "Parsing enums")
-    (define enums-parsed (map parse-enum (hash-ref api-json 'enums)))
+    (define enums-parsed
+      (filter (include-object? "enums")
+              (map parse-enum
+                   (hash-ref api-json 'enums))))
     (when enums-rkt-port
       (log-codegen-info "Writing enum bindings")
       (write-enum-bindings enums-rkt-port enums-parsed))
@@ -132,7 +145,9 @@
   (when (or functions-rkt-port functions-doc-port)
     (log-codegen-info "Parsing functions")
     (define functions-parsed
-      (map parse-function (filter pair? (se-path*/list '(Functions) api-xexpr))))
+      (filter (include-object? "functions")
+              (map parse-function
+                   (filter pair? (se-path*/list '(Functions) api-xexpr)))))
     (when functions-rkt-port
       (log-codegen-info "Writing function bindings")
       (write-function-bindings functions-rkt-port functions-parsed))
@@ -141,7 +156,10 @@
       (write-function-docs functions-doc-port functions-parsed)))
   (when (or constants-rkt-port constants-doc-port)
     (log-codegen-info "Parsing constants")
-    (define constants-parsed (filter-map parse-constant (hash-ref api-json 'defines)))
+    (define constants-parsed
+      (filter (include-object? "constants")
+              (map parse-constant
+                   (hash-ref api-json 'defines))))
     (when constants-rkt-port
       (log-codegen-info "Writing constants bindings")
       (write-constant-bindings constants-rkt-port constants-parsed))
@@ -190,6 +208,67 @@
         [("unsigned char") "_ubyte"]
         [else (format "_~a" ty-str)]))]))
 
+(define-struct/contract api-object
+  ([name string?]
+   [description (or/c #f string?)])
+  #:transparent)
+
+(define-struct/contract config
+  ([predicate (-> string? (-> api-object? boolean?))]))
+
+(define/contract current-config
+  (parameter/c config?)
+  (make-parameter (config (lambda (_t) (lambda (_x) #t)))))
+
+(define (include-object? thing)
+  (define check? ((config-predicate (current-config)) thing))
+  (lambda (obj) (check? obj)))
+
+(define (parse-config config-json)
+  (define (make-string-filter ls ift iff)
+    (cond
+      [(null? ls) (lambda (_x) iff)]
+      [else
+       (define pattern
+         (pregexp
+          (cond
+            [(list? ls)
+             (string-join
+              (for/list ([pat (in-list ls)])
+                (format "(~a)" pat))
+              "|")]
+            [(string? ls) ls]
+            [else (raise-user-error "filter value must be a string or list of strings")])))
+       (lambda (x) (if (regexp-match pattern x) ift iff))]))
+
+  (define (parse-filter filter-json)
+    (define thing (hash-ref filter-json 'for #f))
+    (define includes (hash-ref filter-json 'include #f))
+    (define excludes (hash-ref filter-json 'exclude #f))
+    (when (and includes excludes)
+      (raise-user-error "filter contains both \"include\" and \"exclude\" values"))
+    (define obj-filter
+      (cond
+        [includes (compose1 (make-string-filter includes #t #f) api-object-name)]
+        [excludes (compose1 (make-string-filter excludes #f #t) api-object-name)]
+        [else (raise-user-error "filter contains neither include nor exclude value")]))
+    (define thing-filter
+      (or (and thing (make-string-filter thing obj-filter #f))
+          (lambda (_x) obj-filter)))
+    thing-filter)
+
+  (define (compose-filters filters)
+    (lambda (thing)
+      (or (ormap (lambda (f) (f thing)) filters)
+          (raise-user-error (format "no filters matching ~s" thing)))))
+
+  (define filters (hash-ref config-json 'filters #f))
+  (define filter?
+    (if filters
+        (compose-filters (map parse-filter filters))
+        (lambda (_t) (lambda (_x) #t))))
+  (config filter?))
+
 ;;; Root
 
 (define (write-root-bindings port)
@@ -225,10 +304,8 @@
 
 ;;; Functions
 
-(define-struct/contract api-function
-  ([name string?]
-   [description (or/c #f string?)]
-   [return-type string?]
+(define-struct/contract (api-function api-object)
+  ([return-type string?]
    [parameters (listof (cons/c string? string?))]
    [varargs boolean?])
   #:transparent)
@@ -318,28 +395,24 @@
 ;; represents a field, or multiple fields, in an API struct
 ;; note that any array subscripts are included in the field name
 (define-struct/contract api-field
-  ([names (listof string?)]
+  ([name (listof string?)]
    [description (or/c #f string?)]
    [type string?])
   #:transparent)
 
 ;; represents an API struct, parsed from the JSON
-(define-struct/contract api-struct
-  ([name string?]
-   [description (or/c #f string?)]
-   [fields (listof api-field?)])
+(define-struct/contract (api-struct api-object)
+  ([fields (listof api-field?)])
   #:transparent)
 
 ;; represents a typedef in the API, parsed from the header
-(define-struct/contract api-typedef
-  ([name string?]
-   [type string?])
+(define-struct/contract (api-typedef api-object)
+  ([type string?])
   #:transparent)
 
 ;; represents a callback typedef in the API, parsed from the header
-(define-struct/contract api-callback-typedef
-  ([name string?]
-   [return-type string?]
+(define-struct/contract (api-callback-typedef api-object)
+  ([return-type string?]
    [params (listof (cons/c string? string?))])
   #:transparent)
 
@@ -349,10 +422,10 @@
                    #:match-select values))
   (for/list ([typedef typedef-lines])
     (match-define (list _ aliased-type alias-name) typedef)
-    (make-api-typedef alias-name aliased-type)))
+    (make-api-typedef alias-name #f aliased-type)))
 
 (define (api-typedef->binding parsed)
-  (define-values (name type) (parse-type (api-typedef-name parsed) (api-typedef-type parsed)))
+  (define-values (name type) (parse-type (api-object-name parsed) (api-typedef-type parsed)))
   (printf "(define _~a ~a)\n" name type))
 
 (define (parse-function-typedefs header)
@@ -367,11 +440,12 @@
       (cons name (string-trim type)))
     (make-api-callback-typedef
      name
+     #f
      (string-trim ret-type)
      (map split-param param-list))))
 
 (define (api-function-typedef->binding parsed)
-  (match-define (api-callback-typedef name ret-type params) parsed)
+  (match-define (api-callback-typedef name _desc ret-type params) parsed)
   (printf "(define _~a\n  (_fun\n" name)
   (write-params params)
   (write-return-type ret-type)
@@ -418,7 +492,7 @@
       (api-struct->binding api-struct)
       (for ([typedef
              (filter (λ (td)
-                       (string=? (api-struct-name api-struct)
+                       (string=? (api-object-name api-struct)
                                  (api-typedef-type td)))
                      typedefs-parsed)])
         (newline)
@@ -451,7 +525,7 @@
   (printf "[(~a)]{\nAliases for some struct types.\n}\n"
           (string-join
            (for/list ([typedef-parsed typedefs-parsed])
-             (match-define (api-typedef name type) typedef-parsed)
+             (match-define (api-typedef name _desc type) typedef-parsed)
              (format "@defthing[_~a ctype? #:value _~a]" name type))
            "\n              ")))
 
@@ -463,7 +537,7 @@
    "[(~a)]{\nTypes for certain callback functions.\n}\n"
    (string-join
     (for/list ([function-parsed functions-parsed])
-      (match-define (api-callback-typedef name ret-type params) function-parsed)
+      (match-define (api-callback-typedef name _desc ret-type params) function-parsed)
       (string-append
        (format "@defthing[_~a ctype?\n" name)
        (format "                        #:value\n")
@@ -494,16 +568,12 @@
 
 ;;; Enums
 
-(define-struct/contract api-enum-value
-  ([name string?]
-   [description (or/c #f string?)]
-   [value integer?])
+(define-struct/contract (api-enum-value api-object)
+  ([value integer?])
   #:transparent)
 
-(define-struct/contract api-enum
-  ([name string?]
-   [description (or/c #f string?)]
-   [values (listof api-enum-value?)])
+(define-struct/contract (api-enum api-object)
+  ([values (listof api-enum-value?)])
   #:transparent)
 
 (define (parse-enum enum-json)
@@ -565,10 +635,8 @@
 
 ;;; Constants
 
-(define-struct/contract api-constant
-  ([name string?]
-   [description (or/c #f string?)]
-   [type string?]
+(define-struct/contract (api-constant api-object)
+  ([type string?]
    [value any/c])
   #:transparent)
 
@@ -600,10 +668,10 @@
     (constant-type-and-value api-constant))
   (when value
     (newline)
-    (define description (api-constant-description api-constant))
+    (define description (api-object-description api-constant))
     (when description
       (printf ";; ~a\n" description))
-    (printf "(define ~a ~a)\n" (api-constant-name api-constant) value)))
+    (printf "(define ~a ~a)\n" (api-object-name api-constant) value)))
 
 (define (write-constant-bindings port constants-parsed)
   (parameterize ([current-output-port port])
@@ -619,10 +687,10 @@
   (when value
     (newline)
     (printf "@defthing[~a ~a #:value ~a ~s]\n"
-            (api-constant-name api-constant)
+            (api-object-name api-constant)
             type
             value
-            (or (api-constant-description api-constant) ""))))
+            (or (api-object-description api-constant) ""))))
 
 (define (write-constant-docs port constants-parsed)
   (parameterize ([current-output-port port])
