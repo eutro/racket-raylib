@@ -8,6 +8,7 @@
          syntax/datum
 
          racket/file
+         racket/format
          racket/list
          racket/string
          racket/port
@@ -28,6 +29,7 @@
      (append*
       (for/list ([name (in-list '(("unsafe" "structs")
                                   ("unsafe" "enums")
+                                  ("unsafe" "constants")
                                   ("unsafe" "functions")))])
         (define first-part (drop-right name 1))
         (define last-part (last name))
@@ -85,9 +87,11 @@
 
 (define/contract (generate-bindings structs-rkt-port structs-doc-port
                                     enums-rkt-port enums-doc-port
+                                    constants-rkt-port constants-doc-port
                                     functions-rkt-port functions-doc-port
                                     root-rkt-port root-doc-port)
   (-> (or/c #f output-port?) (or/c #f output-port?)
+      (or/c #f output-port?) (or/c #f output-port?)
       (or/c #f output-port?) (or/c #f output-port?)
       (or/c #f output-port?) (or/c #f output-port?)
       (or/c #f output-port?) (or/c #f output-port?)
@@ -135,6 +139,15 @@
     (when functions-doc-port
       (log-codegen-info "Writing function docs")
       (write-function-docs functions-doc-port functions-parsed)))
+  (when (or constants-rkt-port constants-doc-port)
+    (log-codegen-info "Parsing constants")
+    (define constants-parsed (filter-map parse-constant (hash-ref api-json 'defines)))
+    (when constants-rkt-port
+      (log-codegen-info "Writing constants bindings")
+      (write-constant-bindings constants-rkt-port constants-parsed))
+    (when constants-doc-port
+      (log-codegen-info "Writing constants docs")
+      (write-constant-docs constants-doc-port constants-parsed)))
   (when root-rkt-port
     (log-codegen-info "Writing root module")
     (write-root-bindings root-rkt-port))
@@ -185,11 +198,13 @@
     (newline)
     (displayln "(require \"unsafe/functions.rkt\"")
     (displayln "         \"unsafe/structs.rkt\"")
-    (displayln "         \"unsafe/enums.rkt\")")
+    (displayln "         \"unsafe/enums.rkt\"")
+    (displayln "         \"unsafe/constants.rkt\")")
     (newline)
     (displayln "(provide (all-from-out \"unsafe/functions.rkt\"")
     (displayln "                       \"unsafe/structs.rkt\"")
-    (displayln "                       \"unsafe/enums.rkt\"))")))
+    (displayln "                       \"unsafe/enums.rkt\"")
+    (displayln "                       \"unsafe/constants.rkt\"))")))
 
 (define (write-root-docs port)
   (parameterize ([current-output-port port])
@@ -205,7 +220,8 @@
     (newline)
     (displayln "@include-section[\"unsafe/functions.scrbl\"]")
     (displayln "@include-section[\"unsafe/structs.scrbl\"]")
-    (displayln "@include-section[\"unsafe/enums.scrbl\"]")))
+    (displayln "@include-section[\"unsafe/enums.scrbl\"]")
+    (displayln "@include-section[\"unsafe/constants.scrbl\"]")))
 
 ;;; Functions
 
@@ -546,3 +562,74 @@
     (for ([api-enum enums-parsed])
       (newline)
       (api-enum->docs api-enum))))
+
+;;; Constants
+
+(define-struct/contract api-constant
+  ([name string?]
+   [description (or/c #f string?)]
+   [type string?]
+   [value any/c])
+  #:transparent)
+
+(define (parse-constant constant-json)
+  (make-api-constant
+   (hash-ref constant-json 'name)
+   (nonempty-or-false (hash-ref constant-json 'description))
+   (hash-ref constant-json 'type)
+   (hash-ref constant-json 'value)))
+
+(define (constant-type-and-value api-constant)
+  (define raw-value (api-constant-value api-constant))
+  (case (api-constant-type api-constant)
+    [("STRING") (values "string?" (~s raw-value))]
+    [("COLOR")
+     (values
+      "Color?"
+      (~a
+       (cons
+        "make-Color"
+        (cdr
+         (regexp-match
+          #px"CLITERAL\\(Color\\)\\{ (\\d+), (\\d+), (\\d+), (\\d+) \\}"
+          (~a raw-value))))))]
+    [else (values #f #f)]))
+
+(define (api-constant->binding api-constant)
+  (define-values (_type value)
+    (constant-type-and-value api-constant))
+  (when value
+    (newline)
+    (define description (api-constant-description api-constant))
+    (when description
+      (printf ";; ~a\n" description))
+    (printf "(define ~a ~a)\n" (api-constant-name api-constant) value)))
+
+(define (write-constant-bindings port constants-parsed)
+  (parameterize ([current-output-port port])
+    (display "#lang racket/base\n\n")
+    (display "(require \"structs.rkt\")\n\n")
+    (display "(provide (all-defined-out))\n")
+    (for ([api-constant constants-parsed])
+      (api-constant->binding api-constant))))
+
+(define (api-constant->docs api-constant)
+  (define-values (type value)
+    (constant-type-and-value api-constant))
+  (when value
+    (newline)
+    (printf "@defthing[~a ~a #:value ~a ~s]\n"
+            (api-constant-name api-constant)
+            type
+            value
+            (or (api-constant-description api-constant) ""))))
+
+(define (write-constant-docs port constants-parsed)
+  (parameterize ([current-output-port port])
+    (display "#lang scribble/manual\n\n")
+    (display "@(require (for-label raylib/generated/unsafe/constants raylib/generated/unsafe/structs racket/base))\n\n")
+    (display "@table-of-contents[]\n\n")
+    (display "@title{Constants}\n")
+    (display "@defmodule[raylib/generated/unsafe/constants]\n")
+    (for ([api-constant constants-parsed])
+      (api-constant->docs api-constant))))
