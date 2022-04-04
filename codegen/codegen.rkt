@@ -20,8 +20,8 @@
 
 (define (generate-bindings-in root-dir)
   (log-codegen-info "Generating bindings in ~s" (path->string root-dir))
-  (define code-dir (build-path root-dir "generated"))
-  (define docs-dir (build-path root-dir "scribblings" "generated"))
+  (define code-dir root-dir)
+  (define docs-dir (build-path root-dir "scribblings"))
   (for-each make-directory* (list code-dir docs-dir))
   (define ports
     (append
@@ -46,30 +46,42 @@
     (thunk (for-each close-output-port ports))))
 
 (module+ main
-  (require racket/runtime-path)
-  (define-runtime-path root-dir "..")
-  (define kill-logger (make-semaphore))
-  (define logger-thread
-    (thread
-     (let ()
-       (define receiver (make-log-receiver codegen-logger 'debug))
-       (define (do-logging msg)
-         (printf "[~a] ~a\n"
-                 (vector-ref msg 0)
-                 (vector-ref msg 1)))
-       (define (loop)
-         (define msg (sync receiver kill-logger))
-         (unless (semaphore? msg) (do-logging msg) (loop)))
-       (define (finish-logging)
-         (define msg (sync/timeout 0 receiver))
-         (when msg (do-logging msg) (finish-logging)))
-       (thunk
-        (parameterize ([current-output-port (current-error-port)])
-          (loop)
-          (finish-logging))))))
-  (generate-bindings-in root-dir)
-  (semaphore-post kill-logger)
-  (thread-wait logger-thread))
+  (require racket/cmdline)
+
+  (define (main)
+    (define kill-logger (make-semaphore))
+    (define logger-thread
+      (thread
+       (let ()
+         (define receiver (make-log-receiver codegen-logger 'debug))
+         (define (do-logging msg)
+           (printf "[~a] ~a\n"
+                   (vector-ref msg 0)
+                   (vector-ref msg 1)))
+         (define (loop)
+           (define msg (sync receiver kill-logger))
+           (unless (semaphore? msg) (do-logging msg) (loop)))
+         (define (finish-logging)
+           (define msg (sync/timeout 0 receiver))
+           (when msg (do-logging msg) (finish-logging)))
+         (thunk
+          (parameterize ([current-output-port (current-error-port)])
+            (loop)
+            (finish-logging))))))
+
+    (command-line
+     #:once-any
+     [("--url")
+      url
+      "Set the base request URL (default: https://raw.githubusercontent.com/raysan5/raylib/master)"
+      (raylib-raw-root url)]
+     #:args (generated-path)
+     (generate-bindings-in (string->path generated-path)))
+
+    (semaphore-post kill-logger)
+    (thread-wait logger-thread))
+
+  (main))
 
 (define/contract (generate-bindings structs-rkt-port structs-doc-port
                                     enums-rkt-port enums-doc-port
@@ -213,7 +225,7 @@
     (let ()
       (define params (datum ((pname . ptype) ...)))
       (define-values (params* varargs)
-        (if (and (pair? params) (equal? '("" . "") (last params)))
+        (if (and (pair? params) (equal? '("args" . "...") (last params)))
             (values (drop-right params 1) #t)
             (values params #f)))
       (make-api-function
