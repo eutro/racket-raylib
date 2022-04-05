@@ -364,30 +364,10 @@
    (nonempty-or-false (hash-ref enum-json 'description))
    (map parse-enum-value (hash-ref enum-json 'values))))
 
-(define (api-enum->binding parsed)
-  (match-define (api-enum name description enum-values) parsed)
-  (when description
-    (printf ";; ~a\n" description))
-  (printf "(define _~a\n  (_enum '(" name)
-  (for ([enum-value enum-values])
-    (match-define (api-enum-value name enum-desc enum-int-value) enum-value)
-    (printf "~a = ~a" name enum-int-value)
-    (printf "\n           "))
-  (display ")))")
-  (for ([enum-value enum-values])
-    (match-define (api-enum-value name enum-desc enum-int-value) enum-value)
-    (newline)
-    (printf "(define ~a ~a)" name enum-int-value)
-    (when enum-desc
-      (printf " ; ~a" enum-desc)))
-  (newline))
-
 (define (write-enum-bindings port enums-parsed)
-  (parameterize ([current-output-port port])
-    (display "#lang racket/base\n\n(require ffi/unsafe)\n\n(provide (all-defined-out))\n")
-    (for ([api-enum enums-parsed])
-      (newline)
-      (api-enum->binding api-enum))))
+  (local-require "templates/enums.rkt")
+  (define generated (generate-enums enums-parsed))
+  (output generated port))
 
 (define (api-enum->docs parsed)
   (match-define (api-enum name description enum-values) parsed)
