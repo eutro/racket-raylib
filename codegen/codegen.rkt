@@ -5,17 +5,22 @@
          xml
          xml/path
          net/url
+
          syntax/datum
 
          racket/file
          racket/format
-         racket/list
-         racket/string
          racket/port
          racket/match
          racket/function
          racket/contract/base
-         racket/contract/region)
+         racket/contract/region
+
+         scribble/text
+
+         "util.rkt"
+         "config.rkt"
+         "objects.rkt")
 
 (define-logger codegen)
 
@@ -183,92 +188,6 @@
   (log-codegen-debug "Fetching ~s" res-url)
   (port->string (get-pure-port (string->url res-url))))
 
-;;; Utilities
-
-(define (nonempty-or-false str)
-  (if (non-empty-string? str) str #f))
-
-(define/contract (parse-type name ty-str)
-  (-> string? string? (values string? string?))
-  (cond
-    [(string-suffix? name "]")
-     (match-define (list* name* arrays) (string-split name "["))
-     (define arrays* (map (λ (s) (string-trim s "]" #:left? #f)) arrays))
-     (define-values (name** array-component) (parse-type name* ty-str))
-     (values name** (format "(_array ~a ~a)" array-component (string-join arrays* " ")))]
-    [(string=? ty-str "const char *") (values name "_string")]
-    [(string-suffix? ty-str "*") (values name (format "_pointer #;~s" ty-str))]
-    [else
-     (values
-      name
-      (case ty-str
-        [("va_list") "_byte #;\"va_list\""]
-        [("unsigned int") "_uint"]
-        [("char") "_byte"]
-        [("unsigned char") "_ubyte"]
-        [else (format "_~a" ty-str)]))]))
-
-(define-struct/contract api-object
-  ([name string?]
-   [description (or/c #f string?)])
-  #:transparent)
-
-(define-struct/contract config
-  ([predicate (-> string? (-> api-object? boolean?))]))
-
-(define/contract current-config
-  (parameter/c config?)
-  (make-parameter (config (lambda (_t) (lambda (_x) #t)))))
-
-(define (include-object? thing)
-  (define check? ((config-predicate (current-config)) thing))
-  (lambda (obj) (check? obj)))
-
-(define (parse-config config-json)
-  (define (make-string-filter ls ift iff)
-    (cond
-      [(null? ls) (lambda (_x) iff)]
-      [else
-       (define pattern
-         (pregexp
-          (cond
-            [(list? ls)
-             (string-join
-              (for/list ([pat (in-list ls)])
-                (format "(~a)" pat))
-              "|")]
-            [(string? ls) ls]
-            [else (raise-user-error "filter value must be a string or list of strings")])))
-       (lambda (x) (if (regexp-match pattern x) ift iff))]))
-
-  (define (parse-filter filter-json)
-    (define thing (hash-ref filter-json 'for #f))
-    (define includes (hash-ref filter-json 'include #f))
-    (define excludes (hash-ref filter-json 'exclude #f))
-    (when (and includes excludes)
-      (raise-user-error "filter contains both \"include\" and \"exclude\" values"))
-    (define obj-filter
-      (cond
-        [includes (compose1 (make-string-filter includes #t #f) api-object-name)]
-        [excludes (compose1 (make-string-filter excludes #f #t) api-object-name)]
-        [else (raise-user-error "filter contains neither include nor exclude value")]))
-    (define thing-filter
-      (or (and thing (make-string-filter thing obj-filter #f))
-          (lambda (_x) obj-filter)))
-    thing-filter)
-
-  (define (compose-filters filters)
-    (lambda (thing)
-      (or (ormap (lambda (f) (f thing)) filters)
-          (raise-user-error (format "no filters matching ~s" thing)))))
-
-  (define filters (hash-ref config-json 'filters #f))
-  (define filter?
-    (if filters
-        (compose-filters (map parse-filter filters))
-        (lambda (_t) (lambda (_x) #t))))
-  (config filter?))
-
 ;;; Root
 
 (define (write-root-bindings port)
@@ -303,12 +222,6 @@
     (displayln "@include-section[\"unsafe/constants.scrbl\"]")))
 
 ;;; Functions
-
-(define-struct/contract (api-function api-object)
-  ([return-type string?]
-   [parameters (listof (cons/c string? string?))]
-   [varargs boolean?])
-  #:transparent)
 
 (define (parse-function function-xexpr)
   (datum-case
@@ -392,30 +305,6 @@
 
 ;;; Structs
 
-;; represents a field, or multiple fields, in an API struct
-;; note that any array subscripts are included in the field name
-(define-struct/contract api-field
-  ([name (listof string?)]
-   [description (or/c #f string?)]
-   [type string?])
-  #:transparent)
-
-;; represents an API struct, parsed from the JSON
-(define-struct/contract (api-struct api-object)
-  ([fields (listof api-field?)])
-  #:transparent)
-
-;; represents a typedef in the API, parsed from the header
-(define-struct/contract (api-typedef api-object)
-  ([type string?])
-  #:transparent)
-
-;; represents a callback typedef in the API, parsed from the header
-(define-struct/contract (api-callback-typedef api-object)
-  ([return-type string?]
-   [params (listof (cons/c string? string?))])
-  #:transparent)
-
 (define (parse-typedefs header)
   (define typedef-lines
     (regexp-match* #px"\ntypedef ([^ ]+) ([^ ]+);" header
@@ -424,13 +313,10 @@
     (match-define (list _ aliased-type alias-name) typedef)
     (make-api-typedef alias-name #f aliased-type)))
 
-(define (api-typedef->binding parsed)
-  (define-values (name type) (parse-type (api-object-name parsed) (api-typedef-type parsed)))
-  (printf "(define _~a ~a)\n" name type))
-
 (define (parse-function-typedefs header)
   (define typedef-lines
-    (filter-map (curry regexp-match #px"typedef (.+)\\(\\*([^\\)]+)\\)\\((.+)\\);") (string-split header "\n")))
+    (filter-map (curry regexp-match #px"typedef (.+)\\(\\*([^\\)]+)\\)\\((.+)\\);")
+                (string-split header "\n")))
   (for/list ([typedef typedef-lines])
     (match-define (list _ ret-type name params) typedef)
     (define param-list (string-split params ", "))
@@ -444,13 +330,6 @@
      (string-trim ret-type)
      (map split-param param-list))))
 
-(define (api-function-typedef->binding parsed)
-  (match-define (api-callback-typedef name _desc ret-type params) parsed)
-  (printf "(define _~a\n  (_fun\n" name)
-  (write-params params)
-  (write-return-type ret-type)
-  (display ")\n"))
-
 (define (parse-struct struct-json)
   (define (parse-struct-field field-json)
     (make-api-field
@@ -462,119 +341,17 @@
    (nonempty-or-false (hash-ref struct-json 'description))
    (map parse-struct-field (hash-ref struct-json 'fields))))
 
-(define (api-struct->binding parsed)
-  (match-define (api-struct name description fields) parsed)
-  (when description
-    (printf ";; ~a\n" description))
-  (printf "(define-cstruct _~a\n  (" name)
-  (for ([struct-field fields])
-    (match-define (api-field names field-desc field-type) struct-field)
-    (define field-strings
-      (string-join
-       (for/list ([name names])
-         (define-values (name* type) (parse-type name field-type))
-         (format "[~a ~a]" name* type))
-       " "))
-    (display field-strings)
-    (when field-desc
-      (printf " ; ~a" field-desc))
-    (printf "\n   "))
-  (display "))\n"))
+(define (write-struct-bindings port structs-parsed typedefs-parsed function-typedefs-parsed)
+  (local-require "templates/structs.rkt")
+  (define generated (generate-structs structs-parsed typedefs-parsed function-typedefs-parsed))
+  (output generated port))
 
-(define (write-struct-bindings port
-                               structs-parsed
-                               typedefs-parsed
-                               function-typedefs-parsed)
-  (parameterize ([current-output-port port])
-    (display "#lang racket/base\n\n(require ffi/unsafe)\n\n(provide (all-defined-out))\n")
-    (for ([api-struct structs-parsed])
-      (newline)
-      (api-struct->binding api-struct)
-      (for ([typedef
-             (filter (λ (td)
-                       (string=? (api-object-name api-struct)
-                                 (api-typedef-type td)))
-                     typedefs-parsed)])
-        (newline)
-        (api-typedef->binding typedef)))
-    (for ([fn-typedef function-typedefs-parsed])
-      (newline)
-      (api-function-typedef->binding fn-typedef))))
-
-(define (api-struct->docs struct-parsed)
-  (match-define (api-struct name desc fields) struct-parsed)
-  (printf "@deftogether[(@defthing[_~a ctype?]\n" name)
-  (printf "              @defstruct[~a\n" name)
-  (printf "                         (~a)\n"
-          (string-join
-           (for/list ([struct-field fields])
-             (match-define (api-field names _field-desc field-type) struct-field)
-             (string-join
-              (for/list ([name names])
-                (define-values (name* type) (parse-type name field-type))
-                (format "[~a ~a]" name* type))
-              " "))
-           "\n                          "))
-  (printf "                         #:constructor-name make-~a])]" name)
-  (printf "{\n~a\n}\n" (or desc "")))
-
-(define (api-typedefs->docs typedefs-parsed)
-  (newline)
-  (display "@section{Type aliases}\n")
-  (display "@deftogether")
-  (printf "[(~a)]{\nAliases for some struct types.\n}\n"
-          (string-join
-           (for/list ([typedef-parsed typedefs-parsed])
-             (match-define (api-typedef name _desc type) typedef-parsed)
-             (format "@defthing[_~a ctype? #:value _~a]" name type))
-           "\n              ")))
-
-(define (api-function-typedefs->docs functions-parsed)
-  (newline)
-  (display "@section{Callback function types}\n")
-  (display "@deftogether")
-  (printf
-   "[(~a)]{\nTypes for certain callback functions.\n}\n"
-   (string-join
-    (for/list ([function-parsed functions-parsed])
-      (match-define (api-callback-typedef name _desc ret-type params) function-parsed)
-      (string-append
-       (format "@defthing[_~a ctype?\n" name)
-       (format "                        #:value\n")
-       (format "                        (_fun\n")
-       (with-output-to-string
-         (thunk
-          (write-params params 25)
-          (write-return-type ret-type 25)))
-       "]"))
-    "\n              ")))
-
-(define (write-struct-docs port
-                           structs-parsed
-                           typedefs-parsed
-                           function-typedefs-parsed)
-  (parameterize ([current-output-port port])
-    (display "#lang scribble/manual\n\n")
-    (display "@(require (for-label raylib/generated/unsafe/structs ffi/unsafe racket/base))\n\n")
-    (display "@table-of-contents[]\n\n")
-    (display "@title{Structs}\n")
-    (display "@defmodule[raylib/generated/unsafe/structs]\n")
-    (display "@section{Struct types}\n")
-    (for ([api-struct structs-parsed])
-      (newline)
-      (api-struct->docs api-struct))
-    (api-typedefs->docs typedefs-parsed)
-    (api-function-typedefs->docs function-typedefs-parsed)))
+(define (write-struct-docs port structs-parsed typedefs-parsed function-typedefs-parsed)
+  (local-require "templates/structs.scrbl")
+  (define generated (generate-structs structs-parsed typedefs-parsed function-typedefs-parsed))
+  (output generated port))
 
 ;;; Enums
-
-(define-struct/contract (api-enum-value api-object)
-  ([value integer?])
-  #:transparent)
-
-(define-struct/contract (api-enum api-object)
-  ([values (listof api-enum-value?)])
-  #:transparent)
 
 (define (parse-enum enum-json)
   (define (parse-enum-value value-json)
@@ -634,11 +411,6 @@
       (api-enum->docs api-enum))))
 
 ;;; Constants
-
-(define-struct/contract (api-constant api-object)
-  ([type string?]
-   [value any/c])
-  #:transparent)
 
 (define (parse-constant constant-json)
   (make-api-constant
