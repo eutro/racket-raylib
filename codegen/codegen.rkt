@@ -17,39 +17,10 @@
 
          scribble/text
 
+         "logger.rkt"
          "util.rkt"
          "config.rkt"
          "objects.rkt")
-
-(define-logger codegen)
-
-(define (generate-bindings-in root-dir)
-  (log-codegen-info "Generating bindings in ~s" (path->string root-dir))
-  (define code-dir root-dir)
-  (define docs-dir (build-path root-dir "scribblings"))
-  (for-each make-directory* (list code-dir docs-dir))
-  (define ports
-    (append
-     (append*
-      (for/list ([name (in-list '(("unsafe" "structs")
-                                  ("unsafe" "enums")
-                                  ("unsafe" "constants")
-                                  ("unsafe" "functions")))])
-        (define first-part (drop-right name 1))
-        (define last-part (last name))
-        (for/list ([root (in-list (list code-dir docs-dir))]
-                   [fmt (in-list '("~a.rkt" "~a.scrbl"))])
-          (define file-dir (apply build-path root first-part))
-          (make-directory* file-dir)
-          (open-output-file (build-path file-dir (format fmt last-part))
-                            #:exists 'replace))))
-     (list
-      (open-output-file (build-path code-dir "unsafe.rkt") #:exists 'replace)
-      (open-output-file (build-path docs-dir "raylib-generated.scrbl") #:exists 'replace))))
-  (dynamic-wind
-    void
-    (thunk (apply generate-bindings ports))
-    (thunk (for-each close-output-port ports))))
 
 (module+ main
   (require racket/cmdline)
@@ -75,131 +46,97 @@
             (loop)
             (finish-logging))))))
 
-    (command-line
-     #:once-any
-     [("--url")
-      url
-      "Set the base request URL (default: https://raw.githubusercontent.com/raysan5/raylib/master)"
-      (raylib-raw-root url)]
-     #:once-each
-     [("--config")
-      config-source
-      "Set the config file"
-      (current-config (parse-config (with-input-from-file config-source read-json)))]
-     #:args (generated-path)
-     (generate-bindings-in (string->path generated-path)))
-
-    (semaphore-post kill-logger)
-    (thread-wait logger-thread))
+    (dynamic-wind
+      void
+      (lambda ()
+        (define config-source* "codegen-conf.rkt")
+        (define clear #f)
+        (command-line
+         #:once-any
+         [("--url")
+          url
+          "Set the base request URL (default: https://raw.githubusercontent.com/raysan5/raylib/master)"
+          (raylib-raw-root url)]
+         #:once-each
+         [("--config")
+          config-source
+          "Set the config file"
+          (set! config-source* (path->complete-path config-source))]
+         [("--clear")
+          "Clear the target directory before generating new files"
+          (set! clear #t)]
+         #:args (generated-path)
+         (let ()
+           (define gen-path (path->complete-path generated-path))
+           (when clear
+             (log-codegen-info "Deleting ~a" gen-path)
+             (delete-directory/files gen-path #:must-exist? #f))
+           (define conf-path (path->complete-path config-source* gen-path))
+           (generate-bindings gen-path conf-path))))
+      (lambda ()
+        (semaphore-post kill-logger)
+        (thread-wait logger-thread))))
 
   (main))
 
-(define/contract (generate-bindings structs-rkt-port structs-doc-port
-                                    enums-rkt-port enums-doc-port
-                                    constants-rkt-port constants-doc-port
-                                    functions-rkt-port functions-doc-port
-                                    root-rkt-port root-doc-port)
-  (-> (or/c #f output-port?) (or/c #f output-port?)
-      (or/c #f output-port?) (or/c #f output-port?)
-      (or/c #f output-port?) (or/c #f output-port?)
-      (or/c #f output-port?) (or/c #f output-port?)
-      (or/c #f output-port?) (or/c #f output-port?)
-      void?)
+(define/contract (generate-bindings gen-path conf-path)
+  (-> path? path? void?)
+
+  (log-codegen-info "Retrieving config from ~a" conf-path)
+  (define config
+    (with-handlers ([exn:fail?
+                     (lambda (e)
+                       (log-codegen-fatal "error retrieving config, see error")
+                       (raise e))])
+      (read-config conf-path)))
+  (define conf-parent (simplify-path (build-path conf-path 'up)))
+
+  (log-codegen-info "Fetching API")
   (define api-json
-    ((compose1 read-json
-               open-input-string
-               fetch-api-url)
+    ((compose1 read-json open-input-string fetch-api-url)
      "parser/raylib_api.json"))
-  (define api-header (fetch-api-url "src/raylib.h"))
   (define api-xexpr
-    ((compose1 xml->xexpr
-               document-element
-               read-xml
-               open-input-string
-               fetch-api-url)
+    ((compose1 xml->xexpr document-element read-xml open-input-string fetch-api-url)
      "parser/raylib_api.xml"))
-  (when (or structs-rkt-port structs-doc-port)
-    (log-codegen-info "Parsing structs")
-    (define structs-parsed
-      (filter (include-object? "structs")
-              (map parse-struct
-                   (hash-ref api-json 'structs))))
-    (define typedefs-parsed (parse-typedefs api-header))
-    (define function-typedefs-parsed (parse-function-typedefs api-header))
-    (when structs-rkt-port
-      (log-codegen-info "Writing struct bindings")
-      (write-struct-bindings
-       structs-rkt-port structs-parsed typedefs-parsed function-typedefs-parsed))
-    (when structs-doc-port
-      (log-codegen-info "Writing struct docs")
-      (write-struct-docs
-       structs-doc-port structs-parsed typedefs-parsed function-typedefs-parsed)))
-  (when (or enums-rkt-port enums-doc-port)
-    (log-codegen-info "Parsing enums")
-    (define enums-parsed
-      (filter (include-object? "enums")
-              (map parse-enum
-                   (hash-ref api-json 'enums))))
-    (when enums-rkt-port
-      (log-codegen-info "Writing enum bindings")
-      (write-enum-bindings enums-rkt-port enums-parsed))
-    (when enums-doc-port
-      (log-codegen-info "Writing enum docs")
-      (write-enum-docs enums-doc-port enums-parsed)))
-  (when (or functions-rkt-port functions-doc-port)
-    (log-codegen-info "Parsing functions")
-    (define functions-parsed
-      (filter (include-object? "functions")
-              (map parse-function
-                   (filter pair? (se-path*/list '(Functions) api-xexpr)))))
-    (when functions-rkt-port
-      (log-codegen-info "Writing function bindings")
-      (write-function-bindings functions-rkt-port functions-parsed))
-    (when functions-doc-port
-      (log-codegen-info "Writing function docs")
-      (write-function-docs functions-doc-port functions-parsed)))
-  (when (or constants-rkt-port constants-doc-port)
-    (log-codegen-info "Parsing constants")
-    (define constants-parsed
-      (filter (include-object? "constants")
-              (map parse-constant
-                   (hash-ref api-json 'defines))))
-    (when constants-rkt-port
-      (log-codegen-info "Writing constants bindings")
-      (write-constant-bindings constants-rkt-port constants-parsed))
-    (when constants-doc-port
-      (log-codegen-info "Writing constants docs")
-      (write-constant-docs constants-doc-port constants-parsed)))
-  (when root-rkt-port
-    (log-codegen-info "Writing root module")
-    (write-root-bindings root-rkt-port))
-  (when root-doc-port
-    (log-codegen-info "Writing root bindings")
-    (write-root-docs root-doc-port))
+  (define api-header (fetch-api-url "src/raylib.h"))
+
+  (log-codegen-info "Parsing structs")
+  (define structs-parsed (map parse-struct (hash-ref api-json 'structs)))
+  (define typedefs-parsed (parse-typedefs api-header))
+  (define function-typedefs-parsed (parse-function-typedefs api-header))
+
+  (log-codegen-info "Parsing enums")
+  (define enums-parsed (map parse-enum (hash-ref api-json 'enums)))
+
+  (log-codegen-info "Parsing functions")
+  (define functions-parsed
+    (map parse-function (filter pair? (se-path*/list '(Functions) api-xexpr))))
+
+  (log-codegen-info "Parsing constants")
+  (define constants-parsed (map parse-constant (hash-ref api-json 'defines)))
+
+  (log-codegen-info "Generating code")
+  (config-codegen
+   config
+   gen-path
+   conf-parent
+   (hash
+    'structs structs-parsed
+    'typedefs typedefs-parsed
+    'function-typedefs function-typedefs-parsed
+    'enums enums-parsed
+    'functions functions-parsed
+    'constants constants-parsed))
+
   (void))
 
 (define raylib-raw-root
-  (make-parameter (or (getenv "RAYLIB_RAW_ROOT")
-                      "https://raw.githubusercontent.com/raysan5/raylib/master")))
+  (make-parameter "https://raw.githubusercontent.com/raysan5/raylib/master"))
 
 (define (fetch-api-url path)
   (define res-url (format "~a/~a" (raylib-raw-root) path))
   (log-codegen-debug "Fetching ~s" res-url)
   (port->string (get-pure-port (string->url res-url))))
-
-;;; Root
-
-(define (write-root-bindings port)
-  (local-require "templates/root.rkt")
-  (define generated (generate-root))
-  (output generated port))
-
-(define (write-root-docs port)
-  (local-require "templates/root.scrbl")
-  (define generated (generate-root))
-  (output generated port))
-
-;;; Functions
 
 (define (parse-function function-xexpr)
   (datum-case
@@ -218,18 +155,6 @@
        (datum return-type)
        params*
        varargs))]))
-
-(define (write-function-bindings port functions-parsed)
-  (local-require "templates/functions.rkt")
-  (define generated (generate-functions functions-parsed))
-  (output generated port))
-
-(define (write-function-docs port functions-parsed)
-  (local-require "templates/functions.scrbl")
-  (define generated (generate-functions functions-parsed))
-  (output generated port))
-
-;;; Structs
 
 (define (parse-typedefs header)
   (define typedef-lines
@@ -267,18 +192,6 @@
    (nonempty-or-false (hash-ref struct-json 'description))
    (map parse-struct-field (hash-ref struct-json 'fields))))
 
-(define (write-struct-bindings port structs-parsed typedefs-parsed function-typedefs-parsed)
-  (local-require "templates/structs.rkt")
-  (define generated (generate-structs structs-parsed typedefs-parsed function-typedefs-parsed))
-  (output generated port))
-
-(define (write-struct-docs port structs-parsed typedefs-parsed function-typedefs-parsed)
-  (local-require "templates/structs.scrbl")
-  (define generated (generate-structs structs-parsed typedefs-parsed function-typedefs-parsed))
-  (output generated port))
-
-;;; Enums
-
 (define (parse-enum enum-json)
   (define (parse-enum-value value-json)
     (make-api-enum-value
@@ -290,31 +203,9 @@
    (nonempty-or-false (hash-ref enum-json 'description))
    (map parse-enum-value (hash-ref enum-json 'values))))
 
-(define (write-enum-bindings port enums-parsed)
-  (local-require "templates/enums.rkt")
-  (define generated (generate-enums enums-parsed))
-  (output generated port))
-
-(define (write-enum-docs port enums-parsed)
-  (local-require "templates/enums.scrbl")
-  (define generated (generate-enums enums-parsed))
-  (output generated port))
-
-;;; Constants
-
 (define (parse-constant constant-json)
   (make-api-constant
    (hash-ref constant-json 'name)
    (nonempty-or-false (hash-ref constant-json 'description))
    (hash-ref constant-json 'type)
    (hash-ref constant-json 'value)))
-
-(define (write-constant-bindings port constants-parsed)
-  (local-require "templates/constants.rkt")
-  (define generated (generate-constants constants-parsed))
-  (output generated port))
-
-(define (write-constant-docs port constants-parsed)
-  (local-require "templates/constants.scrbl")
-  (define generated (generate-constants constants-parsed))
-  (output generated port))

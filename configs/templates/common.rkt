@@ -3,8 +3,9 @@
 @(require racket/match
           racket/format
           racket/contract
-          "../util.rkt"
-          "../objects.rkt")
+
+          raylib/codegen/util
+          raylib/codegen/objects)
 @(provide (all-defined-out))
 
 @(define (constant-type-and-value api-constant)

@@ -1,7 +1,7 @@
 #lang scribble/text
 
 @(require racket/match
-          "../objects.rkt"
+          raylib/codegen/objects
           "common.rkt")
 @(provide generate-functions)
 
