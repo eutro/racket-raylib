@@ -1,11 +1,11 @@
 #lang scribble/manual
 
-@(require (for-label raylib/generated/unsafe/functions raylib/generated/structs ffi/unsafe racket/base))
+@(require (for-label raylib/2d/unsafe/functions raylib/2d/structs ffi/unsafe racket/base))
 
 @table-of-contents[]
 
 @title{Functions}
-@defmodule[raylib/generated/unsafe/functions]
+@defmodule[raylib/2d/unsafe/functions]
 
 @defproc[(InitWindow
           [width _int]

@@ -4,7 +4,9 @@
           raylib/codegen/objects)
 @(provide generate-enums)
 
-@(define (generate-enums enums-parsed)
+@(define (generate-enums
+          enums-parsed
+          #:module _this-mod)
 @list{
 #lang racket/base
 

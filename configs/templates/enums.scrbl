@@ -5,16 +5,18 @@
           raylib/codegen/objects)
 @(provide generate-enums)
 
-@(define (generate-enums enums-parsed)
+@(define (generate-enums
+          enums-parsed
+          #:module this-mod)
 @list{
 #lang scribble/manual
 
-@"@"(require (for-label raylib/generated/unsafe/enums ffi/unsafe racket/base))
+@"@"(require (for-label @|this-mod| ffi/unsafe racket/base))
 
 @"@"table-of-contents[]
 
 @"@"title{Enums}
-@"@"defmodule[raylib/generated/unsafe/enums]
+@"@"defmodule[@|this-mod|]
 @(splice
   (for/list ([parsed-enum (in-list enums-parsed)])
     (match-define (api-enum name description enum-values) parsed-enum)

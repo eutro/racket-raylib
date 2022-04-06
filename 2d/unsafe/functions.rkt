@@ -1,6 +1,6 @@
 #lang racket/base
 
-(require ffi/unsafe ffi/unsafe/define raylib/generated/structs)
+(require ffi/unsafe ffi/unsafe/define raylib/2d/structs)
 
 (define-ffi-definer define-raylib (ffi-lib "libraylib")
   #:provide provide-protected

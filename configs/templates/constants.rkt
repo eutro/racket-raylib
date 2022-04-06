@@ -5,11 +5,14 @@
           "common.rkt")
 @(provide generate-constants)
 
-@(define (generate-constants constants-parsed)
+@(define (generate-constants
+          constants-parsed
+          #:module _this-mod
+          #:structs-module structs-mod)
 @list{
 #lang racket/base
 
-(require "structs.rkt")
+(require @|structs-mod|)
 
 (provide (all-defined-out))@;
 @splice{

@@ -6,7 +6,11 @@
           "common.rkt")
 @(provide generate-structs)
 
-@(define (generate-structs structs-parsed typedefs-parsed function-typedefs-parsed)
+@(define (generate-structs
+          structs-parsed
+          typedefs-parsed
+          function-typedefs-parsed
+          #:module _this-mod)
 @list{
 #lang racket/base
 

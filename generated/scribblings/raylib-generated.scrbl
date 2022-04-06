@@ -1,14 +1,17 @@
 #lang scribble/manual
 
 @title{Generated Raylib Bindings}
-Unsafe, automatically generated, bindings for Raylib.
+Unsafe, automatically generated bindings for
+@deftech{@hyperlink["https://www.raylib.com/"]{Raylib}}
+4.1-dev.
 
 @table-of-contents[]
 
 @defmodule[raylib/generated/unsafe]
-Reexports all of @racket[raylib/generated/unsafe/*].
+Reexports all of @racket[raylib/generated/unsafe/functions]
+and @racket[raylib/generated/*].
 
 @include-section["unsafe/functions.scrbl"]
-@include-section["unsafe/structs.scrbl"]
-@include-section["unsafe/enums.scrbl"]
-@include-section["unsafe/constants.scrbl"]
+@include-section["structs.scrbl"]
+@include-section["enums.scrbl"]
+@include-section["constants.scrbl"]

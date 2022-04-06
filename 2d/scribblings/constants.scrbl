@@ -1,11 +1,11 @@
 #lang scribble/manual
 
-@(require (for-label "../../unsafe/constants.rkt" "../../unsafe/structs.rkt" racket/base))
+@(require (for-label raylib/2d/constants raylib/2d/structs racket/base))
 
 @table-of-contents[]
 
 @title{Constants}
-@defmodule[raylib/generated/unsafe/constants]
+@defmodule[raylib/2d/constants]
 
 @defthing[RAYLIB_VERSION string? #:value "4.1-dev" ""]
 
