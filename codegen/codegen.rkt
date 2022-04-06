@@ -242,67 +242,15 @@
        params*
        varargs))]))
 
-(define (write-params parameters [indent 3])
-  (define indent-str (build-string indent (const #\space)))
-  (for ([param parameters])
-    (match-define (cons pname ptype) param)
-    (define-values (pname* ptype*) (parse-type pname ptype))
-    (display indent-str)
-    (printf "[~a : ~a]\n" pname* ptype*)))
-
-(define (write-return-type return-type [indent 3])
-  (define-values (_n parsed-return) (parse-type "" return-type))
-  (display (build-string indent (const #\space)))
-  (printf "-> ~a)" parsed-return))
-
-(define (api-function->binding parsed)
-  (match-define (api-function name description return-type parameters varargs) parsed)
-  (when description
-    (printf ";; ~a\n" description))
-  (printf "(define-raylib ~a\n  (_fun\n" name)
-  (when varargs
-    (printf "   #:varargs-after ~a\n" (length parameters)))
-  (write-params parameters)
-  (when varargs
-    (displayln "   ;; ... varargs\n"))
-  (write-return-type return-type)
-  (display ")\n"))
-
 (define (write-function-bindings port functions-parsed)
-  (parameterize ([current-output-port port])
-    (display "#lang racket/base\n\n")
-    (display "(require ffi/unsafe ffi/unsafe/define \"structs.rkt\" \"enums.rkt\")\n\n")
-    (display "(define-ffi-definer define-raylib (ffi-lib \"libraylib\")\n")
-    (display "  #:provide provide-protected\n")
-    (display "  #:default-make-fail make-not-available)\n")
-    (for ([api-function functions-parsed])
-      (newline)
-      (api-function->binding api-function))))
-
-(define (api-function->docs parsed)
-  (match-define (api-function name description return-type parameters varargs) parsed)
-  (printf "@defproc[(~a" name)
-  (for ([param parameters])
-    (match-define (cons pname ptype) param)
-    (define-values (pname* ptype*) (parse-type pname ptype))
-    (printf "\n          [~a ~a]" pname* ptype*))
-  (printf ")\n")
-  (define-values (_n parsed-return) (parse-type "" return-type))
-  (printf "         ~a]{\n~a\n}\n" parsed-return description))
+  (local-require "templates/functions.rkt")
+  (define generated (generate-functions functions-parsed))
+  (output generated port))
 
 (define (write-function-docs port functions-parsed)
-  (parameterize ([current-output-port port])
-    (display "#lang scribble/manual\n\n")
-    (display "@(require (for-label raylib/generated/unsafe/functions\n")
-    (display "                     raylib/generated/unsafe/structs\n")
-    (display "                     ffi/unsafe")
-    (display "                     racket/base))\n\n")
-    (display "@table-of-contents[]\n\n")
-    (display "@title{Functions}\n")
-    (display "@defmodule[raylib/generated/unsafe/functions]\n")
-    (for ([api-function functions-parsed])
-      (newline)
-      (api-function->docs api-function))))
+  (local-require "templates/functions.scrbl")
+  (define generated (generate-functions functions-parsed))
+  (output generated port))
 
 ;;; Structs
 

@@ -1,7 +1,6 @@
 #lang scribble/text
 
 @(require racket/match
-
           "../objects.rkt"
           "../util.rkt"
           "common.rkt")
