@@ -9,7 +9,6 @@
          syntax/datum
 
          racket/file
-         racket/format
          racket/port
          racket/match
          racket/function
@@ -18,7 +17,6 @@
 
          scribble/text
 
-         "templates/common.rkt"
          "util.rkt"
          "config.rkt"
          "objects.rkt")
@@ -192,35 +190,14 @@
 ;;; Root
 
 (define (write-root-bindings port)
-  (parameterize ([current-output-port port])
-    (displayln "#lang racket/base")
-    (newline)
-    (displayln "(require \"unsafe/functions.rkt\"")
-    (displayln "         \"unsafe/structs.rkt\"")
-    (displayln "         \"unsafe/enums.rkt\"")
-    (displayln "         \"unsafe/constants.rkt\")")
-    (newline)
-    (displayln "(provide (all-from-out \"unsafe/functions.rkt\"")
-    (displayln "                       \"unsafe/structs.rkt\"")
-    (displayln "                       \"unsafe/enums.rkt\"")
-    (displayln "                       \"unsafe/constants.rkt\"))")))
+  (local-require "templates/root.rkt")
+  (define generated (generate-root))
+  (output generated port))
 
 (define (write-root-docs port)
-  (parameterize ([current-output-port port])
-    (displayln "#lang scribble/manual\n")
-    (newline)
-    (displayln "@title{Generated Raylib Bindings}")
-    (displayln "Unsafe, automatically generated, bindings for Raylib.")
-    (newline)
-    (displayln "@table-of-contents[]")
-    (newline)
-    (displayln "@defmodule[raylib/generated/unsafe]")
-    (displayln "Reexports all of @racket[raylib/generated/unsafe/*].")
-    (newline)
-    (displayln "@include-section[\"unsafe/functions.scrbl\"]")
-    (displayln "@include-section[\"unsafe/structs.scrbl\"]")
-    (displayln "@include-section[\"unsafe/enums.scrbl\"]")
-    (displayln "@include-section[\"unsafe/constants.scrbl\"]")))
+  (local-require "templates/root.scrbl")
+  (define generated (generate-root))
+  (output generated port))
 
 ;;; Functions
 
