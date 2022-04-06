@@ -6,16 +6,19 @@
           "common.rkt")
 @(provide generate-constants)
 
-@(define (generate-constants constants-parsed)
+@(define (generate-constants
+          constants-parsed
+          #:module this-mod
+          #:structs-module structs-mod)
 @list{
 #lang scribble/manual
 
-@"@"(require (for-label "../../unsafe/constants.rkt" "../../unsafe/structs.rkt" racket/base))
+@"@"(require (for-label @|this-mod| @|structs-mod| racket/base))
 
 @"@"table-of-contents[]
 
 @"@"title{Constants}
-@"@"defmodule[raylib/generated/unsafe/constants]
+@"@"defmodule[@|this-mod|]
 @splice{
 @(for/list ([parsed-constant (in-list constants-parsed)])
    (match-define (api-constant name description _ _) parsed-constant)

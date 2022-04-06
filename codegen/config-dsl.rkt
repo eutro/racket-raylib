@@ -11,7 +11,7 @@
          "objects.rkt")
 
 (provide (except-out (all-from-out racket/base) #%module-begin)
-         (all-from-out "config.rkt" "logger.rkt")
+         (all-from-out "config.rkt" "objects.rkt" "logger.rkt")
          (rename-out [config-modbeg #%module-begin])
          current-inputs
          output

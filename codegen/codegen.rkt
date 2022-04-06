@@ -22,62 +22,52 @@
          "config.rkt"
          "objects.rkt")
 
-(module+ main
-  (require racket/cmdline)
+(provide raylib-raw-root
+         do-codegen)
 
-  (define (main)
-    (define kill-logger (make-semaphore))
-    (define logger-thread
-      (thread
-       (let ()
-         (define receiver (make-log-receiver codegen-logger 'debug))
-         (define (do-logging msg)
-           (printf "[~a] ~a\n"
-                   (vector-ref msg 0)
-                   (vector-ref msg 1)))
-         (define (loop)
-           (define msg (sync receiver kill-logger))
-           (unless (semaphore? msg) (do-logging msg) (loop)))
-         (define (finish-logging)
-           (define msg (sync/timeout 0 receiver))
-           (when msg (do-logging msg) (finish-logging)))
-         (thunk
-          (parameterize ([current-output-port (current-error-port)])
-            (loop)
-            (finish-logging))))))
+(define/contract raylib-raw-root
+  (parameter/c string?)
+  (make-parameter "https://raw.githubusercontent.com/raysan5/raylib/master"))
 
-    (dynamic-wind
-      void
-      (lambda ()
-        (define config-source* "codegen-conf.rkt")
-        (define clear #f)
-        (command-line
-         #:once-any
-         [("--url")
-          url
-          "Set the base request URL (default: https://raw.githubusercontent.com/raysan5/raylib/master)"
-          (raylib-raw-root url)]
-         #:once-each
-         [("--config")
-          config-source
-          "Set the config file"
-          (set! config-source* (path->complete-path config-source))]
-         [("--clear")
-          "Clear the target directory before generating new files"
-          (set! clear #t)]
-         #:args (generated-path)
-         (let ()
-           (define gen-path (path->complete-path generated-path))
-           (when clear
-             (log-codegen-info "Deleting ~a" gen-path)
-             (delete-directory/files gen-path #:must-exist? #f))
-           (define conf-path (path->complete-path config-source* gen-path))
-           (generate-bindings gen-path conf-path))))
-      (lambda ()
-        (semaphore-post kill-logger)
-        (thread-wait logger-thread))))
-
-  (main))
+(define/contract (do-codegen
+                  #:config-source [config-source "codegen-conf.rkt"]
+                  #:clear? [clear #f]
+                  generated-path)
+  (->* (path-string?)
+       (#:config-source path-string?
+        #:clear? boolean?)
+       void?)
+  (define gen-path (path->complete-path generated-path))
+  (define conf-path (path->complete-path config-source gen-path))
+  (define kill-logger (make-semaphore))
+  (define logger-thread
+    (thread
+     (let ()
+       (define receiver (make-log-receiver codegen-logger 'debug))
+       (define (do-logging msg)
+         (printf "[~a] ~a\n"
+                 (vector-ref msg 0)
+                 (vector-ref msg 1)))
+       (define (loop)
+         (define msg (sync receiver kill-logger))
+         (unless (semaphore? msg) (do-logging msg) (loop)))
+       (define (finish-logging)
+         (define msg (sync/timeout 0 receiver))
+         (when msg (do-logging msg) (finish-logging)))
+       (thunk
+        (parameterize ([current-output-port (current-error-port)])
+          (loop)
+          (finish-logging))))))
+  (dynamic-wind
+    void
+    (lambda ()
+      (when clear
+        (log-codegen-info "Deleting ~a" gen-path)
+        (delete-directory/files gen-path #:must-exist? #f))
+      (generate-bindings gen-path conf-path))
+    (lambda ()
+      (semaphore-post kill-logger)
+      (thread-wait logger-thread))))
 
 (define/contract (generate-bindings gen-path conf-path)
   (-> path? path? void?)
@@ -129,9 +119,6 @@
     'constants constants-parsed))
 
   (void))
-
-(define raylib-raw-root
-  (make-parameter "https://raw.githubusercontent.com/raysan5/raylib/master"))
 
 (define (fetch-api-url path)
   (define res-url (format "~a/~a" (raylib-raw-root) path))
@@ -209,3 +196,31 @@
    (nonempty-or-false (hash-ref constant-json 'description))
    (hash-ref constant-json 'type)
    (hash-ref constant-json 'value)))
+
+(module+ main
+  (require racket/cmdline)
+
+  (define (main)
+    (define config-source* "codegen-conf.rkt")
+    (define clear #f)
+    (command-line
+     #:once-any
+     [("--url")
+      url
+      "Set the base request URL (default: https://raw.githubusercontent.com/raysan5/raylib/master)"
+      (raylib-raw-root url)]
+     #:once-each
+     [("--config")
+      config-source
+      "Set the config file"
+      (set! config-source* (path->complete-path config-source))]
+     [("--clear")
+      "Clear the target directory before generating new files"
+      (set! clear #t)]
+     #:args (generated-path)
+     (do-codegen
+      #:config-source config-source*
+      #:clear? clear
+      generated-path)))
+
+  (main))

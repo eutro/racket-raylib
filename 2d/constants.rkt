@@ -1,6 +1,6 @@
 #lang racket/base
 
-(require "structs.rkt")
+(require raylib/2d/structs)
 
 (provide (all-defined-out))
 

@@ -6,17 +6,21 @@
           "common.rkt")
 @(provide generate-structs)
 
-@(define (generate-structs structs-parsed typedefs-parsed function-typedefs-parsed)
+@(define (generate-structs
+          structs-parsed
+          typedefs-parsed
+          function-typedefs-parsed
+          #:module this-mod)
 
 @list{
 #lang scribble/manual
 
-@"@"(require (for-label raylib/generated/unsafe/structs ffi/unsafe racket/base))
+@"@"(require (for-label @|this-mod| ffi/unsafe racket/base))
 
 @"@"table-of-contents[]
 
 @"@"title{Structs}
-@"@"defmodule[raylib/generated/unsafe/structs]
+@"@"defmodule[@|this-mod|]
 @"@"section{Struct types}
 @(for/list ([struct-parsed (in-list structs-parsed)])
    (match-define (api-struct name desc fields) struct-parsed)

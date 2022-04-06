@@ -5,13 +5,14 @@
 @(provide generate-root)
 
 @(define (generate-root
+          #:title title
           #:top-desc desc
           #:module mod
           #:module-desc mod-desc
           . modules) @list{
 #lang scribble/manual
 
-@"@"title{Generated Raylib Bindings}
+@"@"title{@|title|}
 @|desc|
 
 @"@"table-of-contents[]

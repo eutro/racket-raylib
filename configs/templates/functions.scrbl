@@ -5,16 +5,19 @@
           "common.rkt")
 @(provide generate-functions)
 
-@(define (generate-functions functions-parsed)
+@(define (generate-functions
+          functions-parsed
+          #:module this-mod
+          #:structs-module structs-mod)
 @list{
 #lang scribble/manual
 
-@"@"(require (for-label "../../unsafe/functions" "../../unsafe/structs" ffi/unsafe racket/base))
+@"@"(require (for-label @|this-mod| @|structs-mod| ffi/unsafe racket/base))
 
 @"@"table-of-contents[]
 
 @"@"title{Functions}
-@"@"defmodule[raylib/generated/unsafe/functions]
+@"@"defmodule[@|this-mod|]
 @(splice
   (for/list ([parsed-function (in-list functions-parsed)])
     (match-define (api-function name description return-type parameters _varargs) parsed-function)

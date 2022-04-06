@@ -1,11 +1,11 @@
 #lang scribble/manual
 
-@(require (for-label raylib/generated/unsafe/structs ffi/unsafe racket/base))
+@(require (for-label raylib/2d/structs ffi/unsafe racket/base))
 
 @table-of-contents[]
 
 @title{Structs}
-@defmodule[raylib/generated/unsafe/structs]
+@defmodule[raylib/2d/structs]
 @section{Struct types}
 
 @deftogether[(@defthing[_Vector2 ctype?]
