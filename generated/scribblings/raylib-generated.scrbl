@@ -1,6 +1,5 @@
 #lang scribble/manual
 
-
 @title{Generated Raylib Bindings}
 Unsafe, automatically generated, bindings for Raylib.
 

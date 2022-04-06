@@ -2,7 +2,7 @@
 
 @(require racket/match
           racket/format
-          "../objects.rkt")
+          raylib/codegen/objects)
 @(provide generate-enums)
 
 @(define (generate-enums enums-parsed)

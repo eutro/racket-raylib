@@ -2,7 +2,7 @@
 
 @(require racket/match
           racket/format
-          "../objects.rkt"
+          raylib/codegen/objects
           "common.rkt")
 @(provide generate-constants)
 

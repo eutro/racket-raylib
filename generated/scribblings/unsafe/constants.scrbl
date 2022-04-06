@@ -1,6 +1,6 @@
 #lang scribble/manual
 
-@(require (for-label raylib/generated/unsafe/constants raylib/generated/unsafe/structs racket/base))
+@(require (for-label "../../unsafe/constants.rkt" "../../unsafe/structs.rkt" racket/base))
 
 @table-of-contents[]
 

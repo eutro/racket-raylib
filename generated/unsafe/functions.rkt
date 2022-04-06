@@ -565,7 +565,6 @@
    [logLevel : _int]
    [text : _string]
    ;; ... varargs
-
    -> _void))
 
 ;; Set the current threshold (minimum) log level
@@ -2521,7 +2520,6 @@
    #:varargs-after 1
    [text : _string]
    ;; ... varargs
-
    -> _string))
 
 ;; Get a piece of a text string

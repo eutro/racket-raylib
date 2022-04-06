@@ -1,0 +1,1 @@
+#lang raylib/codegen/config
