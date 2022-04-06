@@ -18,6 +18,7 @@
 
          scribble/text
 
+         "templates/common.rkt"
          "util.rkt"
          "config.rkt"
          "objects.rkt")
@@ -383,57 +384,12 @@
    (hash-ref constant-json 'type)
    (hash-ref constant-json 'value)))
 
-(define (constant-type-and-value api-constant)
-  (define raw-value (api-constant-value api-constant))
-  (case (api-constant-type api-constant)
-    [("STRING") (values "string?" (~s raw-value))]
-    [("COLOR")
-     (values
-      "Color?"
-      (~a
-       (cons
-        "make-Color"
-        (cdr
-         (regexp-match
-          #px"CLITERAL\\(Color\\)\\{ (\\d+), (\\d+), (\\d+), (\\d+) \\}"
-          (~a raw-value))))))]
-    [else (values #f #f)]))
-
-(define (api-constant->binding api-constant)
-  (define-values (_type value)
-    (constant-type-and-value api-constant))
-  (when value
-    (newline)
-    (define description (api-object-description api-constant))
-    (when description
-      (printf ";; ~a\n" description))
-    (printf "(define ~a ~a)\n" (api-object-name api-constant) value)))
-
 (define (write-constant-bindings port constants-parsed)
-  (parameterize ([current-output-port port])
-    (display "#lang racket/base\n\n")
-    (display "(require \"structs.rkt\")\n\n")
-    (display "(provide (all-defined-out))\n")
-    (for ([api-constant constants-parsed])
-      (api-constant->binding api-constant))))
-
-(define (api-constant->docs api-constant)
-  (define-values (type value)
-    (constant-type-and-value api-constant))
-  (when value
-    (newline)
-    (printf "@defthing[~a ~a #:value ~a ~s]\n"
-            (api-object-name api-constant)
-            type
-            value
-            (or (api-object-description api-constant) ""))))
+  (local-require "templates/constants.rkt")
+  (define generated (generate-constants constants-parsed))
+  (output generated port))
 
 (define (write-constant-docs port constants-parsed)
-  (parameterize ([current-output-port port])
-    (display "#lang scribble/manual\n\n")
-    (display "@(require (for-label raylib/generated/unsafe/constants raylib/generated/unsafe/structs racket/base))\n\n")
-    (display "@table-of-contents[]\n\n")
-    (display "@title{Constants}\n")
-    (display "@defmodule[raylib/generated/unsafe/constants]\n")
-    (for ([api-constant constants-parsed])
-      (api-constant->docs api-constant))))
+  (local-require "templates/constants.scrbl")
+  (define generated (generate-constants constants-parsed))
+  (output generated port))
