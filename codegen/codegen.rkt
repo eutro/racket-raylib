@@ -369,26 +369,10 @@
   (define generated (generate-enums enums-parsed))
   (output generated port))
 
-(define (api-enum->docs parsed)
-  (match-define (api-enum name description enum-values) parsed)
-  (printf "@section{~a}\n" description)
-  (printf "@defthing[_~a ctype?]{~a}" name description)
-  (for ([enum-value enum-values])
-    (match-define (api-enum-value name enum-desc enum-int-value) enum-value)
-    (newline)
-    (printf "@defthing[~a exact-integer? #:value ~a ~s]" name enum-int-value enum-desc))
-  (newline))
-
 (define (write-enum-docs port enums-parsed)
-  (parameterize ([current-output-port port])
-    (display "#lang scribble/manual\n\n")
-    (display "@(require (for-label raylib/generated/unsafe/enums ffi/unsafe racket/base))\n\n")
-    (display "@table-of-contents[]\n\n")
-    (display "@title{Enums}\n")
-    (display "@defmodule[raylib/generated/unsafe/enums]\n")
-    (for ([api-enum enums-parsed])
-      (newline)
-      (api-enum->docs api-enum))))
+  (local-require "templates/enums.scrbl")
+  (define generated (generate-enums enums-parsed))
+  (output generated port))
 
 ;;; Constants
 
