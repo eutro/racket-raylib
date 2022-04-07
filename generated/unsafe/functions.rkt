@@ -771,31 +771,31 @@
 (define-raylib CompressData
   (_fun
    [data : _pointer #;"const unsigned char *"]
-   [dataLength : _int]
-   [compDataLength : _pointer #;"int *"]
+   [dataSize : _int]
+   [compDataSize : _pointer #;"int *"]
    -> _pointer #;"unsigned char *"))
 
 ;; Decompress data (DEFLATE algorithm)
 (define-raylib DecompressData
   (_fun
    [compData : _pointer #;"const unsigned char *"]
-   [compDataLength : _int]
-   [dataLength : _pointer #;"int *"]
+   [compDataSize : _int]
+   [dataSize : _pointer #;"int *"]
    -> _pointer #;"unsigned char *"))
 
 ;; Encode data to Base64 string
 (define-raylib EncodeDataBase64
   (_fun
    [data : _pointer #;"const unsigned char *"]
-   [dataLength : _int]
-   [outputLength : _pointer #;"int *"]
+   [dataSize : _int]
+   [outputSize : _pointer #;"int *"]
    -> _pointer #;"char *"))
 
 ;; Decode Base64 string data
 (define-raylib DecodeDataBase64
   (_fun
    [data : _pointer #;"const unsigned char *"]
-   [outputLength : _pointer #;"int *"]
+   [outputSize : _pointer #;"int *"]
    -> _pointer #;"unsigned char *"))
 
 ;; Save integer value to storage file (to defined position), returns true on success
