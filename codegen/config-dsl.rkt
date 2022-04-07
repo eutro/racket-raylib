@@ -53,16 +53,17 @@
   (dynamic-require mod-path proc))
 
 (define (exclude #:from inputs . filters)
-  (remove (apply conjoin filters) inputs))
+  (remove (apply disjoin filters) inputs))
 
 (define (include #:from inputs . filters)
   (filter (apply disjoin filters) inputs))
 
 (define (all . _args) all)
 
-(define (name-matches re)
+(define (name-matches . pats)
   (lambda (obj)
-    (regexp-match-exact? re (api-object-name obj))))
+    (for/or ([re (in-list pats)])
+      (regexp-match-exact? re (api-object-name obj)))))
 
 (define (parsed sym)
   (hash-ref (inputs-parsed (current-inputs)) sym))
