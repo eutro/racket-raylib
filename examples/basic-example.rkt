@@ -1,7 +1,7 @@
 #!/usr/bin/env racket
 #lang racket
 
-(require raylib/generated/unsafe)
+(require raylib/2d/unsafe)
 
 #<<EOF
 #include "raylib.h"
@@ -25,9 +25,6 @@ int main(void)
 EOF
 
 (InitWindow 800 450 "raylib [core] example - basic window")
-
-(define RAYWHITE {make-Color 245 245 245 255})
-(define LIGHTGRAY {make-Color 200 200 200 255})
 
 (let loop ()
   (when (not (WindowShouldClose))
