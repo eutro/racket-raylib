@@ -65,7 +65,7 @@
    [flag : _uint]
    -> _bool))
 
-;; Set window configuration state using flags (only PLATFORM_DESKTOP)
+;; Set window configuration state using flags
 (define-raylib SetWindowState
   (_fun
    [flags : _uint]
@@ -136,12 +136,6 @@
    [height : _int]
    -> _void))
 
-;; Set window opacity [0.0f..1.0f] (only PLATFORM_DESKTOP)
-(define-raylib SetWindowOpacity
-  (_fun
-   [opacity : _float]
-   -> _void))
-
 ;; Get native window handle
 (define-raylib GetWindowHandle
   (_fun
@@ -154,16 +148,6 @@
 
 ;; Get current screen height
 (define-raylib GetScreenHeight
-  (_fun
-   -> _int))
-
-;; Get current render width (it considers HiDPI)
-(define-raylib GetRenderWidth
-  (_fun
-   -> _int))
-
-;; Get current render height (it considers HiDPI)
-(define-raylib GetRenderHeight
   (_fun
    -> _int))
 
@@ -681,12 +665,6 @@
    [ext : _string]
    -> _bool))
 
-;; Get file length in bytes (NOTE: GetFileSize() conflicts with windows.h)
-(define-raylib GetFileLength
-  (_fun
-   [fileName : _string]
-   -> _int))
-
 ;; Get pointer to extension for a filename string (includes dot: '.png')
 (define-raylib GetFileExtension
   (_fun
@@ -719,11 +697,6 @@
 
 ;; Get current working directory (uses static string)
 (define-raylib GetWorkingDirectory
-  (_fun
-   -> _string))
-
-;; Get the directory if the running application (uses static string)
-(define-raylib GetApplicationDirectory
   (_fun
    -> _string))
 
@@ -770,32 +743,32 @@
 ;; Compress data (DEFLATE algorithm)
 (define-raylib CompressData
   (_fun
-   [data : _pointer #;"const unsigned char *"]
-   [dataSize : _int]
-   [compDataSize : _pointer #;"int *"]
+   [data : _pointer #;"unsigned char *"]
+   [dataLength : _int]
+   [compDataLength : _pointer #;"int *"]
    -> _pointer #;"unsigned char *"))
 
 ;; Decompress data (DEFLATE algorithm)
 (define-raylib DecompressData
   (_fun
-   [compData : _pointer #;"const unsigned char *"]
-   [compDataSize : _int]
-   [dataSize : _pointer #;"int *"]
+   [compData : _pointer #;"unsigned char *"]
+   [compDataLength : _int]
+   [dataLength : _pointer #;"int *"]
    -> _pointer #;"unsigned char *"))
 
 ;; Encode data to Base64 string
 (define-raylib EncodeDataBase64
   (_fun
    [data : _pointer #;"const unsigned char *"]
-   [dataSize : _int]
-   [outputSize : _pointer #;"int *"]
+   [dataLength : _int]
+   [outputLength : _pointer #;"int *"]
    -> _pointer #;"char *"))
 
 ;; Decode Base64 string data
 (define-raylib DecodeDataBase64
   (_fun
-   [data : _pointer #;"const unsigned char *"]
-   [outputSize : _pointer #;"int *"]
+   [data : _pointer #;"unsigned char *"]
+   [outputLength : _pointer #;"int *"]
    -> _pointer #;"unsigned char *"))
 
 ;; Save integer value to storage file (to defined position), returns true on success
@@ -2284,7 +2257,7 @@
    [fileName : _string]
    -> _Font))
 
-;; Load font from file with extended parameters, use NULL for fontChars and 0 for glyphCount to load the default character set
+;; Load font from file with extended parameters
 (define-raylib LoadFontEx
   (_fun
    [fileName : _string]
@@ -2341,18 +2314,11 @@
    [glyphCount : _int]
    -> _void))
 
-;; Unload font from GPU memory (VRAM)
+;; Unload Font from GPU memory (VRAM)
 (define-raylib UnloadFont
   (_fun
    [font : _Font]
    -> _void))
-
-;; Export font as code file, returns true on success
-(define-raylib ExportFontAsCode
-  (_fun
-   [font : _Font]
-   [fileName : _string]
-   -> _bool))
 
 ;; Draw current FPS
 (define-raylib DrawFPS
@@ -2402,18 +2368,6 @@
    [codepoint : _int]
    [position : _Vector2]
    [fontSize : _float]
-   [tint : _Color]
-   -> _void))
-
-;; Draw multiple character (codepoint)
-(define-raylib DrawTextCodepoints
-  (_fun
-   [font : _Font]
-   [codepoints : _pointer #;"const int *"]
-   [count : _int]
-   [position : _Vector2]
-   [fontSize : _float]
-   [spacing : _float]
    [tint : _Color]
    -> _void))
 
@@ -2490,7 +2444,7 @@
 ;; Encode text as codepoints array into UTF-8 text string (WARNING: memory must be freed!)
 (define-raylib TextCodepointsToUTF8
   (_fun
-   [codepoints : _pointer #;"const int *"]
+   [codepoints : _pointer #;"int *"]
    [length : _int]
    -> _pointer #;"char *"))
 
@@ -2920,7 +2874,7 @@
   (_fun
    [mesh : _Mesh]
    [index : _int]
-   [data : _pointer #;"const void *"]
+   [data : _pointer #;"void *"]
    [dataSize : _int]
    [offset : _int]
    -> _void))
@@ -2944,7 +2898,7 @@
   (_fun
    [mesh : _Mesh]
    [material : _Material]
-   [transforms : _pointer #;"const Matrix *"]
+   [transforms : _pointer #;"Matrix *"]
    [instances : _int]
    -> _void))
 
@@ -3119,7 +3073,7 @@
 ;; Unload animation array data
 (define-raylib UnloadModelAnimations
   (_fun
-   [animations : _pointer #;"ModelAnimation *"]
+   [animations : _pointer #;"ModelAnimation*"]
    [count : _uint]
    -> _void))
 
@@ -3167,6 +3121,13 @@
   (_fun
    [ray : _Ray]
    [box : _BoundingBox]
+   -> _RayCollision))
+
+;; Get collision info between ray and model
+(define-raylib GetRayCollisionModel
+  (_fun
+   [ray : _Ray]
+   [model : _Model]
    -> _RayCollision))
 
 ;; Get collision info between ray and mesh
@@ -3337,11 +3298,13 @@
    [pitch : _float]
    -> _void))
 
-;; Set pan for a sound (0.5 is center)
-(define-raylib SetSoundPan
+;; Convert wave data to desired format
+(define-raylib WaveFormat
   (_fun
-   [sound : _Sound]
-   [pan : _float]
+   [wave : _pointer #;"Wave *"]
+   [sampleRate : _int]
+   [sampleSize : _int]
+   [channels : _int]
    -> _void))
 
 ;; Copy a wave to a new wave
@@ -3358,16 +3321,7 @@
    [finalSample : _int]
    -> _void))
 
-;; Convert wave data to desired format
-(define-raylib WaveFormat
-  (_fun
-   [wave : _pointer #;"Wave *"]
-   [sampleRate : _int]
-   [sampleSize : _int]
-   [channels : _int]
-   -> _void))
-
-;; Load samples data from wave as a 32bit float data array
+;; Load samples data from wave as a floats array
 (define-raylib LoadWaveSamples
   (_fun
    [wave : _Wave]
@@ -3389,7 +3343,7 @@
 (define-raylib LoadMusicStreamFromMemory
   (_fun
    [fileType : _string]
-   [data : _pointer #;"const unsigned char *"]
+   [data : _pointer #;"unsigned char *"]
    [dataSize : _int]
    -> _Music))
 
@@ -3454,13 +3408,6 @@
   (_fun
    [music : _Music]
    [pitch : _float]
-   -> _void))
-
-;; Set pan for a music (0.5 is center)
-(define-raylib SetMusicPan
-  (_fun
-   [music : _Music]
-   [pan : _float]
    -> _void))
 
 ;; Get music time length (in seconds)
@@ -3547,36 +3494,8 @@
    [pitch : _float]
    -> _void))
 
-;; Set pan for audio stream (0.5 is centered)
-(define-raylib SetAudioStreamPan
-  (_fun
-   [stream : _AudioStream]
-   [pan : _float]
-   -> _void))
-
 ;; Default size for new audio streams
 (define-raylib SetAudioStreamBufferSizeDefault
   (_fun
    [size : _int]
-   -> _void))
-
-;; Audio thread callback to request new data
-(define-raylib SetAudioStreamCallback
-  (_fun
-   [stream : _AudioStream]
-   [callback : _AudioCallback]
-   -> _void))
-
-;; 
-(define-raylib AttachAudioStreamProcessor
-  (_fun
-   [stream : _AudioStream]
-   [processor : _AudioCallback]
-   -> _void))
-
-;; 
-(define-raylib DetachAudioStreamProcessor
-  (_fun
-   [stream : _AudioStream]
-   [processor : _AudioCallback]
    -> _void))

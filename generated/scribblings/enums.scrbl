@@ -290,7 +290,7 @@
 
 @section{Texture parameters: filter mode}
 @defthing[_TextureFilter ctype?]{Texture parameters: filter mode}
-@defthing[TEXTURE_FILTER_POINT exact-integer? #:value 0 "No filter, just pixel approximation"]
+@defthing[TEXTURE_FILTER_POINT exact-integer? #:value 0 "No filter, just pixel aproximation"]
 @defthing[TEXTURE_FILTER_BILINEAR exact-integer? #:value 1 "Linear filtering"]
 @defthing[TEXTURE_FILTER_TRILINEAR exact-integer? #:value 2 "Trilinear filtering (linear with mipmaps)"]
 @defthing[TEXTURE_FILTER_ANISOTROPIC_4X exact-integer? #:value 3 "Anisotropic filtering 4x"]
@@ -326,8 +326,7 @@
 @defthing[BLEND_MULTIPLIED exact-integer? #:value 2 "Blend textures multiplying colors"]
 @defthing[BLEND_ADD_COLORS exact-integer? #:value 3 "Blend textures adding colors (alternative)"]
 @defthing[BLEND_SUBTRACT_COLORS exact-integer? #:value 4 "Blend textures subtracting colors (alternative)"]
-@defthing[BLEND_ALPHA_PREMUL exact-integer? #:value 5 "Blend premultiplied textures considering alpha"]
-@defthing[BLEND_CUSTOM exact-integer? #:value 6 "Blend textures using custom src/dst factors (use rlSetBlendMode())"]
+@defthing[BLEND_CUSTOM exact-integer? #:value 5 "Belnd textures using custom src/dst factors (use rlSetBlendMode())"]
 
 @section{Gesture}
 @defthing[_Gesture ctype?]{Gesture}

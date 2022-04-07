@@ -281,7 +281,6 @@ Wave, audio wave data
 @deftogether[(@defthing[_AudioStream ctype?]
               @defstruct[AudioStream
                          ([buffer _pointer #;"rAudioBuffer *"]
-                          [processor _pointer #;"rAudioProcessor *"]
                           [sampleRate _uint]
                           [sampleSize _uint]
                           [channels _uint])
@@ -378,12 +377,6 @@ Aliases for some struct types.
                         (_fun
                          [fileName : _string]
                          [text : _pointer #;"char *"]
-                         -> _bool)]
-              @defthing[_AudioCallback ctype?
-                        #:value
-                        (_fun
-                         [bufferData : _pointer #;"void *"]
-                         [frames : _uint]
-                         -> _void)])]{
+                         -> _bool)])]{
 Types for certain callback functions.
 }
