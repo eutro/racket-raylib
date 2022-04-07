@@ -65,7 +65,7 @@
    [flag : _uint]
    -> _bool))
 
-;; Set window configuration state using flags (only PLATFORM_DESKTOP)
+;; Set window configuration state using flags
 (define-raylib SetWindowState
   (_fun
    [flags : _uint]
@@ -136,12 +136,6 @@
    [height : _int]
    -> _void))
 
-;; Set window opacity [0.0f..1.0f] (only PLATFORM_DESKTOP)
-(define-raylib SetWindowOpacity
-  (_fun
-   [opacity : _float]
-   -> _void))
-
 ;; Get native window handle
 (define-raylib GetWindowHandle
   (_fun
@@ -154,16 +148,6 @@
 
 ;; Get current screen height
 (define-raylib GetScreenHeight
-  (_fun
-   -> _int))
-
-;; Get current render width (it considers HiDPI)
-(define-raylib GetRenderWidth
-  (_fun
-   -> _int))
-
-;; Get current render height (it considers HiDPI)
-(define-raylib GetRenderHeight
   (_fun
    -> _int))
 
@@ -2035,7 +2019,7 @@
    [fileName : _string]
    -> _Font))
 
-;; Load font from file with extended parameters, use NULL for fontChars and 0 for glyphCount to load the default character set
+;; Load font from file with extended parameters
 (define-raylib LoadFontEx
   (_fun
    [fileName : _string]
@@ -2092,18 +2076,11 @@
    [glyphCount : _int]
    -> _void))
 
-;; Unload font from GPU memory (VRAM)
+;; Unload Font from GPU memory (VRAM)
 (define-raylib UnloadFont
   (_fun
    [font : _Font]
    -> _void))
-
-;; Export font as code file, returns true on success
-(define-raylib ExportFontAsCode
-  (_fun
-   [font : _Font]
-   [fileName : _string]
-   -> _bool))
 
 ;; Draw current FPS
 (define-raylib DrawFPS
@@ -2156,18 +2133,6 @@
    [tint : _Color]
    -> _void))
 
-;; Draw multiple character (codepoint)
-(define-raylib DrawTextCodepoints
-  (_fun
-   [font : _Font]
-   [codepoints : _pointer #;"const int *"]
-   [count : _int]
-   [position : _Vector2]
-   [fontSize : _float]
-   [spacing : _float]
-   [tint : _Color]
-   -> _void))
-
 ;; Measure string width for default font
 (define-raylib MeasureText
   (_fun
@@ -2217,6 +2182,13 @@
   (_fun
    [codepoints : _pointer #;"int *"]
    -> _void))
+
+;; Get collision info between ray and model
+(define-raylib GetRayCollisionModel
+  (_fun
+   [ray : _Ray]
+   [model : _Model]
+   -> _RayCollision))
 
 ;; Initialize audio device and context
 (define-raylib InitAudioDevice
@@ -2359,11 +2331,13 @@
    [pitch : _float]
    -> _void))
 
-;; Set pan for a sound (0.5 is center)
-(define-raylib SetSoundPan
+;; Convert wave data to desired format
+(define-raylib WaveFormat
   (_fun
-   [sound : _Sound]
-   [pan : _float]
+   [wave : _pointer #;"Wave *"]
+   [sampleRate : _int]
+   [sampleSize : _int]
+   [channels : _int]
    -> _void))
 
 ;; Copy a wave to a new wave
@@ -2380,16 +2354,7 @@
    [finalSample : _int]
    -> _void))
 
-;; Convert wave data to desired format
-(define-raylib WaveFormat
-  (_fun
-   [wave : _pointer #;"Wave *"]
-   [sampleRate : _int]
-   [sampleSize : _int]
-   [channels : _int]
-   -> _void))
-
-;; Load samples data from wave as a 32bit float data array
+;; Load samples data from wave as a floats array
 (define-raylib LoadWaveSamples
   (_fun
    [wave : _Wave]
@@ -2411,7 +2376,7 @@
 (define-raylib LoadMusicStreamFromMemory
   (_fun
    [fileType : _string]
-   [data : _pointer #;"const unsigned char *"]
+   [data : _pointer #;"unsigned char *"]
    [dataSize : _int]
    -> _Music))
 
@@ -2476,13 +2441,6 @@
   (_fun
    [music : _Music]
    [pitch : _float]
-   -> _void))
-
-;; Set pan for a music (0.5 is center)
-(define-raylib SetMusicPan
-  (_fun
-   [music : _Music]
-   [pan : _float]
    -> _void))
 
 ;; Get music time length (in seconds)
@@ -2569,36 +2527,8 @@
    [pitch : _float]
    -> _void))
 
-;; Set pan for audio stream (0.5 is centered)
-(define-raylib SetAudioStreamPan
-  (_fun
-   [stream : _AudioStream]
-   [pan : _float]
-   -> _void))
-
 ;; Default size for new audio streams
 (define-raylib SetAudioStreamBufferSizeDefault
   (_fun
    [size : _int]
-   -> _void))
-
-;; Audio thread callback to request new data
-(define-raylib SetAudioStreamCallback
-  (_fun
-   [stream : _AudioStream]
-   [callback : _AudioCallback]
-   -> _void))
-
-;; 
-(define-raylib AttachAudioStreamProcessor
-  (_fun
-   [stream : _AudioStream]
-   [processor : _AudioCallback]
-   -> _void))
-
-;; 
-(define-raylib DetachAudioStreamProcessor
-  (_fun
-   [stream : _AudioStream]
-   [processor : _AudioCallback]
    -> _void))

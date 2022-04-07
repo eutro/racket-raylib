@@ -69,7 +69,7 @@ Check if one specific window flag is enabled
 @defproc[(SetWindowState
           [flags _uint])
          _void]{
-Set window configuration state using flags (only PLATFORM_DESKTOP)
+Set window configuration state using flags
 }
 
 @defproc[(ClearWindowState
@@ -137,12 +137,6 @@ Set window minimum dimensions (for FLAG_WINDOW_RESIZABLE)
 Set window dimensions
 }
 
-@defproc[(SetWindowOpacity
-          [opacity _float])
-         _void]{
-Set window opacity [0.0f..1.0f] (only PLATFORM_DESKTOP)
-}
-
 @defproc[(GetWindowHandle)
          _pointer #;"void *"]{
 Get native window handle
@@ -156,16 +150,6 @@ Get current screen width
 @defproc[(GetScreenHeight)
          _int]{
 Get current screen height
-}
-
-@defproc[(GetRenderWidth)
-         _int]{
-Get current render width (it considers HiDPI)
-}
-
-@defproc[(GetRenderHeight)
-         _int]{
-Get current render height (it considers HiDPI)
 }
 
 @defproc[(GetMonitorCount)
@@ -680,12 +664,6 @@ Check if a directory path exists
 Check file extension (including point: .png, .wav)
 }
 
-@defproc[(GetFileLength
-          [fileName _string])
-         _int]{
-Get file length in bytes (NOTE: GetFileSize() conflicts with windows.h)
-}
-
 @defproc[(GetFileExtension
           [fileName _string])
          _string]{
@@ -719,11 +697,6 @@ Get previous directory path for a given path (uses static string)
 @defproc[(GetWorkingDirectory)
          _string]{
 Get current working directory (uses static string)
-}
-
-@defproc[(GetApplicationDirectory)
-         _string]{
-Get the directory if the running application (uses static string)
 }
 
 @defproc[(GetDirectoryFiles
@@ -767,32 +740,32 @@ Get file modification time (last write time)
 }
 
 @defproc[(CompressData
-          [data _pointer #;"const unsigned char *"]
-          [dataSize _int]
-          [compDataSize _pointer #;"int *"])
+          [data _pointer #;"unsigned char *"]
+          [dataLength _int]
+          [compDataLength _pointer #;"int *"])
          _pointer #;"unsigned char *"]{
 Compress data (DEFLATE algorithm)
 }
 
 @defproc[(DecompressData
-          [compData _pointer #;"const unsigned char *"]
-          [compDataSize _int]
-          [dataSize _pointer #;"int *"])
+          [compData _pointer #;"unsigned char *"]
+          [compDataLength _int]
+          [dataLength _pointer #;"int *"])
          _pointer #;"unsigned char *"]{
 Decompress data (DEFLATE algorithm)
 }
 
 @defproc[(EncodeDataBase64
           [data _pointer #;"const unsigned char *"]
-          [dataSize _int]
-          [outputSize _pointer #;"int *"])
+          [dataLength _int]
+          [outputLength _pointer #;"int *"])
          _pointer #;"char *"]{
 Encode data to Base64 string
 }
 
 @defproc[(DecodeDataBase64
-          [data _pointer #;"const unsigned char *"]
-          [outputSize _pointer #;"int *"])
+          [data _pointer #;"unsigned char *"]
+          [outputLength _pointer #;"int *"])
          _pointer #;"unsigned char *"]{
 Decode Base64 string data
 }
@@ -2289,7 +2262,7 @@ Load font from file into GPU memory (VRAM)
           [fontChars _pointer #;"int *"]
           [glyphCount _int])
          _Font]{
-Load font from file with extended parameters, use NULL for fontChars and 0 for glyphCount to load the default character set
+Load font from file with extended parameters
 }
 
 @defproc[(LoadFontFromImage
@@ -2343,14 +2316,7 @@ Unload font chars info data (RAM)
 @defproc[(UnloadFont
           [font _Font])
          _void]{
-Unload font from GPU memory (VRAM)
-}
-
-@defproc[(ExportFontAsCode
-          [font _Font]
-          [fileName _string])
-         _bool]{
-Export font as code file, returns true on success
+Unload Font from GPU memory (VRAM)
 }
 
 @defproc[(DrawFPS
@@ -2402,18 +2368,6 @@ Draw text using Font and pro parameters (rotation)
           [tint _Color])
          _void]{
 Draw one character (codepoint)
-}
-
-@defproc[(DrawTextCodepoints
-          [font _Font]
-          [codepoints _pointer #;"const int *"]
-          [count _int]
-          [position _Vector2]
-          [fontSize _float]
-          [spacing _float]
-          [tint _Color])
-         _void]{
-Draw multiple character (codepoint)
 }
 
 @defproc[(MeasureText
@@ -2487,7 +2441,7 @@ Encode one codepoint into UTF-8 byte array (array length returned as parameter)
 }
 
 @defproc[(TextCodepointsToUTF8
-          [codepoints _pointer #;"const int *"]
+          [codepoints _pointer #;"int *"]
           [length _int])
          _pointer #;"char *"]{
 Encode text as codepoints array into UTF-8 text string (WARNING: memory must be freed!)
@@ -2915,7 +2869,7 @@ Upload mesh vertex data in GPU and provide VAO/VBO ids
 @defproc[(UpdateMeshBuffer
           [mesh _Mesh]
           [index _int]
-          [data _pointer #;"const void *"]
+          [data _pointer #;"void *"]
           [dataSize _int]
           [offset _int])
          _void]{
@@ -2939,7 +2893,7 @@ Draw a 3d mesh with material and transform
 @defproc[(DrawMeshInstanced
           [mesh _Mesh]
           [material _Material]
-          [transforms _pointer #;"const Matrix *"]
+          [transforms _pointer #;"Matrix *"]
           [instances _int])
          _void]{
 Draw multiple mesh instances with material and different transforms
@@ -3114,7 +3068,7 @@ Unload animation data
 }
 
 @defproc[(UnloadModelAnimations
-          [animations _pointer #;"ModelAnimation *"]
+          [animations _pointer #;"ModelAnimation*"]
           [count _uint])
          _void]{
 Unload animation array data
@@ -3164,6 +3118,13 @@ Get collision info between ray and sphere
           [box _BoundingBox])
          _RayCollision]{
 Get collision info between ray and box
+}
+
+@defproc[(GetRayCollisionModel
+          [ray _Ray]
+          [model _Model])
+         _RayCollision]{
+Get collision info between ray and model
 }
 
 @defproc[(GetRayCollisionMesh
@@ -3334,11 +3295,13 @@ Set volume for a sound (1.0 is max level)
 Set pitch for a sound (1.0 is base level)
 }
 
-@defproc[(SetSoundPan
-          [sound _Sound]
-          [pan _float])
+@defproc[(WaveFormat
+          [wave _pointer #;"Wave *"]
+          [sampleRate _int]
+          [sampleSize _int]
+          [channels _int])
          _void]{
-Set pan for a sound (0.5 is center)
+Convert wave data to desired format
 }
 
 @defproc[(WaveCopy
@@ -3355,19 +3318,10 @@ Copy a wave to a new wave
 Crop a wave to defined samples range
 }
 
-@defproc[(WaveFormat
-          [wave _pointer #;"Wave *"]
-          [sampleRate _int]
-          [sampleSize _int]
-          [channels _int])
-         _void]{
-Convert wave data to desired format
-}
-
 @defproc[(LoadWaveSamples
           [wave _Wave])
          _pointer #;"float *"]{
-Load samples data from wave as a 32bit float data array
+Load samples data from wave as a floats array
 }
 
 @defproc[(UnloadWaveSamples
@@ -3384,7 +3338,7 @@ Load music stream from file
 
 @defproc[(LoadMusicStreamFromMemory
           [fileType _string]
-          [data _pointer #;"const unsigned char *"]
+          [data _pointer #;"unsigned char *"]
           [dataSize _int])
          _Music]{
 Load music stream from data
@@ -3451,13 +3405,6 @@ Set volume for music (1.0 is max level)
           [pitch _float])
          _void]{
 Set pitch for a music (1.0 is base level)
-}
-
-@defproc[(SetMusicPan
-          [music _Music]
-          [pan _float])
-         _void]{
-Set pan for a music (0.5 is center)
 }
 
 @defproc[(GetMusicTimeLength
@@ -3544,36 +3491,8 @@ Set volume for audio stream (1.0 is max level)
 Set pitch for audio stream (1.0 is base level)
 }
 
-@defproc[(SetAudioStreamPan
-          [stream _AudioStream]
-          [pan _float])
-         _void]{
-Set pan for audio stream (0.5 is centered)
-}
-
 @defproc[(SetAudioStreamBufferSizeDefault
           [size _int])
          _void]{
 Default size for new audio streams
-}
-
-@defproc[(SetAudioStreamCallback
-          [stream _AudioStream]
-          [callback _AudioCallback])
-         _void]{
-Audio thread callback to request new data
-}
-
-@defproc[(AttachAudioStreamProcessor
-          [stream _AudioStream]
-          [processor _AudioCallback])
-         _void]{
-
-}
-
-@defproc[(DetachAudioStreamProcessor
-          [stream _AudioStream]
-          [processor _AudioCallback])
-         _void]{
-
 }

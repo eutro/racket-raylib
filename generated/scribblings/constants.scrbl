@@ -7,7 +7,7 @@
 @title{Constants}
 @defmodule[raylib/generated/constants]
 
-@defthing[RAYLIB_VERSION string? #:value "4.1-dev" ""]
+@defthing[RAYLIB_VERSION string? #:value "4.0" ""]
 
 @defthing[LIGHTGRAY Color? #:value (make-Color 200 200 200 255) "Light Gray"]
 

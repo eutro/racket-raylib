@@ -17,12 +17,14 @@
 (define-runtime-path git-path '(lib "raylib/raylib-git"))
 (define-runtime-path root-path ".")
 
-(define (main)
+(define (main ref)
   (displayln "--- Checking out Raylib")
   (delete-directory/files git-path #:must-exist? #f)
-  (git-checkout "github.com" "raysan5/raylib"
-                #:dest-dir git-path
-                #:transport 'https)
+  (git-checkout
+   "github.com" "raysan5/raylib"
+   #:ref ref
+   #:dest-dir git-path
+   #:transport 'https)
   (define git-parser-path (build-path git-path "parser"))
 
   (delete-directory/files git-parser-path #:must-exist? #f)
@@ -37,7 +39,7 @@
       (exit code)))
 
   (displayln "--- Parsing Raylib Header")
-  (parameterize ([current-directory parser-path])
+  (parameterize ([current-directory git-parser-path])
     (assert-success (system*/exit-code make)))
 
   (raylib-raw-root (url->string (path->url git-path)))
@@ -56,4 +58,7 @@
   (delete-directory/files git-path #:must-exist? #f))
 
 (module+ main
-  (main))
+  (require racket/cmdline)
+  (command-line
+   #:args (raylib-ref)
+   (main raylib-ref)))

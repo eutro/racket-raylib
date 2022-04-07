@@ -235,7 +235,6 @@
 ;; AudioStream, custom audio stream
 (define-cstruct _AudioStream
   ([buffer _pointer #;"rAudioBuffer *"] ; Pointer to internal data used by the audio system
-   [processor _pointer #;"rAudioProcessor *"] ; Pointer to internal data processor, useful for audio effects
    [sampleRate _uint] ; Frequency (samples per second)
    [sampleSize _uint] ; Bit depth (bits per sample): 8, 16, 32 (24 not supported)
    [channels _uint] ; Number of channels (1-mono, 2-stereo, ...)
@@ -312,9 +311,3 @@
    [fileName : _string]
    [text : _pointer #;"char *"]
    -> _bool))
-
-(define _AudioCallback
-  (_fun
-   [bufferData : _pointer #;"void *"]
-   [frames : _uint]
-   -> _void))

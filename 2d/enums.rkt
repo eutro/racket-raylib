@@ -551,7 +551,7 @@
            TEXTURE_FILTER_ANISOTROPIC_8X = 4
            TEXTURE_FILTER_ANISOTROPIC_16X = 5
            )))
-(define TEXTURE_FILTER_POINT 0) ; No filter, just pixel approximation
+(define TEXTURE_FILTER_POINT 0) ; No filter, just pixel aproximation
 (define TEXTURE_FILTER_BILINEAR 1) ; Linear filtering
 (define TEXTURE_FILTER_TRILINEAR 2) ; Trilinear filtering (linear with mipmaps)
 (define TEXTURE_FILTER_ANISOTROPIC_4X 3) ; Anisotropic filtering 4x
@@ -603,16 +603,14 @@
            BLEND_MULTIPLIED = 2
            BLEND_ADD_COLORS = 3
            BLEND_SUBTRACT_COLORS = 4
-           BLEND_ALPHA_PREMUL = 5
-           BLEND_CUSTOM = 6
+           BLEND_CUSTOM = 5
            )))
 (define BLEND_ALPHA 0) ; Blend textures considering alpha (default)
 (define BLEND_ADDITIVE 1) ; Blend textures adding colors
 (define BLEND_MULTIPLIED 2) ; Blend textures multiplying colors
 (define BLEND_ADD_COLORS 3) ; Blend textures adding colors (alternative)
 (define BLEND_SUBTRACT_COLORS 4) ; Blend textures subtracting colors (alternative)
-(define BLEND_ALPHA_PREMUL 5) ; Blend premultiplied textures considering alpha
-(define BLEND_CUSTOM 6) ; Blend textures using custom src/dst factors (use rlSetBlendMode())
+(define BLEND_CUSTOM 5) ; Belnd textures using custom src/dst factors (use rlSetBlendMode())
 
 ;; Gesture
 (define _Gesture
