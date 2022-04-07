@@ -1,3 +1,3 @@
-# raylib
+# racket-raylib
 
-Racket bindings for [raylib](https://github.com/raysan5/raylib) 4.0.
+Semi-automatically generated [Raylib](https://github.com/raysan5/raylib) bindings for Racket.
