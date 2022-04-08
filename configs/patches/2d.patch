@@ -1,0 +1,59 @@
+diff --color --unified -r a/scribblings/unsafe/functions.scrbl b/scribblings/unsafe/functions.scrbl
+--- a/scribblings/unsafe/functions.scrbl	2022-04-08 19:54:19.505388951 +0200
++++ b/scribblings/unsafe/functions.scrbl	2022-04-08 19:53:22.714390727 +0200
+@@ -4,6 +4,10 @@
+ 
+ @title{Functions}
+ 
++Unsafe bindings to Raylib functions.
++
++Functions ending in an asterisk (@racketid[*]) are Racket extensions to the raw bindings.
++
+ @table-of-contents[]
+ 
+ @defmodule[raylib/2d/unsafe/functions]
+@@ -526,11 +530,20 @@
+           [count (_pointer-to _int)])
+          (_pointer-to (_pointer-to _byte))]{
+ Get dropped files names (memory should be freed)
++
++Note: the use of @racket[GetDroppedFiles*] is encouraged instead
+ }
+ 
+ @defproc[(ClearDroppedFiles)
+          _void]{
+ Clear dropped files paths buffer (free memory)
++
++Note: the use of @racket[GetDroppedFiles*] is encouraged instead
++}
++
++@defproc[(GetDroppedFiles*)
++         (vectorof string?)]{
++Get dropped files names, converting to Racket strings
+ }
+ 
+ @defproc[(SaveStorageValue
+diff --color --unified -r a/unsafe/functions.rkt b/unsafe/functions.rkt
+--- a/unsafe/functions.rkt	2022-04-08 19:52:38.133392122 +0200
++++ b/unsafe/functions.rkt	2022-04-08 19:52:38.146392121 +0200
+@@ -533,6 +533,20 @@
+   (_fun
+    -> _void))
+ 
++(provide GetDroppedFiles*)
++(define-raylib GetDroppedFiles*
++  (_fun
++   [count : (_ptr o _int)]
++   -> (_vector o _string count))
++  #:c-id GetDroppedFiles
++  #:wrap
++  (lambda (proc)
++    (define (GetDroppedFiles*)
++      (define value (proc))
++      (ClearDroppedFiles)
++      value)
++    proc))
++
+ ;; Save integer value to storage file (to defined position), returns true on success
+ (define-raylib SaveStorageValue
+   (_fun

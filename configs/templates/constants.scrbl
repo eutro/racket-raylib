@@ -15,9 +15,10 @@
 
 @"@"(require (for-label @|this-mod| @|structs-mod| racket/base))
 
+@"@"title{Constants}
+
 @"@"table-of-contents[]
 
-@"@"title{Constants}
 @"@"defmodule[@|this-mod|]
 @splice{
 @(for/list ([parsed-constant (in-list constants-parsed)])

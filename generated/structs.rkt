@@ -1,6 +1,6 @@
 #lang racket/base
 
-(require ffi/unsafe)
+(require ffi/unsafe raylib/support)
 
 (provide (all-defined-out))
 
@@ -53,7 +53,7 @@
 
 ;; Image, pixel data stored in CPU memory (RAM)
 (define-cstruct _Image
-  ([data _pointer #;"void *"] ; Image raw data
+  ([data (_pointer-to _void)] ; Image raw data
    [width _int] ; Image base width
    [height _int] ; Image base height
    [mipmaps _int] ; Mipmap levels, 1 by default
@@ -107,8 +107,8 @@
    [glyphCount _int] ; Number of glyph characters
    [glyphPadding _int] ; Padding around the glyph characters
    [texture _Texture2D] ; Texture atlas containing the glyphs
-   [recs _pointer #;"Rectangle *"] ; Rectangles in texture for the glyphs
-   [glyphs _pointer #;"GlyphInfo *"] ; Glyphs info data
+   [recs (_pointer-to _Rectangle)] ; Rectangles in texture for the glyphs
+   [glyphs (_pointer-to _GlyphInfo)] ; Glyphs info data
    ))
 
 ;; Camera, defines position/orientation in 3d space
@@ -134,25 +134,25 @@
 (define-cstruct _Mesh
   ([vertexCount _int] ; Number of vertices stored in arrays
    [triangleCount _int] ; Number of triangles stored (indexed or not)
-   [vertices _pointer #;"float *"] ; Vertex position (XYZ - 3 components per vertex) (shader-location = 0)
-   [texcoords _pointer #;"float *"] ; Vertex texture coordinates (UV - 2 components per vertex) (shader-location = 1)
-   [texcoords2 _pointer #;"float *"] ; Vertex second texture coordinates (useful for lightmaps) (shader-location = 5)
-   [normals _pointer #;"float *"] ; Vertex normals (XYZ - 3 components per vertex) (shader-location = 2)
-   [tangents _pointer #;"float *"] ; Vertex tangents (XYZW - 4 components per vertex) (shader-location = 4)
-   [colors _pointer #;"unsigned char *"] ; Vertex colors (RGBA - 4 components per vertex) (shader-location = 3)
-   [indices _pointer #;"unsigned short *"] ; Vertex indices (in case vertex data comes indexed)
-   [animVertices _pointer #;"float *"] ; Animated vertex positions (after bones transformations)
-   [animNormals _pointer #;"float *"] ; Animated normals (after bones transformations)
-   [boneIds _pointer #;"unsigned char *"] ; Vertex bone ids, max 255 bone ids, up to 4 bones influence by vertex (skinning)
-   [boneWeights _pointer #;"float *"] ; Vertex bone weight, up to 4 bones influence by vertex (skinning)
+   [vertices (_pointer-to _float)] ; Vertex position (XYZ - 3 components per vertex) (shader-location = 0)
+   [texcoords (_pointer-to _float)] ; Vertex texture coordinates (UV - 2 components per vertex) (shader-location = 1)
+   [texcoords2 (_pointer-to _float)] ; Vertex second texture coordinates (useful for lightmaps) (shader-location = 5)
+   [normals (_pointer-to _float)] ; Vertex normals (XYZ - 3 components per vertex) (shader-location = 2)
+   [tangents (_pointer-to _float)] ; Vertex tangents (XYZW - 4 components per vertex) (shader-location = 4)
+   [colors (_pointer-to _ubyte)] ; Vertex colors (RGBA - 4 components per vertex) (shader-location = 3)
+   [indices (_pointer-to _ushort)] ; Vertex indices (in case vertex data comes indexed)
+   [animVertices (_pointer-to _float)] ; Animated vertex positions (after bones transformations)
+   [animNormals (_pointer-to _float)] ; Animated normals (after bones transformations)
+   [boneIds (_pointer-to _ubyte)] ; Vertex bone ids, max 255 bone ids, up to 4 bones influence by vertex (skinning)
+   [boneWeights (_pointer-to _float)] ; Vertex bone weight, up to 4 bones influence by vertex (skinning)
    [vaoId _uint] ; OpenGL Vertex Array Object id
-   [vboId _pointer #;"unsigned int *"] ; OpenGL Vertex Buffer Objects id (default vertex data)
+   [vboId (_pointer-to _uint)] ; OpenGL Vertex Buffer Objects id (default vertex data)
    ))
 
 ;; Shader
 (define-cstruct _Shader
   ([id _uint] ; Shader program id
-   [locs _pointer #;"int *"] ; Shader locations array (RL_MAX_SHADER_LOCATIONS)
+   [locs (_pointer-to _int)] ; Shader locations array (RL_MAX_SHADER_LOCATIONS)
    ))
 
 ;; MaterialMap
@@ -165,7 +165,7 @@
 ;; Material, includes shader and maps
 (define-cstruct _Material
   ([shader _Shader] ; Material shader
-   [maps _pointer #;"MaterialMap *"] ; Material maps array (MAX_MATERIAL_MAPS)
+   [maps (_pointer-to _MaterialMap)] ; Material maps array (MAX_MATERIAL_MAPS)
    [params (_array _float 4)] ; Material generic parameters (if required)
    ))
 
@@ -187,20 +187,20 @@
   ([transform _Matrix] ; Local transform matrix
    [meshCount _int] ; Number of meshes
    [materialCount _int] ; Number of materials
-   [meshes _pointer #;"Mesh *"] ; Meshes array
-   [materials _pointer #;"Material *"] ; Materials array
-   [meshMaterial _pointer #;"int *"] ; Mesh material number
+   [meshes (_pointer-to _Mesh)] ; Meshes array
+   [materials (_pointer-to _Material)] ; Materials array
+   [meshMaterial (_pointer-to _int)] ; Mesh material number
    [boneCount _int] ; Number of bones
-   [bones _pointer #;"BoneInfo *"] ; Bones information (skeleton)
-   [bindPose _pointer #;"Transform *"] ; Bones base transformation (pose)
+   [bones (_pointer-to _BoneInfo)] ; Bones information (skeleton)
+   [bindPose (_pointer-to _Transform)] ; Bones base transformation (pose)
    ))
 
 ;; ModelAnimation
 (define-cstruct _ModelAnimation
   ([boneCount _int] ; Number of bones
    [frameCount _int] ; Number of animation frames
-   [bones _pointer #;"BoneInfo *"] ; Bones information (skeleton)
-   [framePoses _pointer #;"Transform **"] ; Poses array by frame
+   [bones (_pointer-to _BoneInfo)] ; Bones information (skeleton)
+   [framePoses (_pointer-to (_pointer-to _Transform))] ; Poses array by frame
    ))
 
 ;; Ray, ray for raycasting
@@ -229,12 +229,12 @@
    [sampleRate _uint] ; Frequency (samples per second)
    [sampleSize _uint] ; Bit depth (bits per sample): 8, 16, 32 (24 not supported)
    [channels _uint] ; Number of channels (1-mono, 2-stereo, ...)
-   [data _pointer #;"void *"] ; Buffer data pointer
+   [data (_pointer-to _void)] ; Buffer data pointer
    ))
 
 ;; AudioStream, custom audio stream
 (define-cstruct _AudioStream
-  ([buffer _pointer #;"rAudioBuffer *"] ; Pointer to internal data used by the audio system
+  ([buffer (_pointer-to _rAudioBuffer)] ; Pointer to internal data used by the audio system
    [sampleRate _uint] ; Frequency (samples per second)
    [sampleSize _uint] ; Bit depth (bits per sample): 8, 16, 32 (24 not supported)
    [channels _uint] ; Number of channels (1-mono, 2-stereo, ...)
@@ -252,7 +252,7 @@
    [frameCount _uint] ; Total number of frames (considering channels)
    [looping _bool] ; Music looping enable
    [ctxType _int] ; Type of music context (audio filetype)
-   [ctxData _pointer #;"void *"] ; Audio context data, depends on type
+   [ctxData (_pointer-to _void)] ; Audio context data, depends on type
    ))
 
 ;; VrDeviceInfo, Head-Mounted-Display device parameters
@@ -291,23 +291,23 @@
 (define _LoadFileDataCallback
   (_fun
    [fileName : _string]
-   [bytesRead : _pointer #;"unsigned int *"]
-   -> _pointer #;"unsigned char *"))
+   [bytesRead : (_pointer-to _uint)]
+   -> (_pointer-to _ubyte)))
 
 (define _SaveFileDataCallback
   (_fun
    [fileName : _string]
-   [data : _pointer #;"void *"]
+   [data : (_pointer-to _void)]
    [bytesToWrite : _uint]
    -> _bool))
 
 (define _LoadFileTextCallback
   (_fun
    [fileName : _string]
-   -> _pointer #;"char *"))
+   -> (_pointer-to _byte)))
 
 (define _SaveFileTextCallback
   (_fun
    [fileName : _string]
-   [text : _pointer #;"char *"]
+   [text : (_pointer-to _byte)]
    -> _bool))

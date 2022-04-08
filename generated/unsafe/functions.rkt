@@ -1,6 +1,6 @@
 #lang racket/base
 
-(require ffi/unsafe ffi/unsafe/define raylib/generated/structs)
+(require ffi/unsafe ffi/unsafe/define raylib/generated/structs raylib/support)
 
 (define-ffi-definer define-raylib (ffi-lib "libraylib")
   #:provide provide-protected
@@ -139,7 +139,7 @@
 ;; Get native window handle
 (define-raylib GetWindowHandle
   (_fun
-   -> _pointer #;"void *"))
+   -> (_pointer-to _void)))
 
 ;; Get current screen width
 (define-raylib GetScreenWidth
@@ -411,7 +411,7 @@
   (_fun
    [shader : _Shader]
    [locIndex : _int]
-   [value : _pointer #;"const void *"]
+   [value : (_pointer-to _void)]
    [uniformType : _int]
    -> _void))
 
@@ -420,7 +420,7 @@
   (_fun
    [shader : _Shader]
    [locIndex : _int]
-   [value : _pointer #;"const void *"]
+   [value : (_pointer-to _void)]
    [uniformType : _int]
    [count : _int]
    -> _void))
@@ -561,19 +561,19 @@
 (define-raylib MemAlloc
   (_fun
    [size : _int]
-   -> _pointer #;"void *"))
+   -> (_pointer-to _void)))
 
 ;; Internal memory reallocator
 (define-raylib MemRealloc
   (_fun
-   [ptr : _pointer #;"void *"]
+   [ptr : (_pointer-to _void)]
    [size : _int]
-   -> _pointer #;"void *"))
+   -> (_pointer-to _void)))
 
 ;; Internal memory free
 (define-raylib MemFree
   (_fun
-   [ptr : _pointer #;"void *"]
+   [ptr : (_pointer-to _void)]
    -> _void))
 
 ;; Set custom trace log
@@ -610,20 +610,20 @@
 (define-raylib LoadFileData
   (_fun
    [fileName : _string]
-   [bytesRead : _pointer #;"unsigned int *"]
-   -> _pointer #;"unsigned char *"))
+   [bytesRead : (_pointer-to _uint)]
+   -> (_pointer-to _ubyte)))
 
 ;; Unload file data allocated by LoadFileData()
 (define-raylib UnloadFileData
   (_fun
-   [data : _pointer #;"unsigned char *"]
+   [data : (_pointer-to _ubyte)]
    -> _void))
 
 ;; Save data to file from byte array (write), returns true on success
 (define-raylib SaveFileData
   (_fun
    [fileName : _string]
-   [data : _pointer #;"void *"]
+   [data : (_pointer-to _void)]
    [bytesToWrite : _uint]
    -> _bool))
 
@@ -631,19 +631,19 @@
 (define-raylib LoadFileText
   (_fun
    [fileName : _string]
-   -> _pointer #;"char *"))
+   -> (_pointer-to _byte)))
 
 ;; Unload file text data allocated by LoadFileText()
 (define-raylib UnloadFileText
   (_fun
-   [text : _pointer #;"char *"]
+   [text : (_pointer-to _byte)]
    -> _void))
 
 ;; Save text data to file (write), string must be '\0' terminated, returns true on success
 (define-raylib SaveFileText
   (_fun
    [fileName : _string]
-   [text : _pointer #;"char *"]
+   [text : (_pointer-to _byte)]
    -> _bool))
 
 ;; Check if file exists
@@ -704,8 +704,8 @@
 (define-raylib GetDirectoryFiles
   (_fun
    [dirPath : _string]
-   [count : _pointer #;"int *"]
-   -> _pointer #;"char **"))
+   [count : (_pointer-to _int)]
+   -> (_pointer-to (_pointer-to _byte))))
 
 ;; Clear directory files paths buffers (free memory)
 (define-raylib ClearDirectoryFiles
@@ -726,8 +726,8 @@
 ;; Get dropped files names (memory should be freed)
 (define-raylib GetDroppedFiles
   (_fun
-   [count : _pointer #;"int *"]
-   -> _pointer #;"char **"))
+   [count : (_pointer-to _int)]
+   -> (_pointer-to (_pointer-to _byte))))
 
 ;; Clear dropped files paths buffer (free memory)
 (define-raylib ClearDroppedFiles
@@ -743,33 +743,33 @@
 ;; Compress data (DEFLATE algorithm)
 (define-raylib CompressData
   (_fun
-   [data : _pointer #;"unsigned char *"]
+   [data : (_pointer-to _ubyte)]
    [dataLength : _int]
-   [compDataLength : _pointer #;"int *"]
-   -> _pointer #;"unsigned char *"))
+   [compDataLength : (_pointer-to _int)]
+   -> (_pointer-to _ubyte)))
 
 ;; Decompress data (DEFLATE algorithm)
 (define-raylib DecompressData
   (_fun
-   [compData : _pointer #;"unsigned char *"]
+   [compData : (_pointer-to _ubyte)]
    [compDataLength : _int]
-   [dataLength : _pointer #;"int *"]
-   -> _pointer #;"unsigned char *"))
+   [dataLength : (_pointer-to _int)]
+   -> (_pointer-to _ubyte)))
 
 ;; Encode data to Base64 string
 (define-raylib EncodeDataBase64
   (_fun
-   [data : _pointer #;"const unsigned char *"]
+   [data : (_pointer-to _ubyte)]
    [dataLength : _int]
-   [outputLength : _pointer #;"int *"]
-   -> _pointer #;"char *"))
+   [outputLength : (_pointer-to _int)]
+   -> (_pointer-to _byte)))
 
 ;; Decode Base64 string data
 (define-raylib DecodeDataBase64
   (_fun
-   [data : _pointer #;"unsigned char *"]
-   [outputLength : _pointer #;"int *"]
-   -> _pointer #;"unsigned char *"))
+   [data : (_pointer-to _ubyte)]
+   [outputLength : (_pointer-to _int)]
+   -> (_pointer-to _ubyte)))
 
 ;; Save integer value to storage file (to defined position), returns true on success
 (define-raylib SaveStorageValue
@@ -1049,7 +1049,7 @@
 ;; Update camera position for selected mode
 (define-raylib UpdateCamera
   (_fun
-   [camera : _pointer #;"Camera *"]
+   [camera : (_pointer-to _Camera)]
    -> _void))
 
 ;; Set camera pan key to combine with mouse movement (free camera)
@@ -1163,7 +1163,7 @@
 ;; Draw lines sequence
 (define-raylib DrawLineStrip
   (_fun
-   [points : _pointer #;"Vector2 *"]
+   [points : (_pointer-to _Vector2)]
    [pointCount : _int]
    [color : _Color]
    -> _void))
@@ -1394,7 +1394,7 @@
 ;; Draw a triangle fan defined by points (first vertex is the center)
 (define-raylib DrawTriangleFan
   (_fun
-   [points : _pointer #;"Vector2 *"]
+   [points : (_pointer-to _Vector2)]
    [pointCount : _int]
    [color : _Color]
    -> _void))
@@ -1402,7 +1402,7 @@
 ;; Draw a triangle strip defined by points
 (define-raylib DrawTriangleStrip
   (_fun
-   [points : _pointer #;"Vector2 *"]
+   [points : (_pointer-to _Vector2)]
    [pointCount : _int]
    [color : _Color]
    -> _void))
@@ -1493,7 +1493,7 @@
    [endPos1 : _Vector2]
    [startPos2 : _Vector2]
    [endPos2 : _Vector2]
-   [collisionPoint : _pointer #;"Vector2 *"]
+   [collisionPoint : (_pointer-to _Vector2)]
    -> _bool))
 
 ;; Check if point belongs to line created between two points [p1] and [p2] with defined margin in pixels [threshold]
@@ -1532,14 +1532,14 @@
 (define-raylib LoadImageAnim
   (_fun
    [fileName : _string]
-   [frames : _pointer #;"int *"]
+   [frames : (_pointer-to _int)]
    -> _Image))
 
 ;; Load image from memory buffer, fileType refers to extension: i.e. '.png'
 (define-raylib LoadImageFromMemory
   (_fun
    [fileType : _string]
-   [fileData : _pointer #;"const unsigned char *"]
+   [fileData : (_pointer-to _ubyte)]
    [dataSize : _int]
    -> _Image))
 
@@ -1671,35 +1671,35 @@
 ;; Convert image data to desired format
 (define-raylib ImageFormat
   (_fun
-   [image : _pointer #;"Image *"]
+   [image : (_pointer-to _Image)]
    [newFormat : _int]
    -> _void))
 
 ;; Convert image to POT (power-of-two)
 (define-raylib ImageToPOT
   (_fun
-   [image : _pointer #;"Image *"]
+   [image : (_pointer-to _Image)]
    [fill : _Color]
    -> _void))
 
 ;; Crop an image to a defined rectangle
 (define-raylib ImageCrop
   (_fun
-   [image : _pointer #;"Image *"]
+   [image : (_pointer-to _Image)]
    [crop : _Rectangle]
    -> _void))
 
 ;; Crop image depending on alpha value
 (define-raylib ImageAlphaCrop
   (_fun
-   [image : _pointer #;"Image *"]
+   [image : (_pointer-to _Image)]
    [threshold : _float]
    -> _void))
 
 ;; Clear alpha channel to desired color
 (define-raylib ImageAlphaClear
   (_fun
-   [image : _pointer #;"Image *"]
+   [image : (_pointer-to _Image)]
    [color : _Color]
    [threshold : _float]
    -> _void))
@@ -1707,20 +1707,20 @@
 ;; Apply alpha mask to image
 (define-raylib ImageAlphaMask
   (_fun
-   [image : _pointer #;"Image *"]
+   [image : (_pointer-to _Image)]
    [alphaMask : _Image]
    -> _void))
 
 ;; Premultiply alpha channel
 (define-raylib ImageAlphaPremultiply
   (_fun
-   [image : _pointer #;"Image *"]
+   [image : (_pointer-to _Image)]
    -> _void))
 
 ;; Resize image (Bicubic scaling algorithm)
 (define-raylib ImageResize
   (_fun
-   [image : _pointer #;"Image *"]
+   [image : (_pointer-to _Image)]
    [newWidth : _int]
    [newHeight : _int]
    -> _void))
@@ -1728,7 +1728,7 @@
 ;; Resize image (Nearest-Neighbor scaling algorithm)
 (define-raylib ImageResizeNN
   (_fun
-   [image : _pointer #;"Image *"]
+   [image : (_pointer-to _Image)]
    [newWidth : _int]
    [newHeight : _int]
    -> _void))
@@ -1736,7 +1736,7 @@
 ;; Resize canvas and fill with color
 (define-raylib ImageResizeCanvas
   (_fun
-   [image : _pointer #;"Image *"]
+   [image : (_pointer-to _Image)]
    [newWidth : _int]
    [newHeight : _int]
    [offsetX : _int]
@@ -1747,13 +1747,13 @@
 ;; Compute all mipmap levels for a provided image
 (define-raylib ImageMipmaps
   (_fun
-   [image : _pointer #;"Image *"]
+   [image : (_pointer-to _Image)]
    -> _void))
 
 ;; Dither image data to 16bpp or lower (Floyd-Steinberg dithering)
 (define-raylib ImageDither
   (_fun
-   [image : _pointer #;"Image *"]
+   [image : (_pointer-to _Image)]
    [rBpp : _int]
    [gBpp : _int]
    [bBpp : _int]
@@ -1763,64 +1763,64 @@
 ;; Flip image vertically
 (define-raylib ImageFlipVertical
   (_fun
-   [image : _pointer #;"Image *"]
+   [image : (_pointer-to _Image)]
    -> _void))
 
 ;; Flip image horizontally
 (define-raylib ImageFlipHorizontal
   (_fun
-   [image : _pointer #;"Image *"]
+   [image : (_pointer-to _Image)]
    -> _void))
 
 ;; Rotate image clockwise 90deg
 (define-raylib ImageRotateCW
   (_fun
-   [image : _pointer #;"Image *"]
+   [image : (_pointer-to _Image)]
    -> _void))
 
 ;; Rotate image counter-clockwise 90deg
 (define-raylib ImageRotateCCW
   (_fun
-   [image : _pointer #;"Image *"]
+   [image : (_pointer-to _Image)]
    -> _void))
 
 ;; Modify image color: tint
 (define-raylib ImageColorTint
   (_fun
-   [image : _pointer #;"Image *"]
+   [image : (_pointer-to _Image)]
    [color : _Color]
    -> _void))
 
 ;; Modify image color: invert
 (define-raylib ImageColorInvert
   (_fun
-   [image : _pointer #;"Image *"]
+   [image : (_pointer-to _Image)]
    -> _void))
 
 ;; Modify image color: grayscale
 (define-raylib ImageColorGrayscale
   (_fun
-   [image : _pointer #;"Image *"]
+   [image : (_pointer-to _Image)]
    -> _void))
 
 ;; Modify image color: contrast (-100 to 100)
 (define-raylib ImageColorContrast
   (_fun
-   [image : _pointer #;"Image *"]
+   [image : (_pointer-to _Image)]
    [contrast : _float]
    -> _void))
 
 ;; Modify image color: brightness (-255 to 255)
 (define-raylib ImageColorBrightness
   (_fun
-   [image : _pointer #;"Image *"]
+   [image : (_pointer-to _Image)]
    [brightness : _int]
    -> _void))
 
 ;; Modify image color: replace color
 (define-raylib ImageColorReplace
   (_fun
-   [image : _pointer #;"Image *"]
+   [image : (_pointer-to _Image)]
    [color : _Color]
    [replace : _Color]
    -> _void))
@@ -1829,26 +1829,26 @@
 (define-raylib LoadImageColors
   (_fun
    [image : _Image]
-   -> _pointer #;"Color *"))
+   -> (_pointer-to _Color)))
 
 ;; Load colors palette from image as a Color array (RGBA - 32bit)
 (define-raylib LoadImagePalette
   (_fun
    [image : _Image]
    [maxPaletteSize : _int]
-   [colorCount : _pointer #;"int *"]
-   -> _pointer #;"Color *"))
+   [colorCount : (_pointer-to _int)]
+   -> (_pointer-to _Color)))
 
 ;; Unload color data loaded with LoadImageColors()
 (define-raylib UnloadImageColors
   (_fun
-   [colors : _pointer #;"Color *"]
+   [colors : (_pointer-to _Color)]
    -> _void))
 
 ;; Unload colors palette loaded with LoadImagePalette()
 (define-raylib UnloadImagePalette
   (_fun
-   [colors : _pointer #;"Color *"]
+   [colors : (_pointer-to _Color)]
    -> _void))
 
 ;; Get image alpha border rectangle
@@ -1869,14 +1869,14 @@
 ;; Clear image background with given color
 (define-raylib ImageClearBackground
   (_fun
-   [dst : _pointer #;"Image *"]
+   [dst : (_pointer-to _Image)]
    [color : _Color]
    -> _void))
 
 ;; Draw pixel within an image
 (define-raylib ImageDrawPixel
   (_fun
-   [dst : _pointer #;"Image *"]
+   [dst : (_pointer-to _Image)]
    [posX : _int]
    [posY : _int]
    [color : _Color]
@@ -1885,7 +1885,7 @@
 ;; Draw pixel within an image (Vector version)
 (define-raylib ImageDrawPixelV
   (_fun
-   [dst : _pointer #;"Image *"]
+   [dst : (_pointer-to _Image)]
    [position : _Vector2]
    [color : _Color]
    -> _void))
@@ -1893,7 +1893,7 @@
 ;; Draw line within an image
 (define-raylib ImageDrawLine
   (_fun
-   [dst : _pointer #;"Image *"]
+   [dst : (_pointer-to _Image)]
    [startPosX : _int]
    [startPosY : _int]
    [endPosX : _int]
@@ -1904,7 +1904,7 @@
 ;; Draw line within an image (Vector version)
 (define-raylib ImageDrawLineV
   (_fun
-   [dst : _pointer #;"Image *"]
+   [dst : (_pointer-to _Image)]
    [start : _Vector2]
    [end : _Vector2]
    [color : _Color]
@@ -1913,7 +1913,7 @@
 ;; Draw circle within an image
 (define-raylib ImageDrawCircle
   (_fun
-   [dst : _pointer #;"Image *"]
+   [dst : (_pointer-to _Image)]
    [centerX : _int]
    [centerY : _int]
    [radius : _int]
@@ -1923,7 +1923,7 @@
 ;; Draw circle within an image (Vector version)
 (define-raylib ImageDrawCircleV
   (_fun
-   [dst : _pointer #;"Image *"]
+   [dst : (_pointer-to _Image)]
    [center : _Vector2]
    [radius : _int]
    [color : _Color]
@@ -1932,7 +1932,7 @@
 ;; Draw rectangle within an image
 (define-raylib ImageDrawRectangle
   (_fun
-   [dst : _pointer #;"Image *"]
+   [dst : (_pointer-to _Image)]
    [posX : _int]
    [posY : _int]
    [width : _int]
@@ -1943,7 +1943,7 @@
 ;; Draw rectangle within an image (Vector version)
 (define-raylib ImageDrawRectangleV
   (_fun
-   [dst : _pointer #;"Image *"]
+   [dst : (_pointer-to _Image)]
    [position : _Vector2]
    [size : _Vector2]
    [color : _Color]
@@ -1952,7 +1952,7 @@
 ;; Draw rectangle within an image
 (define-raylib ImageDrawRectangleRec
   (_fun
-   [dst : _pointer #;"Image *"]
+   [dst : (_pointer-to _Image)]
    [rec : _Rectangle]
    [color : _Color]
    -> _void))
@@ -1960,7 +1960,7 @@
 ;; Draw rectangle lines within an image
 (define-raylib ImageDrawRectangleLines
   (_fun
-   [dst : _pointer #;"Image *"]
+   [dst : (_pointer-to _Image)]
    [rec : _Rectangle]
    [thick : _int]
    [color : _Color]
@@ -1969,7 +1969,7 @@
 ;; Draw a source image within a destination image (tint applied to source)
 (define-raylib ImageDraw
   (_fun
-   [dst : _pointer #;"Image *"]
+   [dst : (_pointer-to _Image)]
    [src : _Image]
    [srcRec : _Rectangle]
    [dstRec : _Rectangle]
@@ -1979,7 +1979,7 @@
 ;; Draw text (using default font) within an image (destination)
 (define-raylib ImageDrawText
   (_fun
-   [dst : _pointer #;"Image *"]
+   [dst : (_pointer-to _Image)]
    [text : _string]
    [posX : _int]
    [posY : _int]
@@ -1990,7 +1990,7 @@
 ;; Draw text (custom sprite font) within an image (destination)
 (define-raylib ImageDrawTextEx
   (_fun
-   [dst : _pointer #;"Image *"]
+   [dst : (_pointer-to _Image)]
    [font : _Font]
    [text : _string]
    [position : _Vector2]
@@ -2041,7 +2041,7 @@
 (define-raylib UpdateTexture
   (_fun
    [texture : _Texture2D]
-   [pixels : _pointer #;"const void *"]
+   [pixels : (_pointer-to _void)]
    -> _void))
 
 ;; Update GPU texture rectangle with new data
@@ -2049,13 +2049,13 @@
   (_fun
    [texture : _Texture2D]
    [rec : _Rectangle]
-   [pixels : _pointer #;"const void *"]
+   [pixels : (_pointer-to _void)]
    -> _void))
 
 ;; Generate GPU mipmaps for a texture
 (define-raylib GenTextureMipmaps
   (_fun
-   [texture : _pointer #;"Texture2D *"]
+   [texture : (_pointer-to _Texture2D)]
    -> _void))
 
 ;; Set texture scaling filter mode
@@ -2157,8 +2157,8 @@
   (_fun
    [texture : _Texture2D]
    [center : _Vector2]
-   [points : _pointer #;"Vector2 *"]
-   [texcoords : _pointer #;"Vector2 *"]
+   [points : (_pointer-to _Vector2)]
+   [texcoords : (_pointer-to _Vector2)]
    [pointCount : _int]
    [tint : _Color]
    -> _void))
@@ -2226,14 +2226,14 @@
 ;; Get Color from a source pixel pointer of certain format
 (define-raylib GetPixelColor
   (_fun
-   [srcPtr : _pointer #;"void *"]
+   [srcPtr : (_pointer-to _void)]
    [format : _int]
    -> _Color))
 
 ;; Set color formatted into destination pixel pointer
 (define-raylib SetPixelColor
   (_fun
-   [dstPtr : _pointer #;"void *"]
+   [dstPtr : (_pointer-to _void)]
    [color : _Color]
    [format : _int]
    -> _void))
@@ -2262,7 +2262,7 @@
   (_fun
    [fileName : _string]
    [fontSize : _int]
-   [fontChars : _pointer #;"int *"]
+   [fontChars : (_pointer-to _int)]
    [glyphCount : _int]
    -> _Font))
 
@@ -2278,29 +2278,29 @@
 (define-raylib LoadFontFromMemory
   (_fun
    [fileType : _string]
-   [fileData : _pointer #;"const unsigned char *"]
+   [fileData : (_pointer-to _ubyte)]
    [dataSize : _int]
    [fontSize : _int]
-   [fontChars : _pointer #;"int *"]
+   [fontChars : (_pointer-to _int)]
    [glyphCount : _int]
    -> _Font))
 
 ;; Load font data for further use
 (define-raylib LoadFontData
   (_fun
-   [fileData : _pointer #;"const unsigned char *"]
+   [fileData : (_pointer-to _ubyte)]
    [dataSize : _int]
    [fontSize : _int]
-   [fontChars : _pointer #;"int *"]
+   [fontChars : (_pointer-to _int)]
    [glyphCount : _int]
    [type : _int]
-   -> _pointer #;"GlyphInfo *"))
+   -> (_pointer-to _GlyphInfo)))
 
 ;; Generate image font atlas using chars info
 (define-raylib GenImageFontAtlas
   (_fun
-   [chars : _pointer #;"const GlyphInfo *"]
-   [recs : _pointer #;"Rectangle **"]
+   [chars : (_pointer-to _GlyphInfo)]
+   [recs : (_pointer-to (_pointer-to _Rectangle))]
    [glyphCount : _int]
    [fontSize : _int]
    [padding : _int]
@@ -2310,7 +2310,7 @@
 ;; Unload font chars info data (RAM)
 (define-raylib UnloadFontData
   (_fun
-   [chars : _pointer #;"GlyphInfo *"]
+   [chars : (_pointer-to _GlyphInfo)]
    [glyphCount : _int]
    -> _void))
 
@@ -2412,13 +2412,13 @@
 (define-raylib LoadCodepoints
   (_fun
    [text : _string]
-   [count : _pointer #;"int *"]
-   -> _pointer #;"int *"))
+   [count : (_pointer-to _int)]
+   -> (_pointer-to _int)))
 
 ;; Unload codepoints data from memory
 (define-raylib UnloadCodepoints
   (_fun
-   [codepoints : _pointer #;"int *"]
+   [codepoints : (_pointer-to _int)]
    -> _void))
 
 ;; Get total number of codepoints in a UTF-8 encoded string
@@ -2431,27 +2431,27 @@
 (define-raylib GetCodepoint
   (_fun
    [text : _string]
-   [bytesProcessed : _pointer #;"int *"]
+   [bytesProcessed : (_pointer-to _int)]
    -> _int))
 
 ;; Encode one codepoint into UTF-8 byte array (array length returned as parameter)
 (define-raylib CodepointToUTF8
   (_fun
    [codepoint : _int]
-   [byteSize : _pointer #;"int *"]
+   [byteSize : (_pointer-to _int)]
    -> _string))
 
 ;; Encode text as codepoints array into UTF-8 text string (WARNING: memory must be freed!)
 (define-raylib TextCodepointsToUTF8
   (_fun
-   [codepoints : _pointer #;"int *"]
+   [codepoints : (_pointer-to _int)]
    [length : _int]
-   -> _pointer #;"char *"))
+   -> (_pointer-to _byte)))
 
 ;; Copy one string to another, returns bytes copied
 (define-raylib TextCopy
   (_fun
-   [dst : _pointer #;"char *"]
+   [dst : (_pointer-to _byte)]
    [src : _string]
    -> _int))
 
@@ -2487,10 +2487,10 @@
 ;; Replace text string (WARNING: memory must be freed!)
 (define-raylib TextReplace
   (_fun
-   [text : _pointer #;"char *"]
+   [text : (_pointer-to _byte)]
    [replace : _string]
    [by : _string]
-   -> _pointer #;"char *"))
+   -> (_pointer-to _byte)))
 
 ;; Insert text in a position (WARNING: memory must be freed!)
 (define-raylib TextInsert
@@ -2498,12 +2498,12 @@
    [text : _string]
    [insert : _string]
    [position : _int]
-   -> _pointer #;"char *"))
+   -> (_pointer-to _byte)))
 
 ;; Join text strings with delimiter
 (define-raylib TextJoin
   (_fun
-   [textList : _pointer #;"const char **"]
+   [textList : (_pointer-to (_pointer-to _byte))]
    [count : _int]
    [delimiter : _string]
    -> _string))
@@ -2513,15 +2513,15 @@
   (_fun
    [text : _string]
    [delimiter : _byte]
-   [count : _pointer #;"int *"]
-   -> _pointer #;"const char **"))
+   [count : (_pointer-to _int)]
+   -> (_pointer-to (_pointer-to _byte))))
 
 ;; Append text at specific position and move cursor!
 (define-raylib TextAppend
   (_fun
-   [text : _pointer #;"char *"]
+   [text : (_pointer-to _byte)]
    [append : _string]
-   [position : _pointer #;"int *"]
+   [position : (_pointer-to _int)]
    -> _void))
 
 ;; Find first text occurrence within a string
@@ -2592,7 +2592,7 @@
 ;; Draw a triangle strip defined by points
 (define-raylib DrawTriangleStrip3D
   (_fun
-   [points : _pointer #;"Vector3 *"]
+   [points : (_pointer-to _Vector3)]
    [pointCount : _int]
    [color : _Color]
    -> _void))
@@ -2865,7 +2865,7 @@
 ;; Upload mesh vertex data in GPU and provide VAO/VBO ids
 (define-raylib UploadMesh
   (_fun
-   [mesh : _pointer #;"Mesh *"]
+   [mesh : (_pointer-to _Mesh)]
    [dynamic : _bool]
    -> _void))
 
@@ -2874,7 +2874,7 @@
   (_fun
    [mesh : _Mesh]
    [index : _int]
-   [data : _pointer #;"void *"]
+   [data : (_pointer-to _void)]
    [dataSize : _int]
    [offset : _int]
    -> _void))
@@ -2898,7 +2898,7 @@
   (_fun
    [mesh : _Mesh]
    [material : _Material]
-   [transforms : _pointer #;"Matrix *"]
+   [transforms : (_pointer-to _Matrix)]
    [instances : _int]
    -> _void))
 
@@ -2918,13 +2918,13 @@
 ;; Compute mesh tangents
 (define-raylib GenMeshTangents
   (_fun
-   [mesh : _pointer #;"Mesh *"]
+   [mesh : (_pointer-to _Mesh)]
    -> _void))
 
 ;; Compute mesh binormals
 (define-raylib GenMeshBinormals
   (_fun
-   [mesh : _pointer #;"Mesh *"]
+   [mesh : (_pointer-to _Mesh)]
    -> _void))
 
 ;; Generate polygonal mesh
@@ -3019,8 +3019,8 @@
 (define-raylib LoadMaterials
   (_fun
    [fileName : _string]
-   [materialCount : _pointer #;"int *"]
-   -> _pointer #;"Material *"))
+   [materialCount : (_pointer-to _int)]
+   -> (_pointer-to _Material)))
 
 ;; Load default material (Supports: DIFFUSE, SPECULAR, NORMAL maps)
 (define-raylib LoadMaterialDefault
@@ -3036,7 +3036,7 @@
 ;; Set texture for a material map type (MATERIAL_MAP_DIFFUSE, MATERIAL_MAP_SPECULAR...)
 (define-raylib SetMaterialTexture
   (_fun
-   [material : _pointer #;"Material *"]
+   [material : (_pointer-to _Material)]
    [mapType : _int]
    [texture : _Texture2D]
    -> _void))
@@ -3044,7 +3044,7 @@
 ;; Set material for a mesh
 (define-raylib SetModelMeshMaterial
   (_fun
-   [model : _pointer #;"Model *"]
+   [model : (_pointer-to _Model)]
    [meshId : _int]
    [materialId : _int]
    -> _void))
@@ -3053,8 +3053,8 @@
 (define-raylib LoadModelAnimations
   (_fun
    [fileName : _string]
-   [animCount : _pointer #;"unsigned int *"]
-   -> _pointer #;"ModelAnimation *"))
+   [animCount : (_pointer-to _uint)]
+   -> (_pointer-to _ModelAnimation)))
 
 ;; Update model animation pose
 (define-raylib UpdateModelAnimation
@@ -3073,7 +3073,7 @@
 ;; Unload animation array data
 (define-raylib UnloadModelAnimations
   (_fun
-   [animations : _pointer #;"ModelAnimation*"]
+   [animations : (_pointer-to _ModelAnimation)]
    [count : _uint]
    -> _void))
 
@@ -3188,7 +3188,7 @@
 (define-raylib LoadWaveFromMemory
   (_fun
    [fileType : _string]
-   [fileData : _pointer #;"const unsigned char *"]
+   [fileData : (_pointer-to _ubyte)]
    [dataSize : _int]
    -> _Wave))
 
@@ -3208,7 +3208,7 @@
 (define-raylib UpdateSound
   (_fun
    [sound : _Sound]
-   [data : _pointer #;"const void *"]
+   [data : (_pointer-to _void)]
    [sampleCount : _int]
    -> _void))
 
@@ -3301,7 +3301,7 @@
 ;; Convert wave data to desired format
 (define-raylib WaveFormat
   (_fun
-   [wave : _pointer #;"Wave *"]
+   [wave : (_pointer-to _Wave)]
    [sampleRate : _int]
    [sampleSize : _int]
    [channels : _int]
@@ -3316,7 +3316,7 @@
 ;; Crop a wave to defined samples range
 (define-raylib WaveCrop
   (_fun
-   [wave : _pointer #;"Wave *"]
+   [wave : (_pointer-to _Wave)]
    [initSample : _int]
    [finalSample : _int]
    -> _void))
@@ -3325,12 +3325,12 @@
 (define-raylib LoadWaveSamples
   (_fun
    [wave : _Wave]
-   -> _pointer #;"float *"))
+   -> (_pointer-to _float)))
 
 ;; Unload samples data loaded with LoadWaveSamples()
 (define-raylib UnloadWaveSamples
   (_fun
-   [samples : _pointer #;"float *"]
+   [samples : (_pointer-to _float)]
    -> _void))
 
 ;; Load music stream from file
@@ -3343,7 +3343,7 @@
 (define-raylib LoadMusicStreamFromMemory
   (_fun
    [fileType : _string]
-   [data : _pointer #;"unsigned char *"]
+   [data : (_pointer-to _ubyte)]
    [dataSize : _int]
    -> _Music))
 
@@ -3440,7 +3440,7 @@
 (define-raylib UpdateAudioStream
   (_fun
    [stream : _AudioStream]
-   [data : _pointer #;"const void *"]
+   [data : (_pointer-to _void)]
    [frameCount : _int]
    -> _void))
 

@@ -33,15 +33,20 @@
       (define-values (name** array-component) (parse-type name* ty-str))
       (values name** (format "(_array ~a ~a)" array-component (string-join arrays* " ")))]
      [(string=? ty-str "const char *") (values name "_string")]
-     [(string-suffix? ty-str "*") (values name (format "_pointer #;~s" ty-str))]
+     [(string-prefix? ty-str "const ")
+      (parse-type name (substring ty-str (string-length "const ")))]
+     [(string-suffix? ty-str "*")
+      (define pointee-str (string-trim (substring ty-str 0 (sub1 (string-length ty-str)))))
+      (values name (format "(_pointer-to ~a)" (parse-type* pointee-str)))]
      [else
       (values
        name
        (case ty-str
          [("va_list") "_byte #;\"va_list\""]
-         [("unsigned int") "_uint"]
          [("char") "_byte"]
          [("unsigned char") "_ubyte"]
+         [("unsigned short") "_ushort"]
+         [("unsigned int") "_uint"]
          [else (format "_~a" ty-str)]))]))
 
 @(define (parse-type* ty-str)

@@ -14,7 +14,7 @@
 @list{
 #lang racket/base
 
-(require ffi/unsafe)
+(require ffi/unsafe raylib/support)
 
 (provide (all-defined-out))
 @(splice

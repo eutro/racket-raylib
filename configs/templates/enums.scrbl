@@ -13,9 +13,10 @@
 
 @"@"(require (for-label @|this-mod| ffi/unsafe racket/base))
 
+@"@"title{Enums}
+
 @"@"table-of-contents[]
 
-@"@"title{Enums}
 @"@"defmodule[@|this-mod|]
 @(splice
   (for/list ([parsed-enum (in-list enums-parsed)])

@@ -12,11 +12,12 @@
 @list{
 #lang scribble/manual
 
-@"@"(require (for-label @|this-mod| @|structs-mod| ffi/unsafe racket/base))
+@"@"(require (for-label @|this-mod| @|structs-mod| raylib/support ffi/unsafe racket/base))
+
+@"@"title{Functions}
 
 @"@"table-of-contents[]
 
-@"@"title{Functions}
 @"@"defmodule[@|this-mod|]
 @(splice
   (for/list ([parsed-function (in-list functions-parsed)])
