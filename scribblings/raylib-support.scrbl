@@ -1,14 +1,15 @@
 #lang scribble/manual
 
 @(require (for-label ffi/unsafe
+                     raylib/support
                      racket/base
                      (except-in racket/contract/base ->)))
 
 @title{Raylib Support}
 
-Various utilities to make interfacing with Raylib nicer.
-
 @defmodule[raylib/support]
+
+Various utilities to make interfacing with Raylib nicer.
 
 @defform[(_pointer-to type)]{
 Returns @racket[_pointer], but is more useful for documentation.

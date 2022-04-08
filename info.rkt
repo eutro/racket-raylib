@@ -19,9 +19,7 @@
     "net-doc"))
 
 (define scribblings
-  '(("./scribblings/raylib.scrbl")
-    ("generated/scribblings/raylib-generated.scrbl" (multi-page))
-    ("2d/scribblings/raylib-2d.scrbl" (multi-page))))
+  '(("scribblings/raylib.scrbl" (multi-page))))
 
 (define pkg-desc "Semi-automatically generated Raylib bindings.")
 

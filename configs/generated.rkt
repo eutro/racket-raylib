@@ -35,8 +35,11 @@
   }
   #:module @list{raylib/generated/unsafe}
   #:module-desc @list{
-  Reexports all of @"@"racket[raylib/generated/unsafe/functions]
-  and @"@"racket[raylib/generated/*].
+  This module re-exports all of
+  @"@"racketmodname[raylib/generated/unsafe/functions],
+  @"@"racketmodname[raylib/generated/structs],
+  @"@"racketmodname[raylib/generated/enums] and
+  @"@"racketmodname[raylib/generated/constants].
   }
   (all-modules "~a.scrbl")))
 

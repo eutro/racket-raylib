@@ -7,7 +7,10 @@
 (provide _pointer-to
          ptr-box
          define-ptr
-         borrow)
+         borrow
+         (protect-out raylib-ffi-obj))
+
+(define raylib-ffi-obj (ffi-lib "libraylib"))
 
 (define-syntax-rule (_pointer-to _type)
   _pointer)

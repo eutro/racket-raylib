@@ -16,9 +16,10 @@
 
 @"@"title{Functions}
 
+@"@"defmodule[@|this-mod|]
+
 @"@"table-of-contents[]
 
-@"@"defmodule[@|this-mod|]
 @(splice
   (for/list ([parsed-function (in-list functions-parsed)])
     (match-define (api-function name description return-type parameters _varargs) parsed-function)

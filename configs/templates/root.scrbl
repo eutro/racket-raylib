@@ -15,10 +15,11 @@
 @"@"title{@|title|}
 @|desc|
 
-@"@"table-of-contents[]
-
 @"@"defmodule[@|mod|]
 @|mod-desc|
+
+@"@"table-of-contents[]
+
 @(splice
   (for/list ([mod (in-list modules)])
     @list{@(void)
