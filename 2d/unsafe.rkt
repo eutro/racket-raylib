@@ -1,11 +1,11 @@
 #lang racket/base
 
-(require "unsafe/functions.rkt"
-         "structs.rkt"
-         "enums.rkt"
-         "constants.rkt")
+(require raylib/2d/unsafe/functions
+         raylib/2d/structs
+         raylib/2d/constants
+         raylib/2d/enums)
 
-(provide (all-from-out "unsafe/functions.rkt"
-                       "structs.rkt"
-                       "enums.rkt"
-                       "constants.rkt"))
+(provide (all-from-out raylib/2d/unsafe/functions
+                       raylib/2d/structs
+                       raylib/2d/constants
+                       raylib/2d/enums))

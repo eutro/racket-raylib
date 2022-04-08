@@ -5,11 +5,15 @@ Unsafe, automatically generated bindings for
 @hyperlink["https://www.raylib.com/"]{Raylib}
 4.0.
 
+@defmodule[raylib/generated/unsafe]
+This module re-exports all of
+@racketmodname[raylib/generated/unsafe/functions],
+@racketmodname[raylib/generated/structs],
+@racketmodname[raylib/generated/enums] and
+@racketmodname[raylib/generated/constants].
+
 @table-of-contents[]
 
-@defmodule[raylib/generated/unsafe]
-Reexports all of @racket[raylib/generated/unsafe/functions]
-and @racket[raylib/generated/*].
 
 @include-section["unsafe/functions.scrbl"]
 @include-section["structs.scrbl"]

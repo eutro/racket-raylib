@@ -4,9 +4,10 @@
 
 @title{Functions}
 
+@defmodule[raylib/generated/unsafe/functions]
+
 @table-of-contents[]
 
-@defmodule[raylib/generated/unsafe/functions]
 
 @defproc[(InitWindow
           [width _int]

@@ -6,15 +6,6 @@
                racket/port
                (rename-in scribble/text [output scrbl-output]))
 
-(define (all-modules fmt)
-  (for/list ([path
-              (in-list
-               '("unsafe/functions"
-                 "structs"
-                 "enums"
-                 "constants"))])
-    (format fmt path)))
-
 (define raylib-version
   (api-constant-value
    (car
@@ -23,296 +14,310 @@
      #:from (parsed 'constants)))))
 
 (output
- #:to "unsafe.rkt"
- #:from
- (apply (template "./templates/root.rkt" 'generate-root)
-        (all-modules "~a.rkt")))
-
-(output
  #:to "scribblings/raylib-2d.scrbl"
  #:from
- (apply
-  (template "./templates/root.scrbl" 'generate-root)
-  #:title @list{Raylib 2D Bindings}
-  #:top-desc @list{
-  Unsafe bindings for @"@"hyperlink["https://www.raylib.com/"]{Raylib}'s
-  2D components.
+ @list{
+ #lang scribble/manual
 
-  These bindings are currently for Raylib @|raylib-version|.
+ @"@"title{Raylib 2D Bindings}
 
-  Most of these bindings are perfectly safe, as long as they are not horribly misused.
-  They are called and marked "unsafe", since they are a thin wrapper over a C API,
-  and thus undefined behaviour is possible if the bindings are used incorrectly.
-  }
-  #:module @list{raylib/2d/unsafe}
-  #:module-desc @list{
-  Reexports all of @"@"racket[raylib/2d/unsafe/functions] and @"@"racket[raylib/2d/*].
-  }
-  (all-modules "~a.scrbl")))
+ Unsafe bindings for Raylib's 2D components.
 
-(define structs-module
-  @list{raylib/2d/structs})
+ These bindings are currently for Raylib @|raylib-version|.
 
-(for ([out-fmt (in-list '("~a.rkt" "scribblings/~a.scrbl"))]
-      [in-fmt (in-list '("~a.rkt" "~a.scrbl"))])
+ Most of these bindings are perfectly safe, as long as they are not horribly misused.
+ They are called and marked "unsafe", since they are a thin wrapper over a C API,
+ and thus undefined behaviour is possible if the bindings are used incorrectly.
 
-  (define (exclusion
-           #:reason reason
-           . funcs)
-    (cons
-     reason
-     funcs))
+ @"@"defmodule[raylib/2d/unsafe]
 
-  (define exclusions
-    (list
-     (exclusion
-      #:reason @list{@"@"racket[clipboard<%>] should be used instead}
-      "SetClipboardText"
-      "GetClipboardText")
+ This module re-exports all of
+ @"@"racketmodname[raylib/2d/unsafe/functions],
+ @"@"racketmodname[raylib/2d/structs],
+ @"@"racketmodname[raylib/2d/enums] and
+ @"@"racketmodname[raylib/2d/constants].
 
-     #;; There's open-url in DrRacket but I'm against suggesting it
-     (exclusion
-      #:reason @list{@"@"racket[open-url] should be used instead}
-      "OpenURL")
+ @"@"table-of-contents[]
 
-     (exclusion
-      #:reason @list{@"@"racket[sleep] should be used instead}
-      "WaitTime")
+ @"@"include-section["unsafe/functions.scrbl"]
 
-     (exclusion
-      #:reason @list{@"@"racket[random] should be used instead}
-      "GetRandomValue"
-      "SetRandomSeed")
+ @(splice
+   (add-newlines
+    (for/list ([t+m (in-list
+                     '(("Structs" . "raylib/~a/structs")
+                       ("Enums" . "raylib/~a/enums")
+                       ("Constants" . "raylib/~a/constants")))])
+      (define title (car t+m))
+      (define mod (cdr t+m))
+      @list{
+      @"@"section{2D @|title|}
+      @"@"defmodule[@(format mod "2d")]
+      Re-exports @"@"racketmodname[@(format mod "generated")].
+      @(void)})))})
 
-     (exclusion
-      #:reason @list{
-      @"@"racket[malloc], @"@"racket[free] and other Racket pointer
-      conversion functions should be used instead
-      }
-      "MemAlloc"
-      "MemRealloc"
-      "MemFree")
+(define (exclusion
+         #:reason reason
+         . funcs)
+  (cons
+   reason
+   funcs))
 
-     (exclusion
-      #:reason @list{
-      @"@"seclink["zip" #:doc '(lib "file/scribblings/file.scrbl")]{@"@"racket[file/zip]}
-      and
-      @"@"seclink["base64" #:doc '(lib "net/scribblings/net.scrbl")]{@"@"racket[net/base64]}
-      (or alternatives) should be used instead
-      }
-      "CompressData"
-      "DecompressData"
-      "EncodeDataBase64"
-      "DecodeDataBase64")
+(define exclusions
+  (list
+   (exclusion
+    #:reason @list{@"@"racket[clipboard<%>] should be used instead}
+    "SetClipboardText"
+    "GetClipboardText")
 
-     (exclusion
-      #:reason @list{Racket's own IO functions should be used instead}
-      "LoadFileData"
-      "LoadFileText"
-      "UnloadFileData"
-      "UnloadFileText"
-      "SaveFileData"
-      "SaveFileText"
+   #;; There's open-url in DrRacket but I'm against suggesting it
+   (exclusion
+    #:reason @list{@"@"racket[open-url] should be used instead}
+    "OpenURL")
 
-      "FileExists"
-      "DirectoryExists"
-      "IsFileExtension"
-      "GetFileLength"
-      "GetFileExtension"
-      "GetFileName"
-      "GetFileNameWithoutExt"
-      "GetDirectoryPath"
-      "GetPrevDirectoryPath"
-      "GetWorkingDirectory"
-      "GetApplicationDirectory"
-      "GetDirectoryFiles"
-      "ClearDirectoryFiles"
-      "ChangeDirectory"
-      "GetFileModTime")
+   (exclusion
+    #:reason @list{@"@"racket[sleep] should be used instead}
+    "WaitTime")
 
-     (exclusion
-      #:reason @list{Racket's own string functions should be used instead}
-      "GetCodepointCount"
-      "GetCodepoint"
-      "CodepointToUTF8"
-      "TextCodepointsToUTF8"
-      "TextCopy"
-      "TextIsEqual"
-      "TextLength"
-      "TextFormat"
-      "TextSubtext"
-      "TextReplace"
-      "TextInsert"
-      "TextJoin"
-      "TextSplit"
-      "TextAppend"
-      "TextFindIndex"
-      "TextToUpper"
-      "TextToLower"
-      "TextToPascal"
-      "TextToInteger")
+   (exclusion
+    #:reason @list{@"@"racket[random] should be used instead}
+    "GetRandomValue"
+    "SetRandomSeed")
 
-     (exclusion
-      #:reason @list{
-      this takes a varargs function pointer, which is
-      impossible to produce with pure Racket bindings
-      }
-      "SetTraceLogCallback")
+   (exclusion
+    #:reason @list{
+    @"@"racket[malloc], @"@"racket[free] and other Racket pointer
+    conversion functions should be used instead
+    }
+    "MemAlloc"
+    "MemRealloc"
+    "MemFree")
 
-     (exclusion
-      #:reason @list{these are not applicable to 2D rendering}
-      "BeginVrStereoMode"
-      "BeginMode3D"
-      "EndVrStereoMode"
-      "EndMode3D"
-      "LoadVrStereoConfig"
-      "UnloadVrStereoConfig"
+   (exclusion
+    #:reason @list{
+    @"@"seclink["zip" #:doc '(lib "file/scribblings/file.scrbl")]{@"@"racket[file/zip]}
+    and
+    @"@"seclink["base64" #:doc '(lib "net/scribblings/net.scrbl")]{@"@"racket[net/base64]}
+    (or alternatives) should be used instead
+    }
+    "CompressData"
+    "DecompressData"
+    "EncodeDataBase64"
+    "DecodeDataBase64")
 
-      "DrawLine3D"
-      "DrawPoint3D"
-      "DrawCircle3D"
-      "DrawTriangle3D"
-      "DrawTriangleStrip3D"
-      "DrawCube"
-      "DrawCubeV"
-      "DrawCubeWires"
-      "DrawCubeWiresV"
-      "DrawCubeTexture"
-      "DrawCubeTextureRec"
-      "DrawSphere"
-      "DrawSphereEx"
-      "DrawSphereWires"
-      "DrawCylinder"
-      "DrawCylinderEx"
-      "DrawCylinderWires"
-      "DrawCylinderWiresEx"
-      "DrawPlane"
-      "DrawRay"
-      "DrawGrid"
-      "LoadModel"
-      "LoadModelFromMesh"
-      "UnloadModel"
-      "UnloadModelKeepMeshes"
-      "GetModelBoundingBox"
-      "DrawModel"
-      "DrawModelEx"
-      "DrawModelWires"
-      "DrawModelWiresEx"
-      "DrawBoundingBox"
-      "DrawBillboard"
-      "DrawBillboardRec"
-      "DrawBillboardPro"
-      "UploadMesh"
-      "UpdateMeshBuffer"
-      "UnloadMesh"
-      "DrawMesh"
-      "DrawMeshInstanced"
-      "ExportMesh"
-      "GetMeshBoundingBox"
-      "GenMeshTangents"
-      "GenMeshBinormals"
-      "GenMeshPoly"
-      "GenMeshPlane"
-      "GenMeshCube"
-      "GenMeshSphere"
-      "GenMeshHemiSphere"
-      "GenMeshCylinder"
-      "GenMeshCone"
-      "GenMeshTorus"
-      "GenMeshKnot"
-      "GenMeshHeightmap"
-      "GenMeshCubicmap"
-      "LoadMaterials"
-      "LoadMaterialDefault"
-      "UnloadMaterial"
-      "SetMaterialTexture"
-      "SetModelMeshMaterial"
-      "LoadModelAnimations"
-      "UpdateModelAnimation"
-      "UnloadModelAnimation"
-      "UnloadModelAnimations"
-      "IsModelAnimationValid"
-      "CheckCollisionSpheres"
-      "CheckCollisionBoxes"
-      "CheckCollisionBoxSphere"
-      "GetRayCollisionSphere"
-      "GetRayCollisionBox"
-      "GetRayCollisionMesh"
-      "GetRayCollisionTriangle"
-      "GetRayCollisionQuad")))
+   (exclusion
+    #:reason @list{Racket's own IO functions should be used instead}
+    "LoadFileData"
+    "LoadFileText"
+    "UnloadFileData"
+    "UnloadFileText"
+    "SaveFileData"
+    "SaveFileText"
 
-  (define exclusion-set
-    (list->set (append-map cdr exclusions)))
+    "FileExists"
+    "DirectoryExists"
+    "IsFileExtension"
+    "GetFileLength"
+    "GetFileExtension"
+    "GetFileName"
+    "GetFileNameWithoutExt"
+    "GetDirectoryPath"
+    "GetPrevDirectoryPath"
+    "GetWorkingDirectory"
+    "GetApplicationDirectory"
+    "GetDirectoryFiles"
+    "ClearDirectoryFiles"
+    "ChangeDirectory"
+    "GetFileModTime")
 
-  (define included-functions
-    (for/list ([func (in-list (parsed 'functions))]
-               #:unless (set-member? exclusion-set (api-object-name func)))
-      func))
+   (exclusion
+    #:reason @list{Racket's own string functions should be used instead}
+    "GetCodepointCount"
+    "GetCodepoint"
+    "CodepointToUTF8"
+    "TextCodepointsToUTF8"
+    "TextCopy"
+    "TextIsEqual"
+    "TextLength"
+    "TextFormat"
+    "TextSubtext"
+    "TextReplace"
+    "TextInsert"
+    "TextJoin"
+    "TextSplit"
+    "TextAppend"
+    "TextFindIndex"
+    "TextToUpper"
+    "TextToLower"
+    "TextToPascal"
+    "TextToInteger")
 
-  (define templated-functions
-    ((template (format in-fmt "./templates/functions") 'generate-functions)
-     #:module @list{raylib/2d/unsafe/functions}
-     #:structs-module structs-module
-     included-functions))
+   (exclusion
+    #:reason @list{
+    this takes a varargs function pointer, which is
+    impossible to produce with pure Racket bindings
+    }
+    "SetTraceLogCallback")
 
+   (exclusion
+    #:reason @list{these are not applicable to 2D rendering}
+    "BeginVrStereoMode"
+    "BeginMode3D"
+    "EndVrStereoMode"
+    "EndMode3D"
+    "LoadVrStereoConfig"
+    "UnloadVrStereoConfig"
+
+    "DrawLine3D"
+    "DrawPoint3D"
+    "DrawCircle3D"
+    "DrawTriangle3D"
+    "DrawTriangleStrip3D"
+    "DrawCube"
+    "DrawCubeV"
+    "DrawCubeWires"
+    "DrawCubeWiresV"
+    "DrawCubeTexture"
+    "DrawCubeTextureRec"
+    "DrawSphere"
+    "DrawSphereEx"
+    "DrawSphereWires"
+    "DrawCylinder"
+    "DrawCylinderEx"
+    "DrawCylinderWires"
+    "DrawCylinderWiresEx"
+    "DrawPlane"
+    "DrawRay"
+    "DrawGrid"
+    "LoadModel"
+    "LoadModelFromMesh"
+    "UnloadModel"
+    "UnloadModelKeepMeshes"
+    "GetModelBoundingBox"
+    "DrawModel"
+    "DrawModelEx"
+    "DrawModelWires"
+    "DrawModelWiresEx"
+    "DrawBoundingBox"
+    "DrawBillboard"
+    "DrawBillboardRec"
+    "DrawBillboardPro"
+    "UploadMesh"
+    "UpdateMeshBuffer"
+    "UnloadMesh"
+    "DrawMesh"
+    "DrawMeshInstanced"
+    "ExportMesh"
+    "GetMeshBoundingBox"
+    "GenMeshTangents"
+    "GenMeshBinormals"
+    "GenMeshPoly"
+    "GenMeshPlane"
+    "GenMeshCube"
+    "GenMeshSphere"
+    "GenMeshHemiSphere"
+    "GenMeshCylinder"
+    "GenMeshCone"
+    "GenMeshTorus"
+    "GenMeshKnot"
+    "GenMeshHeightmap"
+    "GenMeshCubicmap"
+    "LoadMaterials"
+    "LoadMaterialDefault"
+    "UnloadMaterial"
+    "SetMaterialTexture"
+    "SetModelMeshMaterial"
+    "LoadModelAnimations"
+    "UpdateModelAnimation"
+    "UnloadModelAnimation"
+    "UnloadModelAnimations"
+    "IsModelAnimationValid"
+    "CheckCollisionSpheres"
+    "CheckCollisionBoxes"
+    "CheckCollisionBoxSphere"
+    "GetRayCollisionSphere"
+    "GetRayCollisionBox"
+    "GetRayCollisionMesh"
+    "GetRayCollisionTriangle"
+    "GetRayCollisionQuad")))
+
+(define existing-functions
+  (for/set ([obj (in-list (parsed 'functions))])
+    (api-object-name obj)))
+
+(define exclusion-list
+  (filter (λ (x) (set-member? existing-functions x))
+          (append-map cdr exclusions)))
+
+(define generate-reexport
+  (template "./templates/reexport.rkt" 'generate-reexport))
+
+(output
+ #:to "unsafe.rkt"
+ #:from
+ (generate-reexport
+  (list @list{raylib/2d/unsafe/functions})
+  (list @list{raylib/2d/structs})
+  (list @list{raylib/2d/constants})
+  (list @list{raylib/2d/enums})))
+
+(output
+ #:to "unsafe/functions.rkt"
+ #:from
+ (generate-reexport
+  (cons @list{raylib/generated/unsafe/functions} exclusion-list)
+  (list @list{raylib/derived})))
+
+(for ([base (in-list '("structs" "enums" "constants"))])
   (output
-   #:to (format out-fmt "unsafe/functions")
+   #:to (format "~a.rkt" base)
    #:from
-   (if (string-suffix? out-fmt ".rkt")
-       templated-functions
-       @list{
-   @|templated-functions|
-   @"@"section{Excluded Functions}
-   This is a list of all the functions excluded from these bindings.
+   (generate-reexport
+    (list (format "raylib/generated/~a" base)))))
 
-   These are documented here in case you are looking at one of the
-   @"@"hyperlink["https://www.raylib.com/examples.html"]{Raylib examples}
-   and come across a function that doesn't exist in these bindings.
+(output
+ #:to "scribblings/unsafe/functions.scrbl"
+ #:from
+ @list{
+ #lang scribble/manual
 
-   @"@"(require (for-label racket/gui/base))
+ @"@"(require (for-label raylib/generated/unsafe/functions
+                         racket/gui/base
+                         racket/base))
 
-   @"@"tabular[
-     #:style 'boxed
-     #:row-properties '(bottom-border)
-     (list (list @"@"bold{Function(s) Excluded}
-                 @"@"bold{Reason})
-           @(block
-             (add-newlines
-              (for/list ([excl (in-list exclusions)])
-                (match-define (cons reason functions) excl)
-                @list{(list @"@"list{@(add-newlines
-                                       #:sep ", "
-                                       (for/list ([func (in-list functions)])
-                                         @list{@"@"racket[@|func|]}))}
-                            @"@"list{@|reason|})}))))
-   ]
-   @(void)}))
+ @"@"title{2D Functions}
 
-  ;; these are all perfectly safe
-  (output
-   #:to (format out-fmt "structs")
-   #:from
-   ((template (format in-fmt "./templates/structs") 'generate-structs)
-    #:module structs-module
-    (parsed 'structs) ;; TODO exclude a number of structs
-    (parsed 'typedefs)
-    (exclude
-     #:from (parsed 'function-typedefs)
-     (name-matches "TraceLogCallback"))))
-  (output
-   #:to (format out-fmt "constants")
-   #:from
-   ((template (format in-fmt "./templates/constants") 'generate-constants)
-    #:module @list{raylib/2d/constants}
-    #:structs-module structs-module
-    (parsed 'constants)))
-  (output
-   #:to (format out-fmt "enums")
-   #:from
-   ((template (format in-fmt "./templates/enums") 'generate-enums)
-    #:module @list{raylib/2d/enums}
-    (parsed 'enums))))
+ @"@"defmodule[raylib/2d/unsafe/functions]
 
-(apply-patch
- #:from "./patches/2d.patch"
- "-p1")
+ @"@"(define functions-ref
+       @"@"racketmodname[raylib/generated/unsafe/functions])
+
+ This module re-exports @"@"racketmodname[raylib/derived] and
+ most of @"@"|functions-ref|. Specifically, @"@"racketmodname[raylib/2d/unsafe]
+ re-exports everything that is useful for 2D rendering with Raylib.
+
+ @"@"section{Excluded Functions}
+
+ This is a list of all the functions excluded from @"@"|functions-ref|.
+
+ These are documented here in case you are looking at one of the
+ @"@"hyperlink["https://www.raylib.com/examples.html"]{Raylib examples}
+ and come across a function that doesn't exist in these bindings.
+
+ @"@"tabular[
+   #:style 'boxed
+   #:row-properties '(bottom-border)
+   (list (list @"@"bold{Function(s) Excluded}
+               @"@"bold{Reason})
+         @(block
+           (add-newlines
+            (for/list ([excl (in-list exclusions)])
+              (match-define (cons reason functions) excl)
+              @list{(list @"@"list{@(add-newlines
+                                     #:sep ", "
+                                     (for/list ([func (in-list functions)]
+                                                #:when (set-member? existing-functions func))
+                                       @list{@"@"racket[@|func|]}))}
+                          @"@"list{@|reason|})}))))
+ ]
+ @(void)}
+ )
