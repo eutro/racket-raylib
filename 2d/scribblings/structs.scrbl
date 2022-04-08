@@ -1,10 +1,11 @@
 #lang scribble/manual
 
-@(require (for-label raylib/2d/structs ffi/unsafe racket/base))
+@(require (for-label raylib/2d/structs raylib/support ffi/unsafe racket/base))
+
+@title{Structs}
 
 @table-of-contents[]
 
-@title{Structs}
 @defmodule[raylib/2d/structs]
 @section{Struct types}
 
@@ -67,7 +68,7 @@ Rectangle, 4 components
 
 @deftogether[(@defthing[_Image ctype?]
               @defstruct[Image
-                         ([data _pointer #;"void *"]
+                         ([data (_pointer-to _void)]
                           [width _int]
                           [height _int]
                           [mipmaps _int]
@@ -125,8 +126,8 @@ GlyphInfo, font characters glyphs info
                           [glyphCount _int]
                           [glyphPadding _int]
                           [texture _Texture2D]
-                          [recs _pointer #;"Rectangle *"]
-                          [glyphs _pointer #;"GlyphInfo *"])
+                          [recs (_pointer-to _Rectangle)]
+                          [glyphs (_pointer-to _GlyphInfo)])
                          #:constructor-name make-Font])]{
 Font, font texture and GlyphInfo array data
 }
@@ -156,19 +157,19 @@ Camera2D, defines position/orientation in 2d space
               @defstruct[Mesh
                          ([vertexCount _int]
                           [triangleCount _int]
-                          [vertices _pointer #;"float *"]
-                          [texcoords _pointer #;"float *"]
-                          [texcoords2 _pointer #;"float *"]
-                          [normals _pointer #;"float *"]
-                          [tangents _pointer #;"float *"]
-                          [colors _pointer #;"unsigned char *"]
-                          [indices _pointer #;"unsigned short *"]
-                          [animVertices _pointer #;"float *"]
-                          [animNormals _pointer #;"float *"]
-                          [boneIds _pointer #;"unsigned char *"]
-                          [boneWeights _pointer #;"float *"]
+                          [vertices (_pointer-to _float)]
+                          [texcoords (_pointer-to _float)]
+                          [texcoords2 (_pointer-to _float)]
+                          [normals (_pointer-to _float)]
+                          [tangents (_pointer-to _float)]
+                          [colors (_pointer-to _ubyte)]
+                          [indices (_pointer-to _ushort)]
+                          [animVertices (_pointer-to _float)]
+                          [animNormals (_pointer-to _float)]
+                          [boneIds (_pointer-to _ubyte)]
+                          [boneWeights (_pointer-to _float)]
                           [vaoId _uint]
-                          [vboId _pointer #;"unsigned int *"])
+                          [vboId (_pointer-to _uint)])
                          #:constructor-name make-Mesh])]{
 Mesh, vertex data and vao/vbo
 }
@@ -176,7 +177,7 @@ Mesh, vertex data and vao/vbo
 @deftogether[(@defthing[_Shader ctype?]
               @defstruct[Shader
                          ([id _uint]
-                          [locs _pointer #;"int *"])
+                          [locs (_pointer-to _int)])
                          #:constructor-name make-Shader])]{
 Shader
 }
@@ -193,7 +194,7 @@ MaterialMap
 @deftogether[(@defthing[_Material ctype?]
               @defstruct[Material
                          ([shader _Shader]
-                          [maps _pointer #;"MaterialMap *"]
+                          [maps (_pointer-to _MaterialMap)]
                           [params (_array _float 4)])
                          #:constructor-name make-Material])]{
 Material, includes shader and maps
@@ -221,12 +222,12 @@ Bone, skeletal animation bone
                          ([transform _Matrix]
                           [meshCount _int]
                           [materialCount _int]
-                          [meshes _pointer #;"Mesh *"]
-                          [materials _pointer #;"Material *"]
-                          [meshMaterial _pointer #;"int *"]
+                          [meshes (_pointer-to _Mesh)]
+                          [materials (_pointer-to _Material)]
+                          [meshMaterial (_pointer-to _int)]
                           [boneCount _int]
-                          [bones _pointer #;"BoneInfo *"]
-                          [bindPose _pointer #;"Transform *"])
+                          [bones (_pointer-to _BoneInfo)]
+                          [bindPose (_pointer-to _Transform)])
                          #:constructor-name make-Model])]{
 Model, meshes, materials and animation data
 }
@@ -235,8 +236,8 @@ Model, meshes, materials and animation data
               @defstruct[ModelAnimation
                          ([boneCount _int]
                           [frameCount _int]
-                          [bones _pointer #;"BoneInfo *"]
-                          [framePoses _pointer #;"Transform **"])
+                          [bones (_pointer-to _BoneInfo)]
+                          [framePoses (_pointer-to (_pointer-to _Transform))])
                          #:constructor-name make-ModelAnimation])]{
 ModelAnimation
 }
@@ -273,14 +274,14 @@ BoundingBox
                           [sampleRate _uint]
                           [sampleSize _uint]
                           [channels _uint]
-                          [data _pointer #;"void *"])
+                          [data (_pointer-to _void)])
                          #:constructor-name make-Wave])]{
 Wave, audio wave data
 }
 
 @deftogether[(@defthing[_AudioStream ctype?]
               @defstruct[AudioStream
-                         ([buffer _pointer #;"rAudioBuffer *"]
+                         ([buffer (_pointer-to _rAudioBuffer)]
                           [sampleRate _uint]
                           [sampleSize _uint]
                           [channels _uint])
@@ -302,7 +303,7 @@ Sound
                           [frameCount _uint]
                           [looping _bool]
                           [ctxType _int]
-                          [ctxData _pointer #;"void *"])
+                          [ctxData (_pointer-to _void)])
                          #:constructor-name make-Music])]{
 Music, audio stream, anything longer than ~10 seconds should be streamed
 }
@@ -358,25 +359,25 @@ Aliases for some struct types.
                         #:value
                         (_fun
                          [fileName : _string]
-                         [bytesRead : _pointer #;"unsigned int *"]
-                         -> _pointer #;"unsigned char *")]
+                         [bytesRead : (_pointer-to _uint)]
+                         -> (_pointer-to _ubyte))]
               @defthing[_SaveFileDataCallback ctype?
                         #:value
                         (_fun
                          [fileName : _string]
-                         [data : _pointer #;"void *"]
+                         [data : (_pointer-to _void)]
                          [bytesToWrite : _uint]
                          -> _bool)]
               @defthing[_LoadFileTextCallback ctype?
                         #:value
                         (_fun
                          [fileName : _string]
-                         -> _pointer #;"char *")]
+                         -> (_pointer-to _byte))]
               @defthing[_SaveFileTextCallback ctype?
                         #:value
                         (_fun
                          [fileName : _string]
-                         [text : _pointer #;"char *"]
+                         [text : (_pointer-to _byte)]
                          -> _bool)])]{
 Types for certain callback functions.
 }

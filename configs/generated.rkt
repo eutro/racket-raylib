@@ -30,7 +30,7 @@
   #:title @list{Generated Raylib Bindings}
   #:top-desc @list{
   Unsafe, automatically generated bindings for
-  @"@"deftech{@"@"hyperlink["https://www.raylib.com/"]{Raylib}}
+  @"@"hyperlink["https://www.raylib.com/"]{Raylib}
   @|raylib-version|.
   }
   #:module @list{raylib/generated/unsafe}

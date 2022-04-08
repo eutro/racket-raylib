@@ -2,9 +2,10 @@
 
 @(require (for-label raylib/generated/constants raylib/generated/structs racket/base))
 
+@title{Constants}
+
 @table-of-contents[]
 
-@title{Constants}
 @defmodule[raylib/generated/constants]
 
 @defthing[RAYLIB_VERSION string? #:value "4.0" ""]

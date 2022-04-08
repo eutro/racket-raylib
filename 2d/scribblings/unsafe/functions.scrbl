@@ -1,10 +1,15 @@
 #lang scribble/manual
 
-@(require (for-label raylib/2d/unsafe/functions raylib/2d/structs ffi/unsafe racket/base))
+@(require (for-label raylib/2d/unsafe/functions raylib/2d/structs raylib/support ffi/unsafe racket/base))
+
+@title{Functions}
+
+Unsafe bindings to Raylib functions.
+
+Functions ending in an asterisk (@racketid[*]) are Racket extensions to the raw bindings.
 
 @table-of-contents[]
 
-@title{Functions}
 @defmodule[raylib/2d/unsafe/functions]
 
 @defproc[(InitWindow
@@ -138,7 +143,7 @@ Set window dimensions
 }
 
 @defproc[(GetWindowHandle)
-         _pointer #;"void *"]{
+         (_pointer-to _void)]{
 Get native window handle
 }
 
@@ -359,7 +364,7 @@ Get shader attribute location
 @defproc[(SetShaderValue
           [shader _Shader]
           [locIndex _int]
-          [value _pointer #;"const void *"]
+          [value (_pointer-to _void)]
           [uniformType _int])
          _void]{
 Set shader uniform value
@@ -368,7 +373,7 @@ Set shader uniform value
 @defproc[(SetShaderValueV
           [shader _Shader]
           [locIndex _int]
-          [value _pointer #;"const void *"]
+          [value (_pointer-to _void)]
           [uniformType _int]
           [count _int])
          _void]{
@@ -522,14 +527,23 @@ Check if a file has been dropped into window
 }
 
 @defproc[(GetDroppedFiles
-          [count _pointer #;"int *"])
-         _pointer #;"char **"]{
+          [count (_pointer-to _int)])
+         (_pointer-to (_pointer-to _byte))]{
 Get dropped files names (memory should be freed)
+
+Note: the use of @racket[GetDroppedFiles*] is encouraged instead
 }
 
 @defproc[(ClearDroppedFiles)
          _void]{
 Clear dropped files paths buffer (free memory)
+
+Note: the use of @racket[GetDroppedFiles*] is encouraged instead
+}
+
+@defproc[(GetDroppedFiles*)
+         (vectorof string?)]{
+Get dropped files names, converting to Racket strings
 }
 
 @defproc[(SaveStorageValue
@@ -808,7 +822,7 @@ Set camera mode (multiple camera modes available)
 }
 
 @defproc[(UpdateCamera
-          [camera _pointer #;"Camera *"])
+          [camera (_pointer-to _Camera)])
          _void]{
 Update camera position for selected mode
 }
@@ -922,7 +936,7 @@ Draw line using cubic bezier curves with 2 control points
 }
 
 @defproc[(DrawLineStrip
-          [points _pointer #;"Vector2 *"]
+          [points (_pointer-to _Vector2)]
           [pointCount _int]
           [color _Color])
          _void]{
@@ -1153,7 +1167,7 @@ Draw triangle outline (vertex in counter-clockwise order!)
 }
 
 @defproc[(DrawTriangleFan
-          [points _pointer #;"Vector2 *"]
+          [points (_pointer-to _Vector2)]
           [pointCount _int]
           [color _Color])
          _void]{
@@ -1161,7 +1175,7 @@ Draw a triangle fan defined by points (first vertex is the center)
 }
 
 @defproc[(DrawTriangleStrip
-          [points _pointer #;"Vector2 *"]
+          [points (_pointer-to _Vector2)]
           [pointCount _int]
           [color _Color])
          _void]{
@@ -1252,7 +1266,7 @@ Check if point is inside a triangle
           [endPos1 _Vector2]
           [startPos2 _Vector2]
           [endPos2 _Vector2]
-          [collisionPoint _pointer #;"Vector2 *"])
+          [collisionPoint (_pointer-to _Vector2)])
          _bool]{
 Check the collision between two lines defined by two points each, returns collision point by reference
 }
@@ -1291,14 +1305,14 @@ Load image from RAW file data
 
 @defproc[(LoadImageAnim
           [fileName _string]
-          [frames _pointer #;"int *"])
+          [frames (_pointer-to _int)])
          _Image]{
 Load image sequence from file (frames appended to image.data)
 }
 
 @defproc[(LoadImageFromMemory
           [fileType _string]
-          [fileData _pointer #;"const unsigned char *"]
+          [fileData (_pointer-to _ubyte)]
           [dataSize _int])
          _Image]{
 Load image from memory buffer, fileType refers to extension: i.e. '.png'
@@ -1430,35 +1444,35 @@ Create an image from text (custom sprite font)
 }
 
 @defproc[(ImageFormat
-          [image _pointer #;"Image *"]
+          [image (_pointer-to _Image)]
           [newFormat _int])
          _void]{
 Convert image data to desired format
 }
 
 @defproc[(ImageToPOT
-          [image _pointer #;"Image *"]
+          [image (_pointer-to _Image)]
           [fill _Color])
          _void]{
 Convert image to POT (power-of-two)
 }
 
 @defproc[(ImageCrop
-          [image _pointer #;"Image *"]
+          [image (_pointer-to _Image)]
           [crop _Rectangle])
          _void]{
 Crop an image to a defined rectangle
 }
 
 @defproc[(ImageAlphaCrop
-          [image _pointer #;"Image *"]
+          [image (_pointer-to _Image)]
           [threshold _float])
          _void]{
 Crop image depending on alpha value
 }
 
 @defproc[(ImageAlphaClear
-          [image _pointer #;"Image *"]
+          [image (_pointer-to _Image)]
           [color _Color]
           [threshold _float])
          _void]{
@@ -1466,20 +1480,20 @@ Clear alpha channel to desired color
 }
 
 @defproc[(ImageAlphaMask
-          [image _pointer #;"Image *"]
+          [image (_pointer-to _Image)]
           [alphaMask _Image])
          _void]{
 Apply alpha mask to image
 }
 
 @defproc[(ImageAlphaPremultiply
-          [image _pointer #;"Image *"])
+          [image (_pointer-to _Image)])
          _void]{
 Premultiply alpha channel
 }
 
 @defproc[(ImageResize
-          [image _pointer #;"Image *"]
+          [image (_pointer-to _Image)]
           [newWidth _int]
           [newHeight _int])
          _void]{
@@ -1487,7 +1501,7 @@ Resize image (Bicubic scaling algorithm)
 }
 
 @defproc[(ImageResizeNN
-          [image _pointer #;"Image *"]
+          [image (_pointer-to _Image)]
           [newWidth _int]
           [newHeight _int])
          _void]{
@@ -1495,7 +1509,7 @@ Resize image (Nearest-Neighbor scaling algorithm)
 }
 
 @defproc[(ImageResizeCanvas
-          [image _pointer #;"Image *"]
+          [image (_pointer-to _Image)]
           [newWidth _int]
           [newHeight _int]
           [offsetX _int]
@@ -1506,13 +1520,13 @@ Resize canvas and fill with color
 }
 
 @defproc[(ImageMipmaps
-          [image _pointer #;"Image *"])
+          [image (_pointer-to _Image)])
          _void]{
 Compute all mipmap levels for a provided image
 }
 
 @defproc[(ImageDither
-          [image _pointer #;"Image *"]
+          [image (_pointer-to _Image)]
           [rBpp _int]
           [gBpp _int]
           [bBpp _int]
@@ -1522,64 +1536,64 @@ Dither image data to 16bpp or lower (Floyd-Steinberg dithering)
 }
 
 @defproc[(ImageFlipVertical
-          [image _pointer #;"Image *"])
+          [image (_pointer-to _Image)])
          _void]{
 Flip image vertically
 }
 
 @defproc[(ImageFlipHorizontal
-          [image _pointer #;"Image *"])
+          [image (_pointer-to _Image)])
          _void]{
 Flip image horizontally
 }
 
 @defproc[(ImageRotateCW
-          [image _pointer #;"Image *"])
+          [image (_pointer-to _Image)])
          _void]{
 Rotate image clockwise 90deg
 }
 
 @defproc[(ImageRotateCCW
-          [image _pointer #;"Image *"])
+          [image (_pointer-to _Image)])
          _void]{
 Rotate image counter-clockwise 90deg
 }
 
 @defproc[(ImageColorTint
-          [image _pointer #;"Image *"]
+          [image (_pointer-to _Image)]
           [color _Color])
          _void]{
 Modify image color: tint
 }
 
 @defproc[(ImageColorInvert
-          [image _pointer #;"Image *"])
+          [image (_pointer-to _Image)])
          _void]{
 Modify image color: invert
 }
 
 @defproc[(ImageColorGrayscale
-          [image _pointer #;"Image *"])
+          [image (_pointer-to _Image)])
          _void]{
 Modify image color: grayscale
 }
 
 @defproc[(ImageColorContrast
-          [image _pointer #;"Image *"]
+          [image (_pointer-to _Image)]
           [contrast _float])
          _void]{
 Modify image color: contrast (-100 to 100)
 }
 
 @defproc[(ImageColorBrightness
-          [image _pointer #;"Image *"]
+          [image (_pointer-to _Image)]
           [brightness _int])
          _void]{
 Modify image color: brightness (-255 to 255)
 }
 
 @defproc[(ImageColorReplace
-          [image _pointer #;"Image *"]
+          [image (_pointer-to _Image)]
           [color _Color]
           [replace _Color])
          _void]{
@@ -1588,26 +1602,26 @@ Modify image color: replace color
 
 @defproc[(LoadImageColors
           [image _Image])
-         _pointer #;"Color *"]{
+         (_pointer-to _Color)]{
 Load color data from image as a Color array (RGBA - 32bit)
 }
 
 @defproc[(LoadImagePalette
           [image _Image]
           [maxPaletteSize _int]
-          [colorCount _pointer #;"int *"])
-         _pointer #;"Color *"]{
+          [colorCount (_pointer-to _int)])
+         (_pointer-to _Color)]{
 Load colors palette from image as a Color array (RGBA - 32bit)
 }
 
 @defproc[(UnloadImageColors
-          [colors _pointer #;"Color *"])
+          [colors (_pointer-to _Color)])
          _void]{
 Unload color data loaded with LoadImageColors()
 }
 
 @defproc[(UnloadImagePalette
-          [colors _pointer #;"Color *"])
+          [colors (_pointer-to _Color)])
          _void]{
 Unload colors palette loaded with LoadImagePalette()
 }
@@ -1628,14 +1642,14 @@ Get image pixel color at (x, y) position
 }
 
 @defproc[(ImageClearBackground
-          [dst _pointer #;"Image *"]
+          [dst (_pointer-to _Image)]
           [color _Color])
          _void]{
 Clear image background with given color
 }
 
 @defproc[(ImageDrawPixel
-          [dst _pointer #;"Image *"]
+          [dst (_pointer-to _Image)]
           [posX _int]
           [posY _int]
           [color _Color])
@@ -1644,7 +1658,7 @@ Draw pixel within an image
 }
 
 @defproc[(ImageDrawPixelV
-          [dst _pointer #;"Image *"]
+          [dst (_pointer-to _Image)]
           [position _Vector2]
           [color _Color])
          _void]{
@@ -1652,7 +1666,7 @@ Draw pixel within an image (Vector version)
 }
 
 @defproc[(ImageDrawLine
-          [dst _pointer #;"Image *"]
+          [dst (_pointer-to _Image)]
           [startPosX _int]
           [startPosY _int]
           [endPosX _int]
@@ -1663,7 +1677,7 @@ Draw line within an image
 }
 
 @defproc[(ImageDrawLineV
-          [dst _pointer #;"Image *"]
+          [dst (_pointer-to _Image)]
           [start _Vector2]
           [end _Vector2]
           [color _Color])
@@ -1672,7 +1686,7 @@ Draw line within an image (Vector version)
 }
 
 @defproc[(ImageDrawCircle
-          [dst _pointer #;"Image *"]
+          [dst (_pointer-to _Image)]
           [centerX _int]
           [centerY _int]
           [radius _int]
@@ -1682,7 +1696,7 @@ Draw circle within an image
 }
 
 @defproc[(ImageDrawCircleV
-          [dst _pointer #;"Image *"]
+          [dst (_pointer-to _Image)]
           [center _Vector2]
           [radius _int]
           [color _Color])
@@ -1691,7 +1705,7 @@ Draw circle within an image (Vector version)
 }
 
 @defproc[(ImageDrawRectangle
-          [dst _pointer #;"Image *"]
+          [dst (_pointer-to _Image)]
           [posX _int]
           [posY _int]
           [width _int]
@@ -1702,7 +1716,7 @@ Draw rectangle within an image
 }
 
 @defproc[(ImageDrawRectangleV
-          [dst _pointer #;"Image *"]
+          [dst (_pointer-to _Image)]
           [position _Vector2]
           [size _Vector2]
           [color _Color])
@@ -1711,7 +1725,7 @@ Draw rectangle within an image (Vector version)
 }
 
 @defproc[(ImageDrawRectangleRec
-          [dst _pointer #;"Image *"]
+          [dst (_pointer-to _Image)]
           [rec _Rectangle]
           [color _Color])
          _void]{
@@ -1719,7 +1733,7 @@ Draw rectangle within an image
 }
 
 @defproc[(ImageDrawRectangleLines
-          [dst _pointer #;"Image *"]
+          [dst (_pointer-to _Image)]
           [rec _Rectangle]
           [thick _int]
           [color _Color])
@@ -1728,7 +1742,7 @@ Draw rectangle lines within an image
 }
 
 @defproc[(ImageDraw
-          [dst _pointer #;"Image *"]
+          [dst (_pointer-to _Image)]
           [src _Image]
           [srcRec _Rectangle]
           [dstRec _Rectangle]
@@ -1738,7 +1752,7 @@ Draw a source image within a destination image (tint applied to source)
 }
 
 @defproc[(ImageDrawText
-          [dst _pointer #;"Image *"]
+          [dst (_pointer-to _Image)]
           [text _string]
           [posX _int]
           [posY _int]
@@ -1749,7 +1763,7 @@ Draw text (using default font) within an image (destination)
 }
 
 @defproc[(ImageDrawTextEx
-          [dst _pointer #;"Image *"]
+          [dst (_pointer-to _Image)]
           [font _Font]
           [text _string]
           [position _Vector2]
@@ -1800,7 +1814,7 @@ Unload render texture from GPU memory (VRAM)
 
 @defproc[(UpdateTexture
           [texture _Texture2D]
-          [pixels _pointer #;"const void *"])
+          [pixels (_pointer-to _void)])
          _void]{
 Update GPU texture with new data
 }
@@ -1808,13 +1822,13 @@ Update GPU texture with new data
 @defproc[(UpdateTextureRec
           [texture _Texture2D]
           [rec _Rectangle]
-          [pixels _pointer #;"const void *"])
+          [pixels (_pointer-to _void)])
          _void]{
 Update GPU texture rectangle with new data
 }
 
 @defproc[(GenTextureMipmaps
-          [texture _pointer #;"Texture2D *"])
+          [texture (_pointer-to _Texture2D)])
          _void]{
 Generate GPU mipmaps for a texture
 }
@@ -1916,8 +1930,8 @@ Draws a texture (or part of it) that stretches or shrinks nicely
 @defproc[(DrawTexturePoly
           [texture _Texture2D]
           [center _Vector2]
-          [points _pointer #;"Vector2 *"]
-          [texcoords _pointer #;"Vector2 *"]
+          [points (_pointer-to _Vector2)]
+          [texcoords (_pointer-to _Vector2)]
           [pointCount _int]
           [tint _Color])
          _void]{
@@ -1985,14 +1999,14 @@ Get Color structure from hexadecimal value
 }
 
 @defproc[(GetPixelColor
-          [srcPtr _pointer #;"void *"]
+          [srcPtr (_pointer-to _void)]
           [format _int])
          _Color]{
 Get Color from a source pixel pointer of certain format
 }
 
 @defproc[(SetPixelColor
-          [dstPtr _pointer #;"void *"]
+          [dstPtr (_pointer-to _void)]
           [color _Color]
           [format _int])
          _void]{
@@ -2021,7 +2035,7 @@ Load font from file into GPU memory (VRAM)
 @defproc[(LoadFontEx
           [fileName _string]
           [fontSize _int]
-          [fontChars _pointer #;"int *"]
+          [fontChars (_pointer-to _int)]
           [glyphCount _int])
          _Font]{
 Load font from file with extended parameters
@@ -2037,29 +2051,29 @@ Load font from Image (XNA style)
 
 @defproc[(LoadFontFromMemory
           [fileType _string]
-          [fileData _pointer #;"const unsigned char *"]
+          [fileData (_pointer-to _ubyte)]
           [dataSize _int]
           [fontSize _int]
-          [fontChars _pointer #;"int *"]
+          [fontChars (_pointer-to _int)]
           [glyphCount _int])
          _Font]{
 Load font from memory buffer, fileType refers to extension: i.e. '.ttf'
 }
 
 @defproc[(LoadFontData
-          [fileData _pointer #;"const unsigned char *"]
+          [fileData (_pointer-to _ubyte)]
           [dataSize _int]
           [fontSize _int]
-          [fontChars _pointer #;"int *"]
+          [fontChars (_pointer-to _int)]
           [glyphCount _int]
           [type _int])
-         _pointer #;"GlyphInfo *"]{
+         (_pointer-to _GlyphInfo)]{
 Load font data for further use
 }
 
 @defproc[(GenImageFontAtlas
-          [chars _pointer #;"const GlyphInfo *"]
-          [recs _pointer #;"Rectangle **"]
+          [chars (_pointer-to _GlyphInfo)]
+          [recs (_pointer-to (_pointer-to _Rectangle))]
           [glyphCount _int]
           [fontSize _int]
           [padding _int]
@@ -2069,7 +2083,7 @@ Generate image font atlas using chars info
 }
 
 @defproc[(UnloadFontData
-          [chars _pointer #;"GlyphInfo *"]
+          [chars (_pointer-to _GlyphInfo)]
           [glyphCount _int])
          _void]{
 Unload font chars info data (RAM)
@@ -2171,13 +2185,13 @@ Get glyph rectangle in font atlas for a codepoint (unicode character), fallback 
 
 @defproc[(LoadCodepoints
           [text _string]
-          [count _pointer #;"int *"])
-         _pointer #;"int *"]{
+          [count (_pointer-to _int)])
+         (_pointer-to _int)]{
 Load all codepoints from a UTF-8 text string, codepoints count returned by parameter
 }
 
 @defproc[(UnloadCodepoints
-          [codepoints _pointer #;"int *"])
+          [codepoints (_pointer-to _int)])
          _void]{
 Unload codepoints data from memory
 }
@@ -2218,7 +2232,7 @@ Load wave data from file
 
 @defproc[(LoadWaveFromMemory
           [fileType _string]
-          [fileData _pointer #;"const unsigned char *"]
+          [fileData (_pointer-to _ubyte)]
           [dataSize _int])
          _Wave]{
 Load wave from memory buffer, fileType refers to extension: i.e. '.wav'
@@ -2238,7 +2252,7 @@ Load sound from wave data
 
 @defproc[(UpdateSound
           [sound _Sound]
-          [data _pointer #;"const void *"]
+          [data (_pointer-to _void)]
           [sampleCount _int])
          _void]{
 Update sound buffer with new data
@@ -2331,7 +2345,7 @@ Set pitch for a sound (1.0 is base level)
 }
 
 @defproc[(WaveFormat
-          [wave _pointer #;"Wave *"]
+          [wave (_pointer-to _Wave)]
           [sampleRate _int]
           [sampleSize _int]
           [channels _int])
@@ -2346,7 +2360,7 @@ Copy a wave to a new wave
 }
 
 @defproc[(WaveCrop
-          [wave _pointer #;"Wave *"]
+          [wave (_pointer-to _Wave)]
           [initSample _int]
           [finalSample _int])
          _void]{
@@ -2355,12 +2369,12 @@ Crop a wave to defined samples range
 
 @defproc[(LoadWaveSamples
           [wave _Wave])
-         _pointer #;"float *"]{
+         (_pointer-to _float)]{
 Load samples data from wave as a floats array
 }
 
 @defproc[(UnloadWaveSamples
-          [samples _pointer #;"float *"])
+          [samples (_pointer-to _float)])
          _void]{
 Unload samples data loaded with LoadWaveSamples()
 }
@@ -2373,7 +2387,7 @@ Load music stream from file
 
 @defproc[(LoadMusicStreamFromMemory
           [fileType _string]
-          [data _pointer #;"unsigned char *"]
+          [data (_pointer-to _ubyte)]
           [dataSize _int])
          _Music]{
 Load music stream from data
@@ -2470,7 +2484,7 @@ Unload audio stream and free memory
 
 @defproc[(UpdateAudioStream
           [stream _AudioStream]
-          [data _pointer #;"const void *"]
+          [data (_pointer-to _void)]
           [frameCount _int])
          _void]{
 Update audio stream buffers with data

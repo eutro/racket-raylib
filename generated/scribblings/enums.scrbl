@@ -2,9 +2,10 @@
 
 @(require (for-label raylib/generated/enums ffi/unsafe racket/base))
 
+@title{Enums}
+
 @table-of-contents[]
 
-@title{Enums}
 @defmodule[raylib/generated/enums]
 
 @section{System/Window config flags}

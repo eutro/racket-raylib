@@ -12,7 +12,7 @@
 @list{
 #lang racket/base
 
-(require ffi/unsafe ffi/unsafe/define @|structs-mod|)
+(require ffi/unsafe ffi/unsafe/define @|structs-mod| raylib/support)
 
 (define-ffi-definer define-raylib (ffi-lib "libraylib")
   #:provide provide-protected

@@ -75,41 +75,38 @@ EOF
 
 (InitWindow screen-width screen-height "raylib [core] example - drop files")
 
-(define count-ptr (malloc _int))
-(ptr-set! count-ptr _int 0)
-(define dropped-files #f)
+(define dropped-files (vector))
 
 (SetTargetFPS 60)
 
 (let loop ()
   (unless (WindowShouldClose)
     (when (IsFileDropped)
-      (set! dropped-files (GetDroppedFiles count-ptr)))
+      (set! dropped-files (GetDroppedFiles*)))
 
     (BeginDrawing)
 
     (ClearBackground RAYWHITE)
 
-    (define count-v (ptr-ref count-ptr _int))
+    (define count-v (vector-length dropped-files))
     (cond
       [(= count-v 0)
        (DrawText "Drop your files to this window!" 100 40 20 DARKGRAY)]
       [else
        (DrawText "Dropped files:" 100 40 20 DARKGRAY)
 
-       (for ([i (in-range count-v)])
+       (for ([i (in-range count-v)]
+             [dropped-file (in-vector dropped-files)])
          (if (even? i)
              (DrawRectangle 0 (+ 85 (* 40 i)) screen-width 40 (Fade LIGHTGRAY 0.5))
              (DrawRectangle 0 (+ 85 (* 40 i)) screen-width 40 (Fade LIGHTGRAY 0.3)))
 
-         (DrawText (ptr-ref dropped-files _string i) 120 (+ 100 (* 40 i)) 10 GRAY))
+         (DrawText dropped-file 120 (+ 100 (* 40 i)) 10 GRAY))
 
        (DrawText "Drop new files..." 100 (+ 110 (* 40 count-v)) 20 DARKGRAY)])
 
     (EndDrawing)
 
     (loop)))
-
-(ClearDroppedFiles)
 
 (CloseWindow)

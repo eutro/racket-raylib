@@ -1,7 +1,7 @@
 #lang scribble/manual
 
 @title{Raylib 2D Bindings}
-Unsafe bindings for @deftech{@hyperlink["https://www.raylib.com/"]{Raylib}}'s
+Unsafe bindings for @hyperlink["https://www.raylib.com/"]{Raylib}'s
 2D components.
 
 These bindings are currently for Raylib 4.0.

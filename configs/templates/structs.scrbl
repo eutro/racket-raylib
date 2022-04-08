@@ -15,11 +15,12 @@
 @list{
 #lang scribble/manual
 
-@"@"(require (for-label @|this-mod| ffi/unsafe racket/base))
+@"@"(require (for-label @|this-mod| raylib/support ffi/unsafe racket/base))
+
+@"@"title{Structs}
 
 @"@"table-of-contents[]
 
-@"@"title{Structs}
 @"@"defmodule[@|this-mod|]
 @"@"section{Struct types}
 @(for/list ([struct-parsed (in-list structs-parsed)])

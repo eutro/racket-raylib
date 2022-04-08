@@ -35,7 +35,7 @@
   (template "./templates/root.scrbl" 'generate-root)
   #:title @list{Raylib 2D Bindings}
   #:top-desc @list{
-  Unsafe bindings for @"@"deftech{@"@"hyperlink["https://www.raylib.com/"]{Raylib}}'s
+  Unsafe bindings for @"@"hyperlink["https://www.raylib.com/"]{Raylib}'s
   2D components.
 
   These bindings are currently for Raylib @|raylib-version|.
@@ -312,3 +312,7 @@
    ((template (format in-fmt "./templates/enums") 'generate-enums)
     #:module @list{raylib/2d/enums}
     (parsed 'enums))))
+
+(apply-patch
+ #:from "./patches/2d.patch"
+ "-p1")

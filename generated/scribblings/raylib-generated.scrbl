@@ -2,7 +2,7 @@
 
 @title{Generated Raylib Bindings}
 Unsafe, automatically generated bindings for
-@deftech{@hyperlink["https://www.raylib.com/"]{Raylib}}
+@hyperlink["https://www.raylib.com/"]{Raylib}
 4.0.
 
 @table-of-contents[]
