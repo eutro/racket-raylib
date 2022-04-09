@@ -279,7 +279,8 @@
 
  @"@"(require (for-label raylib/generated/unsafe/functions
                          racket/gui/base
-                         racket/base))
+                         racket/base
+                         ffi/unsafe))
 
  @"@"title{2D Functions}
 
