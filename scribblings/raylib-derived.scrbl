@@ -1,6 +1,7 @@
 #lang scribble/manual
 
 @(require (for-label ffi/unsafe
+                     racket/contract/base
                      raylib/derived/unsafe
                      raylib/generated/structs
                      racket/base))
