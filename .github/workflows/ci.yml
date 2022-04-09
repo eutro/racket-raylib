@@ -2,7 +2,7 @@ on: [push, pull_request]
 name: CI
 jobs:
   build:
-    name: "Build on Racket '${{ matrix.racket-version }}' (${{ matrix.racket-variant }}, ${{ matrix.platform }})"
+    name: "Build on Racket '${{ matrix.racket-version }}' (${{ matrix.racket-variant }}, ${{ matrix.running-on }})"
     runs-on: ${{matrix.running-on}}
     strategy:
       matrix:
