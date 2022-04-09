@@ -1,6 +1,9 @@
 #lang racket/base
 
 (require ffi/unsafe
+         racket/runtime-path
+         racket/match
+         raylib/generated/version
          (for-syntax racket/base
                      syntax/parse))
 
@@ -10,7 +13,43 @@
          borrow
          (protect-out raylib-ffi-obj))
 
-(define raylib-ffi-obj (ffi-lib "libraylib"))
+(define-runtime-path lib-path '(lib "raylib/lib"))
+
+(define raylib-ffi-obj
+  (or
+   (let ([supplied (getenv "RACKET_RAYLIB_PATH")])
+     (and supplied (ffi-lib supplied)))
+   (let ([RAYLIB_VERSION (number->string RAYLIB_VERSION)])
+     (define ((non-bundled name))
+       (ffi-lib
+        name
+        (list RAYLIB_VERSION #f)
+        #:fail
+        (lambda ()
+          (raise
+           (exn:fail
+            (string-append
+             "could not load Raylib;\n"
+             "  your operating system may not have prebuilt binaries published;\n"
+             "  or they are incompatible with your system;"
+             "  consider installing Raylib yourself, and/or setting RACKET_RAYLIB_PATH\n")
+            (current-continuation-marks))))))
+     (match (list (system-type 'os)
+                  (system-type 'arch)
+                  (system-type 'word))
+       [(list 'unix 'x86_64 _)
+        (ffi-lib (build-path lib-path "linux_amd64" "libraylib.so")
+                 #:fail (non-bundled "libraylib"))]
+       [(list 'macosx _ _)
+        (ffi-lib (build-path lib-path "macos" "libraylib.dylib")
+                 #:fail (non-bundled "libraylib"))]
+       [(list 'windows _ 32)
+        (ffi-lib (build-path lib-path "win32_msvc16" "raylib.dll")
+                 #:fail (non-bundled "raylib"))]
+       [(list 'windows _ 64)
+        (ffi-lib (build-path lib-path "win64_msvc16" "raylib.dll")
+                 #:fail (non-bundled "raylib"))]
+       [_ ((non-bundled))]))))
 
 (define-syntax-rule (_pointer-to _type)
   _pointer)

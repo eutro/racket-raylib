@@ -6,9 +6,16 @@
          racket/runtime-path
          racket/file
          racket/system
+         racket/port
+         racket/string
+         racket/match
 
          net/git-checkout
          net/url
+
+         file/untar
+         file/unzip
+         file/gunzip
 
          raylib/codegen/codegen)
 
@@ -24,13 +31,106 @@
 (define generate-code (make-parameter #f))
 (define delete-raylib (make-parameter #f))
 
+(define raylib-platforms
+  '(("linux_amd64"     tar "libraylib.so.~a" "libraylib.so")
+    ("macos"           tar "libraylib.~a.dylib" "libraylib.dylib")
+    ("win32_mingw-w64" zip "raylib.dll" "raylib.dll")
+    ("win32_msvc16"    zip "raylib.dll" "raylib.dll")
+    ("win64_mingw-w64" zip "raylib.dll" "raylib.dll")
+    ("win64_msvc16"    zip "raylib.dll" "raylib.dll")))
+
 (define (assert-success code)
   (unless (= 0 code)
     (exit code)))
 
+(define untgz ;; file/untgz doesn't provide #:handle-entry
+  (make-keyword-procedure
+   (lambda (kws kwargs port)
+     (define-values (in out) (make-pipe 4096))
+     (define t
+       (thread
+        (lambda ()
+          (dynamic-wind
+            void
+            (lambda () (gunzip-through-ports port out))
+            (lambda () (close-output-port out))))))
+     (keyword-apply untar kws kwargs in null)
+     (copy-port in (open-output-nowhere))
+     (thread-wait t))))
+
+(define (extract-from-archive
+         type port
+         target-file
+         out-file)
+  (define success? #f)
+  (define files null)
+  (define (save port)
+    (make-parent-directory* out-file)
+    (call-with-output-file* out-file
+      (lambda (out) (copy-port port out)))
+    (set! success? #t))
+  (case type
+    [(tar)
+     (define (tar-filter path dest type size link-target modified perms)
+       (set! files (cons path files))
+       (and (eq? type 'file)
+            (string-suffix? (path->string path) target-file)))
+     (define (handle-entry kind path content size attribs)
+       (save (make-limited-input-port content size #f))
+       null)
+     (untgz port #:filter tar-filter #:handle-entry handle-entry)]
+    [(zip)
+     (define (entry-reader name dir? inflated)
+       (set! files (cons name files))
+       (when (string-suffix? (bytes->string/utf-8 name) target-file)
+         (save inflated)))
+     (unzip port entry-reader)])
+  (values success? files))
+
 (define (main ref)
   (when (fetch-libs)
-    (displayln "--- Fetching Raylib libraries"))
+    (displayln "--- Fetching Raylib libraries")
+    (delete-directory/files lib-path #:must-exist? #f)
+    (define download-fmt-tar
+      (format "https://github.com/raysan5/raylib/releases/download/~a/raylib-~a_~~a.tar.gz"
+              ref ref))
+    (define download-fmt-zip
+      (format "https://github.com/raysan5/raylib/releases/download/~a/raylib-~a_~~a.zip"
+              ref ref))
+    (for ([platform (in-list raylib-platforms)])
+      (match-define (list platform-name archive-format target-file-fmt out-file-name) platform)
+      (define archive-url
+        (format
+         (if (eq? 'tar archive-format)
+             download-fmt-tar
+             download-fmt-zip)
+         platform-name))
+      (define target-file
+        (if (string-contains? target-file-fmt "~")
+            (format target-file-fmt ref)
+            target-file-fmt))
+      (define out-file (build-path lib-path platform-name out-file-name))
+      (printf "fetching ~a for ~a\n" target-file platform-name)
+      (define port (get-pure-port (string->url archive-url) #:redirections 10))
+      (dynamic-wind
+        void
+        (lambda ()
+          (define-values (success? files)
+            (extract-from-archive
+             archive-format
+             port
+             target-file
+             out-file))
+          (unless success?
+            (printf "could not find ~a in archive at ~a\n"
+                    target-file
+                    archive-url)
+            (displayln "files in archive:")
+            (for ([archive-file (in-list files)])
+              (displayln archive-file))
+            (raise-user-error "extraction failed")))
+        (lambda ()
+          (close-input-port port)))))
 
   (when (checkout-raylib)
     (displayln "--- Checking out Raylib")
@@ -80,7 +180,12 @@
    #:once-any
    [("--all")
     "enable all options"
-    (for ([opt (in-list (list checkout-raylib parse-api generate-code delete-raylib))])
+    (for ([opt
+           (in-list (list fetch-libs
+                          checkout-raylib
+                          parse-api
+                          generate-code
+                          delete-raylib))])
       (opt #t))]
    #:once-any
    [("--libs") "fetch Raylib binaries from GitHub releases" (fetch-libs #t)]

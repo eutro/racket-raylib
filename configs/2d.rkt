@@ -262,7 +262,7 @@
  #:from
  (generate-reexport
   (cons @list{raylib/generated/unsafe/functions} exclusion-list)
-  (list @list{raylib/unsafe/derived})))
+  (list @list{raylib/derived/unsafe})))
 
 (for ([base (in-list '("structs" "enums" "constants"))])
   (output
@@ -288,7 +288,7 @@
  @"@"(define functions-ref
        @"@"racketmodname[raylib/generated/unsafe/functions])
 
- This module re-exports @"@"racketmodname[raylib/unsafe/derived] and
+ This module re-exports @"@"racketmodname[raylib/derived/unsafe] and
  most of @"@"|functions-ref|. Specifically, @"@"racketmodname[raylib/2d/unsafe]
  re-exports everything that is useful for 2D rendering with Raylib.
 
