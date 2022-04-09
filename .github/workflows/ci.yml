@@ -2,10 +2,11 @@ on: [push, pull_request]
 name: CI
 jobs:
   build:
-    name: "Build on Racket '${{ matrix.racket-version }}' (${{ matrix.racket-variant }})"
-    runs-on: ubuntu-latest
+    name: "Build on Racket '${{ matrix.racket-version }}' (${{ matrix.racket-variant }}, ${{ matrix.platform }})"
+    runs-on: ${{matrix.running-on}}
     strategy:
       matrix:
+        running-on: ["ubuntu-latest", "windows-latest", "macos-latest"]
         racket-version: ["stable", "current"]
         racket-variant: ["BC", "CS"]
     steps:
