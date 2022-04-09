@@ -6,7 +6,8 @@
   '("codegen"
     "configs"
     "raylib-parser"
-    "working"))
+    "working"
+    "x.rkt"))
 
 (define deps
   '("base"))

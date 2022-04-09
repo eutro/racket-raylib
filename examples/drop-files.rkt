@@ -1,10 +1,7 @@
 #!/usr/bin/env racket
-#lang racket
+#lang racket/base
 
-(require raylib/2d/unsafe
-         ffi/unsafe)
-
-#<<EOF
+(void #<<EOF
 #include "raylib.h"
 
 int main(void)
@@ -69,44 +66,48 @@ int main(void)
     return 0;
 }
 EOF
+)
 
-(define screen-width 800)
-(define screen-height 450)
+(module+ main
+  (require raylib/2d/unsafe)
 
-(InitWindow screen-width screen-height "raylib [core] example - drop files")
+  (define screen-width 800)
+  (define screen-height 450)
 
-(define dropped-files (vector))
+  (InitWindow screen-width screen-height "raylib [core] example - drop files")
 
-(SetTargetFPS 60)
+  (define dropped-files (vector))
 
-(let loop ()
-  (unless (WindowShouldClose)
-    (when (IsFileDropped)
-      (set! dropped-files (GetDroppedFiles*)))
+  (SetTargetFPS 60)
 
-    (BeginDrawing)
+  (let loop ()
+    (unless (WindowShouldClose)
+      (when (IsFileDropped)
+        (set! dropped-files (GetDroppedFiles*)))
 
-    (ClearBackground RAYWHITE)
+      (BeginDrawing)
 
-    (define count-v (vector-length dropped-files))
-    (cond
-      [(= count-v 0)
-       (DrawText "Drop your files to this window!" 100 40 20 DARKGRAY)]
-      [else
-       (DrawText "Dropped files:" 100 40 20 DARKGRAY)
+      (ClearBackground RAYWHITE)
 
-       (for ([i (in-range count-v)]
-             [dropped-file (in-vector dropped-files)])
-         (if (even? i)
-             (DrawRectangle 0 (+ 85 (* 40 i)) screen-width 40 (Fade LIGHTGRAY 0.5))
-             (DrawRectangle 0 (+ 85 (* 40 i)) screen-width 40 (Fade LIGHTGRAY 0.3)))
+      (define count-v (vector-length dropped-files))
+      (cond
+        [(= count-v 0)
+         (DrawText "Drop your files to this window!" 100 40 20 DARKGRAY)]
+        [else
+         (DrawText "Dropped files:" 100 40 20 DARKGRAY)
 
-         (DrawText dropped-file 120 (+ 100 (* 40 i)) 10 GRAY))
+         (for ([i (in-range count-v)]
+               [dropped-file (in-vector dropped-files)])
+           (if (even? i)
+               (DrawRectangle 0 (+ 85 (* 40 i)) screen-width 40 (Fade LIGHTGRAY 0.5))
+               (DrawRectangle 0 (+ 85 (* 40 i)) screen-width 40 (Fade LIGHTGRAY 0.3)))
 
-       (DrawText "Drop new files..." 100 (+ 110 (* 40 count-v)) 20 DARKGRAY)])
+           (DrawText dropped-file 120 (+ 100 (* 40 i)) 10 GRAY))
 
-    (EndDrawing)
+         (DrawText "Drop new files..." 100 (+ 110 (* 40 count-v)) 20 DARKGRAY)])
 
-    (loop)))
+      (EndDrawing)
 
-(CloseWindow)
+      (loop)))
+
+  (CloseWindow))
