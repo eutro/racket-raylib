@@ -99,3 +99,9 @@
     [(_ var:ptr-var-expr)
      (syntax/loc stx
        var.borrow)]))
+
+(module+ test
+  ;; just instantiate them as a test
+  (for ([mod (in-list '(raylib/2d/unsafe
+                        raylib/generated/unsafe))])
+    (dynamic-require mod #f)))
