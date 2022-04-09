@@ -1,16 +1,18 @@
 #lang scribble/manual
 
 @(require (for-label ffi/unsafe
-                     raylib/derived
+                     raylib/derived/unsafe
                      raylib/generated/structs
                      racket/base))
 
 @title{Raylib Derived Utilities}
 
-@defmodule[raylib/derived]
+@defmodule[raylib/derived/unsafe]
 
 Derived Raylib utilities, often modified versions of raw definitions
 from @racketmodname[raylib/generated/unsafe/functions].
+
+These are still unsafe, in that they can cause undefined behaviour if misused.
 
 @defproc[(GetDroppedFiles*) (vectorof string?)]{
 Modified version of @racket[GetDroppedFiles], which returns a vector directly, and clears the

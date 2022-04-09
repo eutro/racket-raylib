@@ -23,11 +23,8 @@
 
  Unsafe bindings for Raylib's 2D components.
 
- These bindings are currently for Raylib @|raylib-version|.
-
- Most of these bindings are perfectly safe, as long as they are not horribly misused.
- They are called and marked "unsafe", since they are a thin wrapper over a C API,
- and thus undefined behaviour is possible if the bindings are used incorrectly.
+ They are called and marked unsafe, since they can cause undefined behaviour
+ if misused, as they are a thin wrapper over a C API.
 
  @"@"defmodule[raylib/2d/unsafe]
 
@@ -265,7 +262,7 @@
  #:from
  (generate-reexport
   (cons @list{raylib/generated/unsafe/functions} exclusion-list)
-  (list @list{raylib/derived})))
+  (list @list{raylib/unsafe/derived})))
 
 (for ([base (in-list '("structs" "enums" "constants"))])
   (output
@@ -291,7 +288,7 @@
  @"@"(define functions-ref
        @"@"racketmodname[raylib/generated/unsafe/functions])
 
- This module re-exports @"@"racketmodname[raylib/derived] and
+ This module re-exports @"@"racketmodname[raylib/unsafe/derived] and
  most of @"@"|functions-ref|. Specifically, @"@"racketmodname[raylib/2d/unsafe]
  re-exports everything that is useful for 2D rendering with Raylib.
 

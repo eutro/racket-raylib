@@ -130,7 +130,7 @@
                     GetRayCollisionMesh
                     GetRayCollisionTriangle
                     GetRayCollisionQuad)
-         raylib/derived)
+         raylib/unsafe/derived)
 
 (provide (all-from-out raylib/generated/unsafe/functions
-                       raylib/derived))
+                       raylib/unsafe/derived))
