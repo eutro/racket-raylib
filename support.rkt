@@ -11,11 +11,11 @@
          ptr-box
          define-ptr
          borrow
-         (protect-out raylib-ffi-obj))
+         (protect-out raylib-ffi-lib))
 
 (define-runtime-path lib-path '(lib "raylib/lib"))
 
-(define raylib-ffi-obj
+(define raylib-ffi-lib
   (or
    (let ([supplied (getenv "RACKET_RAYLIB_PATH")])
      (and supplied (ffi-lib supplied)))

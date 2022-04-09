@@ -27,3 +27,13 @@ but can be referenced as a pointer with @racket[borrow].
 @defform[(borrow var)]{
 "Borrow" a @tech{pointer variable}, taking its memory address as a @racket[cpointer?].
 }
+
+@defthing[raylib-ffi-lib ffi-lib?]{
+The Racket
+@tech[#:doc '(lib "scribblings/foreign/foreign.scrbl")
+      ]{foreign-library value}
+for Raylib.
+
+Use this if you want to redefine any functions to better suit your application.
+The alternative is to use @racket[(ffi-lib #f)] after requiring this module.
+}

@@ -2,7 +2,7 @@
 
 (require ffi/unsafe ffi/unsafe/define raylib/generated/structs raylib/support)
 
-(define-ffi-definer define-raylib raylib-ffi-obj
+(define-ffi-definer define-raylib raylib-ffi-lib
   #:provide provide-protected
   #:default-make-fail make-not-available)
 
