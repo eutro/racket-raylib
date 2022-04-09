@@ -17,6 +17,16 @@
      #:from (parsed 'constants)))))
 
 (output
+ #:to "version.rkt"
+ #:from @list{
+ #lang racket/base
+
+ (provide RAYLIB_VERSION)
+
+ (define RAYLIB_VERSION @|raylib-version|)
+ @(void)})
+
+(output
  #:to "unsafe.rkt"
  #:from
  (apply (template "./templates/root.rkt" 'generate-root)
