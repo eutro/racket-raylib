@@ -17,3 +17,4 @@ These bindings are currently for
 @include-section["../generated/scribblings/raylib-generated.scrbl"]
 @include-section["raylib-derived.scrbl"]
 @include-section["../2d/scribblings/raylib-2d.scrbl"]
+@include-section["../raymath/raylib-raymath.scrbl"]

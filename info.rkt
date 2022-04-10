@@ -6,7 +6,9 @@
   '("codegen"
     "configs"
     "raylib-parser"
+    "raylib-git"
     "working"
+    "raymath/private"
     "x.rkt"))
 
 (define deps

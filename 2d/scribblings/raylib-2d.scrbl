@@ -2,12 +2,12 @@
 
 @title{Raylib 2D Bindings}
 
+@defmodule[raylib/2d/unsafe]
+
 Unsafe bindings for Raylib's 2D components.
 
 They are called and marked unsafe, since they can cause undefined behaviour
 if misused, as they are a thin wrapper over a C API.
-
-@defmodule[raylib/2d/unsafe]
 
 This module re-exports all of
 @racketmodname[raylib/2d/unsafe/functions],

@@ -38,13 +38,12 @@
  (apply
   (template "./templates/root.scrbl" 'generate-root)
   #:title @list{Generated Raylib Bindings}
-  #:top-desc @list{
+  #:module @list{raylib/generated/unsafe}
+  #:desc @list{
   Unsafe, automatically generated bindings for
   @"@"hyperlink["https://www.raylib.com/"]{Raylib}
   @|raylib-version|.
-  }
-  #:module @list{raylib/generated/unsafe}
-  #:module-desc @list{
+
   This module re-exports all of
   @"@"racketmodname[raylib/generated/unsafe/functions],
   @"@"racketmodname[raylib/generated/structs],

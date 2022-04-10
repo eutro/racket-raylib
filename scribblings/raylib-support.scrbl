@@ -12,7 +12,9 @@
 Various utilities to make interfacing with Raylib nicer.
 
 @defform[(_pointer-to type)]{
-Returns @racket[_pointer], but is more useful for documentation.
+A @racket[ctype?] which represents a pointer to @racket[type].
+
+This just returns @racket[_pointer], but is more helpful for documentation.
 }
 
 @defproc[(ptr-box [type ctype?] [value any/c]) cpointer?]{
