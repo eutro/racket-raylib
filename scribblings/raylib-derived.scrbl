@@ -4,6 +4,7 @@
                      racket/contract/base
                      raylib/derived/unsafe
                      raylib/generated/structs
+                     raylib/generated/unsafe/functions
                      racket/base))
 
 @title{Raylib Derived Utilities}
