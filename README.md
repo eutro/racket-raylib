@@ -1,5 +1,9 @@
 # racket-raylib
 
+[![CI](https://github.com/eutro/racket-raylib/actions/workflows/ci.yml/badge.svg)](https://github.com/eutro/racket-raylib/actions/workflows/ci.yml)
+[![Raylib](https://img.shields.io/badge/raylib-4.0.0-green)](https://github.com/raysan5/raylib/releases/tag/4.0.0)
+[![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)](#license)
+
 Semi-automatically generated
 [Raylib](https://github.com/raysan5/raylib) bindings for Racket.
 
