@@ -3,9 +3,20 @@
 Semi-automatically generated
 [Raylib](https://github.com/raysan5/raylib) bindings for Racket.
 
-_All_ functions in
+`raylib/2d/unsafe` (re-)exports all of `raylib.h` which is relevant
+for 2D rendering and games, and is the primary target for this software.
+For more details on excluded functions, consult the documentation.
+
+_All_ functions and types from
 [`raylib.h`](https://github.com/raysan5/raylib/blob/master/src/raylib.h)
-have wrappers and scribble documentation, to ease discoverability.
+have definitions in `raylib/generated/unsafe`. Most of these should
+work, but there is at least one function for which this is impossible.
+
+Functions in
+[`raymath.h`](https://github.com/raysan5/raylib/blob/master/src/raymath.h)
+have been converted to Racket manually, so they may shift out of line
+with the version linked into Raylib. They were written to match those
+in the Raylib 4.0.0 release.
 
 Racket examples can be found in the [examples](examples) directory, C
 examples can be found in [Raylib's

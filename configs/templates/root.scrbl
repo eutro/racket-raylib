@@ -6,14 +6,12 @@
 
 @(define (generate-root
           #:title title
-          #:top-desc desc
           #:module mod
-          #:module-desc mod-desc
+          #:desc mod-desc
           . modules) @list{
 #lang scribble/manual
 
 @"@"title{@|title|}
-@|desc|
 
 @"@"defmodule[@|mod|]
 @|mod-desc|
