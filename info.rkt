@@ -11,6 +11,9 @@
     "raymath/private"
     "x.rkt"))
 
+(define test-omit-paths
+  '("raymath/private"))
+
 (define deps
   '("base"))
 
