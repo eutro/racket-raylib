@@ -18,9 +18,11 @@ Manually written bindings for Raylib's Raymath module.
 These are marked as unsafe because safety cannot be guaranteed,
 but you are very unlikely to experience undefined behaviour using this.
 
-@deftogether[(@defthing[_float3 ctype? #:value (_array/vector _float 3)]
-              @defthing[_float16 ctype? #:value (_array/vector _float 16)])]{
-Float arrays of 3 and 16 elements respectively.
+@deftogether[(@defthing[_float3 ctype?]
+              @defthing[_float16 ctype?])]{
+Struct-wrapped float arrays of 3 and 16 elements respectively.
+
+These are converted to and from @racket[flvector?]s of the given length.
 }
 
 @(define-syntax (define-raymath stx)
