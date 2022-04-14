@@ -29,7 +29,9 @@
 
 (define pkg-desc "Semi-automatically generated Raylib bindings.")
 
-(define version "4.0.0")
+(define version
+  ;; Raylib version . package sub-version
+  "4.0.0.0")
 
 (define pkg-authors '(eutro))
 

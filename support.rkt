@@ -1,6 +1,7 @@
 #lang racket/base
 
 (require ffi/unsafe
+         ffi/unsafe/alloc
          racket/runtime-path
          racket/match
          raylib/generated/version
@@ -11,6 +12,9 @@
          ptr-box
          define-ptr
          borrow
+         attach-cleanup
+         call-with-cleanup
+         let*-with-cleanup
          (protect-out raylib-ffi-lib))
 
 (define-runtime-path lib-path '(lib "raylib/lib"))
@@ -100,8 +104,43 @@
      (syntax/loc stx
        var.borrow)]))
 
+(define (attach-cleanup cleanup value)
+  (((allocator cleanup) values) value))
+
+(define (call-with-cleanup cleanup value proc)
+  (call-with-continuation-barrier
+   (lambda ()
+     (dynamic-wind
+       void
+       (lambda () (proc value))
+       (lambda () (cleanup value))))))
+
+(define-syntax (let*-with-cleanup stx)
+  (syntax-parse stx
+    [(_ ([name:id cleanup:expr value:expr] bindings ...) body ...)
+     (syntax/loc stx
+       (call-with-cleanup
+        cleanup
+        value
+        (lambda (name)
+          (let*-with-cleanup
+           (bindings ...)
+           body ...))))]
+    [(_ () body ...)
+     (syntax/loc stx
+       (let ()
+         body ...))]))
+
 (module+ test
   ;; just instantiate them as a test
   (for ([mod (in-list '(raylib/2d/unsafe
                         raylib/generated/unsafe))])
-    (dynamic-require mod #f)))
+    (dynamic-require mod #f))
+
+  (let*-with-cleanup
+   ([_x displayln 4]
+    [_x displayln 3]
+    [_y displayln 2]
+    [_z displayln 1])
+   (displayln "And for my next magic trick, I will print a series of values!")
+   #t))
