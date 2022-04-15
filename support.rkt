@@ -23,37 +23,48 @@
   (or
    (let ([supplied (getenv "RACKET_RAYLIB_PATH")])
      (and supplied (ffi-lib supplied)))
-   (let ([RAYLIB_VERSION (number->string RAYLIB_VERSION)])
-     (define ((non-bundled name))
-       (ffi-lib
+   (let ([RAYLIB_VERSION (format "~a.0" RAYLIB_VERSION)])
+     (define (try-ffi-lib #:fail proc . args)
+       (with-handlers ([exn:fail? proc])
+         (apply ffi-lib args)))
+     (define ((non-bundled name) ex1)
+       (try-ffi-lib
         name
         (list RAYLIB_VERSION #f)
         #:fail
-        (lambda ()
+        (lambda (ex2)
           (raise
            (exn:fail
             (string-append
              "could not load Raylib;\n"
-             "  your operating system may not have prebuilt binaries published;\n"
-             "  or they are incompatible with your system;"
-             "  consider installing Raylib yourself, and/or setting RACKET_RAYLIB_PATH\n")
+             "   your operating system may not have prebuilt binaries published;\n"
+             "   or they are incompatible with your system;\n"
+             "   consider installing Raylib yourself, and/or setting RACKET_RAYLIB_PATH\n"
+             "  bundled libraries attempt: "
+             (exn-message ex1)
+             "\n  global libraries attempt: "
+             (exn-message ex2))
             (current-continuation-marks))))))
      (match (list (system-type 'os)
                   (system-type 'arch)
                   (system-type 'word))
        [(list 'unix 'x86_64 _)
-        (ffi-lib (build-path lib-path "linux_amd64" "libraylib.so")
-                 #:fail (non-bundled "libraylib"))]
+        (try-ffi-lib (build-path lib-path "linux_amd64" "libraylib.so")
+                     #:fail (non-bundled "libraylib"))]
        [(list 'macosx _ _)
-        (ffi-lib (build-path lib-path "macos" "libraylib.dylib")
-                 #:fail (non-bundled "libraylib"))]
+        (try-ffi-lib (build-path lib-path "macos" "libraylib.dylib")
+                     #:fail (non-bundled "libraylib"))]
        [(list 'windows _ 32)
-        (ffi-lib (build-path lib-path "win32_msvc16" "raylib.dll")
-                 #:fail (non-bundled "raylib"))]
+        (try-ffi-lib (build-path lib-path "win32_msvc16" "raylib.dll")
+                     #:fail (non-bundled "raylib"))]
        [(list 'windows _ 64)
-        (ffi-lib (build-path lib-path "win64_msvc16" "raylib.dll")
-                 #:fail (non-bundled "raylib"))]
-       [_ ((non-bundled))]))))
+        (try-ffi-lib (build-path lib-path "win64_msvc16" "raylib.dll")
+                     #:fail (non-bundled "raylib"))]
+       [(list os arch word)
+        ((non-bundled)
+         (exn (format "your platform (~a, ~a, ~a-bit) does not have bundled binaries"
+                      os arch word)
+              (current-continuation-marks)))]))))
 
 (define-syntax-rule (_pointer-to _type)
   _pointer)
