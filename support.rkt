@@ -4,9 +4,11 @@
          ffi/unsafe/alloc
          racket/runtime-path
          racket/match
+         racket/promise
          raylib/generated/version
          (for-syntax racket/base
-                     syntax/parse))
+                     syntax/parse
+                     syntax/transformer))
 
 (provide _pointer-to
          ptr-box
@@ -19,7 +21,19 @@
 
 (define-runtime-path lib-path '(lib "raylib/lib"))
 
-(define raylib-ffi-lib
+(define-syntax (define-lazy stx)
+  (syntax-parse stx
+    [(_ name:id value:expr)
+     (syntax/loc stx
+       (begin
+         (define lazy-val (delay value))
+         (define-syntax name
+           (make-variable-like-transformer
+            (lambda (stx)
+              (syntax/loc stx
+                (force lazy-val)))))))]))
+
+(define-lazy raylib-ffi-lib
   (or
    (let ([supplied (getenv "RACKET_RAYLIB_PATH")])
      (and supplied (ffi-lib supplied)))
