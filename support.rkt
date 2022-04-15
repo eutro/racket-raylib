@@ -61,7 +61,7 @@
         (try-ffi-lib (build-path lib-path "win64_msvc16" "raylib.dll")
                      #:fail (non-bundled "raylib"))]
        [(list os arch word)
-        ((non-bundled)
+        ((non-bundled "libraylib")
          (exn (format "your platform (~a, ~a, ~a-bit) does not have bundled binaries"
                       os arch word)
               (current-continuation-marks)))]))))
