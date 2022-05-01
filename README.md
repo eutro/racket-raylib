@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/eutro/racket-raylib/actions/workflows/ci.yml/badge.svg)](https://github.com/eutro/racket-raylib/actions/workflows/ci.yml)
 [![Raylib](https://img.shields.io/badge/raylib-4.0.0-green)](https://github.com/raysan5/raylib/releases/tag/4.0.0)
+[![Collection](https://img.shields.io/badge/dynamic/json?color=blueviolet&label=collection&query=%24.collection&url=https%3A%2F%2Fpkgs.racket-lang.org%2Fpkg%2Fraylib.json)](https://pkgs.racket-lang.org/package/raylib)
+[![Documentation](https://img.shields.io/badge/docs-published-teal)](https://docs.racket-lang.org/raylib/)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)](#license)
 
 Semi-automatically generated
@@ -31,11 +33,21 @@ directory.
 
 To install this package:
 
+### From the Package Index
+
+```shell
+raco pkg install raylib
+```
+
+### From Git
+
 ```shell
 git clone git@github.com:eutro/racket-raylib.git
 cd racket-raylib
 raco pkg install
 ```
+
+---
 
 If you're on a common platform, then it should be enough to just
 install this package without installing Raylib separately. However, if
