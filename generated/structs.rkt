@@ -211,7 +211,7 @@
 
 ;; RayCollision, ray hit information
 (define-cstruct _RayCollision
-  ([hit _bool] ; Did the ray hit something?
+  ([hit _stdbool] ; Did the ray hit something?
    [distance _float] ; Distance to nearest hit
    [point _Vector3] ; Point of nearest hit
    [normal _Vector3] ; Surface normal of hit
@@ -250,7 +250,7 @@
 (define-cstruct _Music
   ([stream _AudioStream] ; Audio stream
    [frameCount _uint] ; Total number of frames (considering channels)
-   [looping _bool] ; Music looping enable
+   [looping _stdbool] ; Music looping enable
    [ctxType _int] ; Type of music context (audio filetype)
    [ctxData (_pointer-to _void)] ; Audio context data, depends on type
    ))
@@ -299,7 +299,7 @@
    [fileName : _string]
    [data : (_pointer-to _void)]
    [bytesToWrite : _uint]
-   -> _bool))
+   -> _stdbool))
 
 (define _LoadFileTextCallback
   (_fun
@@ -310,4 +310,4 @@
   (_fun
    [fileName : _string]
    [text : (_pointer-to _byte)]
-   -> _bool))
+   -> _stdbool))

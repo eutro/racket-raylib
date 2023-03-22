@@ -17,7 +17,7 @@
 ;; Check if KEY_ESCAPE pressed or Close icon pressed
 (define-raylib WindowShouldClose
   (_fun
-   -> _bool))
+   -> _stdbool))
 
 ;; Close window and unload OpenGL context
 (define-raylib CloseWindow
@@ -27,43 +27,43 @@
 ;; Check if window has been initialized successfully
 (define-raylib IsWindowReady
   (_fun
-   -> _bool))
+   -> _stdbool))
 
 ;; Check if window is currently fullscreen
 (define-raylib IsWindowFullscreen
   (_fun
-   -> _bool))
+   -> _stdbool))
 
 ;; Check if window is currently hidden (only PLATFORM_DESKTOP)
 (define-raylib IsWindowHidden
   (_fun
-   -> _bool))
+   -> _stdbool))
 
 ;; Check if window is currently minimized (only PLATFORM_DESKTOP)
 (define-raylib IsWindowMinimized
   (_fun
-   -> _bool))
+   -> _stdbool))
 
 ;; Check if window is currently maximized (only PLATFORM_DESKTOP)
 (define-raylib IsWindowMaximized
   (_fun
-   -> _bool))
+   -> _stdbool))
 
 ;; Check if window is currently focused (only PLATFORM_DESKTOP)
 (define-raylib IsWindowFocused
   (_fun
-   -> _bool))
+   -> _stdbool))
 
 ;; Check if window has been resized last frame
 (define-raylib IsWindowResized
   (_fun
-   -> _bool))
+   -> _stdbool))
 
 ;; Check if one specific window flag is enabled
 (define-raylib IsWindowState
   (_fun
    [flag : _uint]
-   -> _bool))
+   -> _stdbool))
 
 ;; Set window configuration state using flags
 (define-raylib SetWindowState
@@ -253,7 +253,7 @@
 ;; Check if cursor is not visible
 (define-raylib IsCursorHidden
   (_fun
-   -> _bool))
+   -> _stdbool))
 
 ;; Enables cursor (unlock cursor)
 (define-raylib EnableCursor
@@ -268,7 +268,7 @@
 ;; Check if cursor is on the screen
 (define-raylib IsCursorOnScreen
   (_fun
-   -> _bool))
+   -> _stdbool))
 
 ;; Set background color (framebuffer clear color)
 (define-raylib ClearBackground
@@ -625,7 +625,7 @@
    [fileName : _string]
    [data : (_pointer-to _void)]
    [bytesToWrite : _uint]
-   -> _bool))
+   -> _stdbool))
 
 ;; Load text data from file (read), returns a '\0' terminated string
 (define-raylib LoadFileText
@@ -644,26 +644,26 @@
   (_fun
    [fileName : _string]
    [text : (_pointer-to _byte)]
-   -> _bool))
+   -> _stdbool))
 
 ;; Check if file exists
 (define-raylib FileExists
   (_fun
    [fileName : _string]
-   -> _bool))
+   -> _stdbool))
 
 ;; Check if a directory path exists
 (define-raylib DirectoryExists
   (_fun
    [dirPath : _string]
-   -> _bool))
+   -> _stdbool))
 
 ;; Check file extension (including point: .png, .wav)
 (define-raylib IsFileExtension
   (_fun
    [fileName : _string]
    [ext : _string]
-   -> _bool))
+   -> _stdbool))
 
 ;; Get pointer to extension for a filename string (includes dot: '.png')
 (define-raylib GetFileExtension
@@ -716,12 +716,12 @@
 (define-raylib ChangeDirectory
   (_fun
    [dir : _string]
-   -> _bool))
+   -> _stdbool))
 
 ;; Check if a file has been dropped into window
 (define-raylib IsFileDropped
   (_fun
-   -> _bool))
+   -> _stdbool))
 
 ;; Get dropped files names (memory should be freed)
 (define-raylib GetDroppedFiles
@@ -776,7 +776,7 @@
   (_fun
    [position : _uint]
    [value : _int]
-   -> _bool))
+   -> _stdbool))
 
 ;; Load integer value from storage file (from defined position)
 (define-raylib LoadStorageValue
@@ -794,25 +794,25 @@
 (define-raylib IsKeyPressed
   (_fun
    [key : _int]
-   -> _bool))
+   -> _stdbool))
 
 ;; Check if a key is being pressed
 (define-raylib IsKeyDown
   (_fun
    [key : _int]
-   -> _bool))
+   -> _stdbool))
 
 ;; Check if a key has been released once
 (define-raylib IsKeyReleased
   (_fun
    [key : _int]
-   -> _bool))
+   -> _stdbool))
 
 ;; Check if a key is NOT being pressed
 (define-raylib IsKeyUp
   (_fun
    [key : _int]
-   -> _bool))
+   -> _stdbool))
 
 ;; Set a custom key to exit program (default is ESC)
 (define-raylib SetExitKey
@@ -834,7 +834,7 @@
 (define-raylib IsGamepadAvailable
   (_fun
    [gamepad : _int]
-   -> _bool))
+   -> _stdbool))
 
 ;; Get gamepad internal name id
 (define-raylib GetGamepadName
@@ -847,28 +847,28 @@
   (_fun
    [gamepad : _int]
    [button : _int]
-   -> _bool))
+   -> _stdbool))
 
 ;; Check if a gamepad button is being pressed
 (define-raylib IsGamepadButtonDown
   (_fun
    [gamepad : _int]
    [button : _int]
-   -> _bool))
+   -> _stdbool))
 
 ;; Check if a gamepad button has been released once
 (define-raylib IsGamepadButtonReleased
   (_fun
    [gamepad : _int]
    [button : _int]
-   -> _bool))
+   -> _stdbool))
 
 ;; Check if a gamepad button is NOT being pressed
 (define-raylib IsGamepadButtonUp
   (_fun
    [gamepad : _int]
    [button : _int]
-   -> _bool))
+   -> _stdbool))
 
 ;; Get the last gamepad button pressed
 (define-raylib GetGamepadButtonPressed
@@ -898,25 +898,25 @@
 (define-raylib IsMouseButtonPressed
   (_fun
    [button : _int]
-   -> _bool))
+   -> _stdbool))
 
 ;; Check if a mouse button is being pressed
 (define-raylib IsMouseButtonDown
   (_fun
    [button : _int]
-   -> _bool))
+   -> _stdbool))
 
 ;; Check if a mouse button has been released once
 (define-raylib IsMouseButtonReleased
   (_fun
    [button : _int]
-   -> _bool))
+   -> _stdbool))
 
 ;; Check if a mouse button is NOT being pressed
 (define-raylib IsMouseButtonUp
   (_fun
    [button : _int]
-   -> _bool))
+   -> _stdbool))
 
 ;; Get mouse position X
 (define-raylib GetMouseX
@@ -1007,7 +1007,7 @@
 (define-raylib IsGestureDetected
   (_fun
    [gesture : _int]
-   -> _bool))
+   -> _stdbool))
 
 ;; Get latest detected gesture
 (define-raylib GetGestureDetected
@@ -1443,7 +1443,7 @@
   (_fun
    [rec1 : _Rectangle]
    [rec2 : _Rectangle]
-   -> _bool))
+   -> _stdbool))
 
 ;; Check collision between two circles
 (define-raylib CheckCollisionCircles
@@ -1452,7 +1452,7 @@
    [radius1 : _float]
    [center2 : _Vector2]
    [radius2 : _float]
-   -> _bool))
+   -> _stdbool))
 
 ;; Check collision between circle and rectangle
 (define-raylib CheckCollisionCircleRec
@@ -1460,14 +1460,14 @@
    [center : _Vector2]
    [radius : _float]
    [rec : _Rectangle]
-   -> _bool))
+   -> _stdbool))
 
 ;; Check if point is inside rectangle
 (define-raylib CheckCollisionPointRec
   (_fun
    [point : _Vector2]
    [rec : _Rectangle]
-   -> _bool))
+   -> _stdbool))
 
 ;; Check if point is inside circle
 (define-raylib CheckCollisionPointCircle
@@ -1475,7 +1475,7 @@
    [point : _Vector2]
    [center : _Vector2]
    [radius : _float]
-   -> _bool))
+   -> _stdbool))
 
 ;; Check if point is inside a triangle
 (define-raylib CheckCollisionPointTriangle
@@ -1484,7 +1484,7 @@
    [p1 : _Vector2]
    [p2 : _Vector2]
    [p3 : _Vector2]
-   -> _bool))
+   -> _stdbool))
 
 ;; Check the collision between two lines defined by two points each, returns collision point by reference
 (define-raylib CheckCollisionLines
@@ -1494,7 +1494,7 @@
    [startPos2 : _Vector2]
    [endPos2 : _Vector2]
    [collisionPoint : (_pointer-to _Vector2)]
-   -> _bool))
+   -> _stdbool))
 
 ;; Check if point belongs to line created between two points [p1] and [p2] with defined margin in pixels [threshold]
 (define-raylib CheckCollisionPointLine
@@ -1503,7 +1503,7 @@
    [p1 : _Vector2]
    [p2 : _Vector2]
    [threshold : _int]
-   -> _bool))
+   -> _stdbool))
 
 ;; Get collision rectangle for two rectangles collision
 (define-raylib GetCollisionRec
@@ -1565,14 +1565,14 @@
   (_fun
    [image : _Image]
    [fileName : _string]
-   -> _bool))
+   -> _stdbool))
 
 ;; Export image as code file defining an array of bytes, returns true on success
 (define-raylib ExportImageAsCode
   (_fun
    [image : _Image]
    [fileName : _string]
-   -> _bool))
+   -> _stdbool))
 
 ;; Generate image: plain color
 (define-raylib GenImageColor
@@ -2460,7 +2460,7 @@
   (_fun
    [text1 : _string]
    [text2 : _string]
-   -> _bool))
+   -> _stdbool))
 
 ;; Get text length, checks for '\0' ending
 (define-raylib TextLength
@@ -2866,7 +2866,7 @@
 (define-raylib UploadMesh
   (_fun
    [mesh : (_pointer-to _Mesh)]
-   [dynamic : _bool]
+   [dynamic : _stdbool]
    -> _void))
 
 ;; Update mesh vertex data in GPU for a specific buffer index
@@ -2907,7 +2907,7 @@
   (_fun
    [mesh : _Mesh]
    [fileName : _string]
-   -> _bool))
+   -> _stdbool))
 
 ;; Compute mesh bounding box limits
 (define-raylib GetMeshBoundingBox
@@ -3082,7 +3082,7 @@
   (_fun
    [model : _Model]
    [anim : _ModelAnimation]
-   -> _bool))
+   -> _stdbool))
 
 ;; Check collision between two spheres
 (define-raylib CheckCollisionSpheres
@@ -3091,14 +3091,14 @@
    [radius1 : _float]
    [center2 : _Vector3]
    [radius2 : _float]
-   -> _bool))
+   -> _stdbool))
 
 ;; Check collision between two bounding boxes
 (define-raylib CheckCollisionBoxes
   (_fun
    [box1 : _BoundingBox]
    [box2 : _BoundingBox]
-   -> _bool))
+   -> _stdbool))
 
 ;; Check collision between box and sphere
 (define-raylib CheckCollisionBoxSphere
@@ -3106,7 +3106,7 @@
    [box : _BoundingBox]
    [center : _Vector3]
    [radius : _float]
-   -> _bool))
+   -> _stdbool))
 
 ;; Get collision info between ray and sphere
 (define-raylib GetRayCollisionSphere
@@ -3170,7 +3170,7 @@
 ;; Check if audio device has been initialized successfully
 (define-raylib IsAudioDeviceReady
   (_fun
-   -> _bool))
+   -> _stdbool))
 
 ;; Set master volume (listener)
 (define-raylib SetMasterVolume
@@ -3229,14 +3229,14 @@
   (_fun
    [wave : _Wave]
    [fileName : _string]
-   -> _bool))
+   -> _stdbool))
 
 ;; Export wave sample data to code (.h), returns true on success
 (define-raylib ExportWaveAsCode
   (_fun
    [wave : _Wave]
    [fileName : _string]
-   -> _bool))
+   -> _stdbool))
 
 ;; Play a sound
 (define-raylib PlaySound
@@ -3282,7 +3282,7 @@
 (define-raylib IsSoundPlaying
   (_fun
    [sound : _Sound]
-   -> _bool))
+   -> _stdbool))
 
 ;; Set volume for a sound (1.0 is max level)
 (define-raylib SetSoundVolume
@@ -3363,7 +3363,7 @@
 (define-raylib IsMusicStreamPlaying
   (_fun
    [music : _Music]
-   -> _bool))
+   -> _stdbool))
 
 ;; Updates buffers for music streaming
 (define-raylib UpdateMusicStream
@@ -3448,7 +3448,7 @@
 (define-raylib IsAudioStreamProcessed
   (_fun
    [stream : _AudioStream]
-   -> _bool))
+   -> _stdbool))
 
 ;; Play audio stream
 (define-raylib PlayAudioStream
@@ -3472,7 +3472,7 @@
 (define-raylib IsAudioStreamPlaying
   (_fun
    [stream : _AudioStream]
-   -> _bool))
+   -> _stdbool))
 
 ;; Stop audio stream
 (define-raylib StopAudioStream

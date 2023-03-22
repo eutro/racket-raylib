@@ -252,7 +252,7 @@ Ray, ray for raycasting
 
 @deftogether[(@defthing[_RayCollision ctype?]
               @defstruct[RayCollision
-                         ([hit _bool]
+                         ([hit _stdbool]
                           [distance _float]
                           [point _Vector3]
                           [normal _Vector3])
@@ -301,7 +301,7 @@ Sound
               @defstruct[Music
                          ([stream _AudioStream]
                           [frameCount _uint]
-                          [looping _bool]
+                          [looping _stdbool]
                           [ctxType _int]
                           [ctxData (_pointer-to _void)])
                          #:constructor-name make-Music])]{
@@ -367,7 +367,7 @@ Aliases for some struct types.
                          [fileName : _string]
                          [data : (_pointer-to _void)]
                          [bytesToWrite : _uint]
-                         -> _bool)]
+                         -> _stdbool)]
               @defthing[_LoadFileTextCallback ctype?
                         #:value
                         (_fun
@@ -378,6 +378,6 @@ Aliases for some struct types.
                         (_fun
                          [fileName : _string]
                          [text : (_pointer-to _byte)]
-                         -> _bool)])]{
+                         -> _stdbool)])]{
 Types for certain callback functions.
 }
