@@ -44,6 +44,7 @@
        (case ty-str
          [("va_list") "_byte #;\"va_list\""]
          [("char") "_byte"]
+         [("bool") "_stdbool"]
          [("unsigned char") "_ubyte"]
          [("unsigned short") "_ushort"]
          [("unsigned int") "_uint"]
