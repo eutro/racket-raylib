@@ -18,7 +18,7 @@ Initialize window and OpenGL context
 }
 
 @defproc[(WindowShouldClose)
-         _bool]{
+         _stdbool]{
 Check if KEY_ESCAPE pressed or Close icon pressed
 }
 
@@ -28,43 +28,43 @@ Close window and unload OpenGL context
 }
 
 @defproc[(IsWindowReady)
-         _bool]{
+         _stdbool]{
 Check if window has been initialized successfully
 }
 
 @defproc[(IsWindowFullscreen)
-         _bool]{
+         _stdbool]{
 Check if window is currently fullscreen
 }
 
 @defproc[(IsWindowHidden)
-         _bool]{
+         _stdbool]{
 Check if window is currently hidden (only PLATFORM_DESKTOP)
 }
 
 @defproc[(IsWindowMinimized)
-         _bool]{
+         _stdbool]{
 Check if window is currently minimized (only PLATFORM_DESKTOP)
 }
 
 @defproc[(IsWindowMaximized)
-         _bool]{
+         _stdbool]{
 Check if window is currently maximized (only PLATFORM_DESKTOP)
 }
 
 @defproc[(IsWindowFocused)
-         _bool]{
+         _stdbool]{
 Check if window is currently focused (only PLATFORM_DESKTOP)
 }
 
 @defproc[(IsWindowResized)
-         _bool]{
+         _stdbool]{
 Check if window has been resized last frame
 }
 
 @defproc[(IsWindowState
           [flag _uint])
-         _bool]{
+         _stdbool]{
 Check if one specific window flag is enabled
 }
 
@@ -254,7 +254,7 @@ Hides cursor
 }
 
 @defproc[(IsCursorHidden)
-         _bool]{
+         _stdbool]{
 Check if cursor is not visible
 }
 
@@ -269,7 +269,7 @@ Disables cursor (lock cursor)
 }
 
 @defproc[(IsCursorOnScreen)
-         _bool]{
+         _stdbool]{
 Check if cursor is on the screen
 }
 
@@ -624,7 +624,7 @@ Unload file data allocated by LoadFileData()
           [fileName _string]
           [data (_pointer-to _void)]
           [bytesToWrite _uint])
-         _bool]{
+         _stdbool]{
 Save data to file from byte array (write), returns true on success
 }
 
@@ -643,26 +643,26 @@ Unload file text data allocated by LoadFileText()
 @defproc[(SaveFileText
           [fileName _string]
           [text (_pointer-to _byte)])
-         _bool]{
+         _stdbool]{
 Save text data to file (write), string must be '\0' terminated, returns true on success
 }
 
 @defproc[(FileExists
           [fileName _string])
-         _bool]{
+         _stdbool]{
 Check if file exists
 }
 
 @defproc[(DirectoryExists
           [dirPath _string])
-         _bool]{
+         _stdbool]{
 Check if a directory path exists
 }
 
 @defproc[(IsFileExtension
           [fileName _string]
           [ext _string])
-         _bool]{
+         _stdbool]{
 Check file extension (including point: .png, .wav)
 }
 
@@ -715,12 +715,12 @@ Clear directory files paths buffers (free memory)
 
 @defproc[(ChangeDirectory
           [dir _string])
-         _bool]{
+         _stdbool]{
 Change working directory, return true on success
 }
 
 @defproc[(IsFileDropped)
-         _bool]{
+         _stdbool]{
 Check if a file has been dropped into window
 }
 
@@ -775,7 +775,7 @@ Decode Base64 string data
 @defproc[(SaveStorageValue
           [position _uint]
           [value _int])
-         _bool]{
+         _stdbool]{
 Save integer value to storage file (to defined position), returns true on success
 }
 
@@ -793,25 +793,25 @@ Open URL with default system browser (if available)
 
 @defproc[(IsKeyPressed
           [key _int])
-         _bool]{
+         _stdbool]{
 Check if a key has been pressed once
 }
 
 @defproc[(IsKeyDown
           [key _int])
-         _bool]{
+         _stdbool]{
 Check if a key is being pressed
 }
 
 @defproc[(IsKeyReleased
           [key _int])
-         _bool]{
+         _stdbool]{
 Check if a key has been released once
 }
 
 @defproc[(IsKeyUp
           [key _int])
-         _bool]{
+         _stdbool]{
 Check if a key is NOT being pressed
 }
 
@@ -833,7 +833,7 @@ Get char pressed (unicode), call it multiple times for chars queued, returns 0 w
 
 @defproc[(IsGamepadAvailable
           [gamepad _int])
-         _bool]{
+         _stdbool]{
 Check if a gamepad is available
 }
 
@@ -846,28 +846,28 @@ Get gamepad internal name id
 @defproc[(IsGamepadButtonPressed
           [gamepad _int]
           [button _int])
-         _bool]{
+         _stdbool]{
 Check if a gamepad button has been pressed once
 }
 
 @defproc[(IsGamepadButtonDown
           [gamepad _int]
           [button _int])
-         _bool]{
+         _stdbool]{
 Check if a gamepad button is being pressed
 }
 
 @defproc[(IsGamepadButtonReleased
           [gamepad _int]
           [button _int])
-         _bool]{
+         _stdbool]{
 Check if a gamepad button has been released once
 }
 
 @defproc[(IsGamepadButtonUp
           [gamepad _int]
           [button _int])
-         _bool]{
+         _stdbool]{
 Check if a gamepad button is NOT being pressed
 }
 
@@ -897,25 +897,25 @@ Set internal gamepad mappings (SDL_GameControllerDB)
 
 @defproc[(IsMouseButtonPressed
           [button _int])
-         _bool]{
+         _stdbool]{
 Check if a mouse button has been pressed once
 }
 
 @defproc[(IsMouseButtonDown
           [button _int])
-         _bool]{
+         _stdbool]{
 Check if a mouse button is being pressed
 }
 
 @defproc[(IsMouseButtonReleased
           [button _int])
-         _bool]{
+         _stdbool]{
 Check if a mouse button has been released once
 }
 
 @defproc[(IsMouseButtonUp
           [button _int])
-         _bool]{
+         _stdbool]{
 Check if a mouse button is NOT being pressed
 }
 
@@ -1006,7 +1006,7 @@ Enable a set of gestures using flags
 
 @defproc[(IsGestureDetected
           [gesture _int])
-         _bool]{
+         _stdbool]{
 Check if a gesture have been detected
 }
 
@@ -1442,7 +1442,7 @@ Draw a polygon outline of n sides with extended parameters
 @defproc[(CheckCollisionRecs
           [rec1 _Rectangle]
           [rec2 _Rectangle])
-         _bool]{
+         _stdbool]{
 Check collision between two rectangles
 }
 
@@ -1451,7 +1451,7 @@ Check collision between two rectangles
           [radius1 _float]
           [center2 _Vector2]
           [radius2 _float])
-         _bool]{
+         _stdbool]{
 Check collision between two circles
 }
 
@@ -1459,14 +1459,14 @@ Check collision between two circles
           [center _Vector2]
           [radius _float]
           [rec _Rectangle])
-         _bool]{
+         _stdbool]{
 Check collision between circle and rectangle
 }
 
 @defproc[(CheckCollisionPointRec
           [point _Vector2]
           [rec _Rectangle])
-         _bool]{
+         _stdbool]{
 Check if point is inside rectangle
 }
 
@@ -1474,7 +1474,7 @@ Check if point is inside rectangle
           [point _Vector2]
           [center _Vector2]
           [radius _float])
-         _bool]{
+         _stdbool]{
 Check if point is inside circle
 }
 
@@ -1483,7 +1483,7 @@ Check if point is inside circle
           [p1 _Vector2]
           [p2 _Vector2]
           [p3 _Vector2])
-         _bool]{
+         _stdbool]{
 Check if point is inside a triangle
 }
 
@@ -1493,7 +1493,7 @@ Check if point is inside a triangle
           [startPos2 _Vector2]
           [endPos2 _Vector2]
           [collisionPoint (_pointer-to _Vector2)])
-         _bool]{
+         _stdbool]{
 Check the collision between two lines defined by two points each, returns collision point by reference
 }
 
@@ -1502,7 +1502,7 @@ Check the collision between two lines defined by two points each, returns collis
           [p1 _Vector2]
           [p2 _Vector2]
           [threshold _int])
-         _bool]{
+         _stdbool]{
 Check if point belongs to line created between two points [p1] and [p2] with defined margin in pixels [threshold]
 }
 
@@ -1564,14 +1564,14 @@ Unload image from CPU memory (RAM)
 @defproc[(ExportImage
           [image _Image]
           [fileName _string])
-         _bool]{
+         _stdbool]{
 Export image data to file, returns true on success
 }
 
 @defproc[(ExportImageAsCode
           [image _Image]
           [fileName _string])
-         _bool]{
+         _stdbool]{
 Export image as code file defining an array of bytes, returns true on success
 }
 
@@ -2459,7 +2459,7 @@ Copy one string to another, returns bytes copied
 @defproc[(TextIsEqual
           [text1 _string]
           [text2 _string])
-         _bool]{
+         _stdbool]{
 Check if two text string are equal
 }
 
@@ -2863,7 +2863,7 @@ Draw a billboard texture defined by source and rotation
 
 @defproc[(UploadMesh
           [mesh (_pointer-to _Mesh)]
-          [dynamic _bool])
+          [dynamic _stdbool])
          _void]{
 Upload mesh vertex data in GPU and provide VAO/VBO ids
 }
@@ -2904,7 +2904,7 @@ Draw multiple mesh instances with material and different transforms
 @defproc[(ExportMesh
           [mesh _Mesh]
           [fileName _string])
-         _bool]{
+         _stdbool]{
 Export mesh data to file, returns true on success
 }
 
@@ -3079,7 +3079,7 @@ Unload animation array data
 @defproc[(IsModelAnimationValid
           [model _Model]
           [anim _ModelAnimation])
-         _bool]{
+         _stdbool]{
 Check model animation skeleton match
 }
 
@@ -3088,14 +3088,14 @@ Check model animation skeleton match
           [radius1 _float]
           [center2 _Vector3]
           [radius2 _float])
-         _bool]{
+         _stdbool]{
 Check collision between two spheres
 }
 
 @defproc[(CheckCollisionBoxes
           [box1 _BoundingBox]
           [box2 _BoundingBox])
-         _bool]{
+         _stdbool]{
 Check collision between two bounding boxes
 }
 
@@ -3103,7 +3103,7 @@ Check collision between two bounding boxes
           [box _BoundingBox]
           [center _Vector3]
           [radius _float])
-         _bool]{
+         _stdbool]{
 Check collision between box and sphere
 }
 
@@ -3167,7 +3167,7 @@ Close the audio device and context
 }
 
 @defproc[(IsAudioDeviceReady)
-         _bool]{
+         _stdbool]{
 Check if audio device has been initialized successfully
 }
 
@@ -3226,14 +3226,14 @@ Unload sound
 @defproc[(ExportWave
           [wave _Wave]
           [fileName _string])
-         _bool]{
+         _stdbool]{
 Export wave data to file, returns true on success
 }
 
 @defproc[(ExportWaveAsCode
           [wave _Wave]
           [fileName _string])
-         _bool]{
+         _stdbool]{
 Export wave sample data to code (.h), returns true on success
 }
 
@@ -3279,7 +3279,7 @@ Get number of sounds playing in the multichannel
 
 @defproc[(IsSoundPlaying
           [sound _Sound])
-         _bool]{
+         _stdbool]{
 Check if a sound is currently playing
 }
 
@@ -3360,7 +3360,7 @@ Start music playing
 
 @defproc[(IsMusicStreamPlaying
           [music _Music])
-         _bool]{
+         _stdbool]{
 Check if music is playing
 }
 
@@ -3445,7 +3445,7 @@ Update audio stream buffers with data
 
 @defproc[(IsAudioStreamProcessed
           [stream _AudioStream])
-         _bool]{
+         _stdbool]{
 Check if any audio stream buffers requires refill
 }
 
@@ -3469,7 +3469,7 @@ Resume audio stream
 
 @defproc[(IsAudioStreamPlaying
           [stream _AudioStream])
-         _bool]{
+         _stdbool]{
 Check if audio stream is playing
 }
 
