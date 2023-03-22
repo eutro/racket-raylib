@@ -31,7 +31,7 @@
 
 (define version
   ;; Raylib version . package sub-version
-  "4.0.0.3")
+  "4.0.0.4")
 
 (define pkg-authors '(eutro))
 
