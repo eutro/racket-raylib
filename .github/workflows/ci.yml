@@ -9,9 +9,10 @@ jobs:
         running-on: ["ubuntu-latest", "windows-latest", "macos-latest"]
         racket-version: ["stable", "current"]
         racket-variant: ["BC", "CS"]
+      fail-fast: false
     steps:
-      - uses: actions/checkout@v2
-      - uses: Bogdanp/setup-racket@v0.12
+      - uses: actions/checkout@v4
+      - uses: Bogdanp/setup-racket@v1.12
         with:
           architecture: x64
           distribution: full
