@@ -38,12 +38,24 @@ Vector4, 4 components
 
 @deftogether[(@defthing[_Matrix ctype?]
               @defstruct[Matrix
-                         ([m0 _float] [m4 _float] [m8 _float] [m12 _float]
-                          [m1 _float] [m5 _float] [m9 _float] [m13 _float]
-                          [m2 _float] [m6 _float] [m10 _float] [m14 _float]
-                          [m3 _float] [m7 _float] [m11 _float] [m15 _float])
+                         ([m0 _float]
+                          [m4 _float]
+                          [m8 _float]
+                          [m12 _float]
+                          [m1 _float]
+                          [m5 _float]
+                          [m9 _float]
+                          [m13 _float]
+                          [m2 _float]
+                          [m6 _float]
+                          [m10 _float]
+                          [m14 _float]
+                          [m3 _float]
+                          [m7 _float]
+                          [m11 _float]
+                          [m15 _float])
                          #:constructor-name make-Matrix])]{
-Matrix, 4x4 components, column major, OpenGL style, right handed
+Matrix, 4x4 components, column major, OpenGL style, right-handed
 }
 
 @deftogether[(@defthing[_Color ctype?]
@@ -168,6 +180,8 @@ Camera2D, defines position/orientation in 2d space
                           [animNormals (_pointer-to _float)]
                           [boneIds (_pointer-to _ubyte)]
                           [boneWeights (_pointer-to _float)]
+                          [boneMatrices (_pointer-to _Matrix)]
+                          [boneCount _int]
                           [vaoId _uint]
                           [vboId (_pointer-to _uint)])
                          #:constructor-name make-Mesh])]{
@@ -206,7 +220,7 @@ Material, includes shader and maps
                           [rotation _Quaternion]
                           [scale _Vector3])
                          #:constructor-name make-Transform])]{
-Transform, vectex transformation data
+Transform, vertex transformation data
 }
 
 @deftogether[(@defthing[_BoneInfo ctype?]
@@ -237,7 +251,8 @@ Model, meshes, materials and animation data
                          ([boneCount _int]
                           [frameCount _int]
                           [bones (_pointer-to _BoneInfo)]
-                          [framePoses (_pointer-to (_pointer-to _Transform))])
+                          [framePoses (_pointer-to (_pointer-to _Transform))]
+                          [name (_array _byte 32)])
                          #:constructor-name make-ModelAnimation])]{
 ModelAnimation
 }
@@ -282,6 +297,7 @@ Wave, audio wave data
 @deftogether[(@defthing[_AudioStream ctype?]
               @defstruct[AudioStream
                          ([buffer (_pointer-to _rAudioBuffer)]
+                          [processor (_pointer-to _rAudioProcessor)]
                           [sampleRate _uint]
                           [sampleSize _uint]
                           [channels _uint])
@@ -314,7 +330,6 @@ Music, audio stream, anything longer than ~10 seconds should be streamed
                           [vResolution _int]
                           [hScreenSize _float]
                           [vScreenSize _float]
-                          [vScreenCenter _float]
                           [eyeToScreenDistance _float]
                           [lensSeparationDistance _float]
                           [interpupillaryDistance _float]
@@ -338,6 +353,33 @@ VrDeviceInfo, Head-Mounted-Display device parameters
 VrStereoConfig, VR stereo rendering configuration for simulator
 }
 
+@deftogether[(@defthing[_FilePathList ctype?]
+              @defstruct[FilePathList
+                         ([capacity _uint]
+                          [count _uint]
+                          [paths (_pointer-to (_pointer-to _byte))])
+                         #:constructor-name make-FilePathList])]{
+File path list
+}
+
+@deftogether[(@defthing[_AutomationEvent ctype?]
+              @defstruct[AutomationEvent
+                         ([frame _uint]
+                          [type _uint]
+                          [params (_array _int 4)])
+                         #:constructor-name make-AutomationEvent])]{
+Automation event
+}
+
+@deftogether[(@defthing[_AutomationEventList ctype?]
+              @defstruct[AutomationEventList
+                         ([capacity _uint]
+                          [count _uint]
+                          [events (_pointer-to _AutomationEvent)])
+                         #:constructor-name make-AutomationEventList])]{
+Automation event list
+}
+
 @section{Type aliases}
 @deftogether[(@defthing[_Quaternion ctype? #:value _Vector4]
               @defthing[_Texture2D ctype? #:value _Texture]
@@ -359,14 +401,14 @@ Aliases for some struct types.
                         #:value
                         (_fun
                          [fileName : _string]
-                         [bytesRead : (_pointer-to _uint)]
+                         [dataSize : (_pointer-to _int)]
                          -> (_pointer-to _ubyte))]
               @defthing[_SaveFileDataCallback ctype?
                         #:value
                         (_fun
                          [fileName : _string]
                          [data : (_pointer-to _void)]
-                         [bytesToWrite : _uint]
+                         [dataSize : _int]
                          -> _stdbool)]
               @defthing[_LoadFileTextCallback ctype?
                         #:value
@@ -378,6 +420,12 @@ Aliases for some struct types.
                         (_fun
                          [fileName : _string]
                          [text : (_pointer-to _byte)]
-                         -> _stdbool)])]{
+                         -> _stdbool)]
+              @defthing[_AudioCallback ctype?
+                        #:value
+                        (_fun
+                         [bufferData : (_pointer-to _void)]
+                         [frames : _uint]
+                         -> _void)])]{
 Types for certain callback functions.
 }

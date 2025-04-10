@@ -1,8 +1,8 @@
 # racket-raylib
 
 [![CI](https://github.com/eutro/racket-raylib/actions/workflows/ci.yml/badge.svg)](https://github.com/eutro/racket-raylib/actions/workflows/ci.yml)
-[![Raylib](https://img.shields.io/badge/raylib-4.0.0-green)](https://github.com/raysan5/raylib/releases/tag/4.0.0)
-[![Collection](https://img.shields.io/badge/dynamic/json?color=blueviolet&label=collection&query=%24.collection&url=https%3A%2F%2Fpkgs.racket-lang.org%2Fpkg%2Fraylib.json)](https://pkgs.racket-lang.org/package/raylib)
+[![Raylib](https://img.shields.io/badge/raylib-5.5.0-green)](https://github.com/raysan5/raylib/releases/tag/5.5)
+[![Collection](https://img.shields.io/badge/collection-raylib-blueviolet)](https://pkgs.racket-lang.org/package/raylib)
 [![Documentation](https://img.shields.io/badge/docs-published-teal)](https://docs.racket-lang.org/raylib/)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)](#license)
 
@@ -22,7 +22,7 @@ Functions in
 [`raymath.h`](https://github.com/raysan5/raylib/blob/master/src/raymath.h)
 have been converted to Racket manually, so they may shift out of line
 with the version linked into Raylib. They were written to match those
-in the Raylib 4.0.0 release.
+in the Raylib 5.5.0 release.
 
 Racket examples can be found in the [examples](examples) directory, C
 examples can be found in [Raylib's

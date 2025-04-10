@@ -2,6 +2,7 @@
 
 (require ffi/unsafe
          ffi/unsafe/alloc
+         (only-in ffi/unsafe/define make-not-available)
          racket/runtime-path
          racket/match
          racket/promise
@@ -17,6 +18,8 @@
          attach-cleanup
          call-with-cleanup
          let*-with-cleanup
+         (rename-out
+          [make-not-available raylib-make-not-available])
          (protect-out raylib-ffi-lib))
 
 (define-runtime-path lib-path '(lib "raylib/lib"))
@@ -33,14 +36,19 @@
               (syntax/loc stx
                 (force lazy-val)))))))]))
 
+(define-logger raylib)
+
+(define (try-ffi-lib #:fail proc . args)
+  (with-handlers ([exn:fail? proc])
+    (define result (apply ffi-lib args))
+    (log-raylib-info "found raylib at ~s" args)
+    result))
+
 (define-lazy raylib-ffi-lib
   (or
    (let ([supplied (getenv "RACKET_RAYLIB_PATH")])
-     (and supplied (ffi-lib supplied)))
+     (and supplied (try-ffi-lib #:fail raise supplied)))
    (let ([RAYLIB_VERSION (format "~a.0" RAYLIB_VERSION)])
-     (define (try-ffi-lib #:fail proc . args)
-       (with-handlers ([exn:fail? proc])
-         (apply ffi-lib args)))
      (define ((non-bundled name) ex1)
        (try-ffi-lib
         name
@@ -84,6 +92,8 @@
   _pointer)
 
 (define (ptr-box type value)
+  (unless (ctype? type)
+    (raise-argument-error 'ptr-box "ctype?" type))
   (define ptr (malloc type))
   (ptr-set! ptr type value)
   ptr)
@@ -95,13 +105,14 @@
       (with-syntax ([type (ptr-var-type var)]
                     [ptr (ptr-var-ptr var)])
         (syntax-parse stx
-          [(set! _ value)
+          #:literals {set!}
+          [(set! _ value:expr)
            (syntax/loc stx
              (ptr-set! ptr type value))]
-          [(this . tail)
+          [(this:id . tail)
            (syntax/loc stx
              ((#%expression . this) . tail))]
-          [_
+          [_:id
            (syntax/loc stx
              (ptr-ref ptr type))])))))
 
@@ -119,11 +130,10 @@
   (define-syntax-class ptr-var-expr
     #:description "a pointer variable"
     #:attributes (borrow)
-    (pattern
-     var:id
-     #:do [(define binding (syntax-local-value this-syntax (lambda () #f)))]
-     #:fail-unless (ptr-var? binding) "binding was not defined as a pointer variable"
-     #:attr borrow (ptr-var-ptr binding)))
+    [pattern var
+             #:declare var (static ptr-var? "pointer variable")
+             #:do [(define binding (syntax-local-value this-syntax))]
+             #:attr borrow (ptr-var-ptr binding)])
   (syntax-parse stx
     [(_ var:ptr-var-expr)
      (syntax/loc stx
@@ -168,4 +178,15 @@
     [_y displayln 2]
     [_z displayln 1])
    (displayln "And for my next magic trick, I will print a series of values!")
-   #t))
+   #t)
+
+  (require rackunit)
+
+  (test-case "define-ptr"
+    (define-ptr x _int 5)
+    (check-equal? x 5)
+    (check-true (cpointer? (borrow x)))
+    (set! x 10)
+    (check-equal? (ptr-ref (borrow x) _int) 10))
+
+  )

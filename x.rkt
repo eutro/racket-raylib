@@ -32,9 +32,9 @@
 (define delete-raylib (make-parameter #f))
 
 (define raylib-platforms
-  '(("linux_amd64"     tar "libraylib.so.~a" "libraylib.so")
-    ("macos"           tar "libraylib.~a.dylib" "libraylib.dylib")
-    ("win32_mingw-w64" zip "raylib.dll" "raylib.dll")
+  '(("linux_amd64"     tar "libraylib.so.~a.0" "libraylib.so")
+    ("macos"           tar "libraylib.~a.0.dylib" "libraylib.dylib")
+    ;("win32_mingw-w64" zip "raylib.dll" "raylib.dll")
     ("win32_msvc16"    zip "raylib.dll" "raylib.dll")
     ("win64_mingw-w64" zip "raylib.dll" "raylib.dll")
     ("win64_msvc16"    zip "raylib.dll" "raylib.dll")))

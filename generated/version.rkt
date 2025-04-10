@@ -2,4 +2,4 @@
 
 (provide RAYLIB_VERSION)
 
-(define RAYLIB_VERSION 4.0)
+(define RAYLIB_VERSION 5.5)

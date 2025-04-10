@@ -69,7 +69,8 @@ EOF
 )
 
 (module+ main
-  (require raylib/2d/unsafe)
+  (require raylib/2d/unsafe
+           raylib/derived/unsafe)
 
   (define screen-width 800)
   (define screen-height 450)
@@ -83,7 +84,9 @@ EOF
   (let loop ()
     (unless (WindowShouldClose)
       (when (IsFileDropped)
-        (set! dropped-files (GetDroppedFiles*)))
+        (define fpl (LoadDroppedFiles))
+        (set! dropped-files (FilePathList->vector fpl))
+        (UnloadDroppedFiles fpl))
 
       (BeginDrawing)
 

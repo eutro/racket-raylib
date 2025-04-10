@@ -4,7 +4,7 @@
 
 (provide (all-defined-out))
 
-(define RAYLIB_VERSION "4.0")
+(define RAYLIB_VERSION "5.5")
 
 ;; Light Gray
 (define LIGHTGRAY (make-Color 200 200 200 255))

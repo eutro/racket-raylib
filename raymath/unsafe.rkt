@@ -5,7 +5,6 @@
          racket/flonum
          raylib/support
          raylib/generated/structs
-         racket/include
          (for-syntax racket/base
                      syntax/parse))
 
@@ -14,7 +13,7 @@
 
 (define-ffi-definer define-raylib raylib-ffi-lib
   #:provide provide-protected
-  #:default-make-fail make-not-available)
+  #:default-make-fail raylib-make-not-available)
 
 (define (_array/flvector len)
   (define array-type (make-array-type _float len))
@@ -69,4 +68,5 @@
             (~? (~@ -> output))))
          ...))]))
 
-(include "private/defs.rkt")
+(require "private/parser.rkt")
+(parse-from-file define-raymath "private/defs.h")

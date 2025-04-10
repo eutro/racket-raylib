@@ -27,12 +27,24 @@
 
 (define _Quaternion _Vector4)
 
-;; Matrix, 4x4 components, column major, OpenGL style, right handed
+;; Matrix, 4x4 components, column major, OpenGL style, right-handed
 (define-cstruct _Matrix
-  ([m0 _float] [m4 _float] [m8 _float] [m12 _float] ; Matrix first row (4 components)
-   [m1 _float] [m5 _float] [m9 _float] [m13 _float] ; Matrix second row (4 components)
-   [m2 _float] [m6 _float] [m10 _float] [m14 _float] ; Matrix third row (4 components)
-   [m3 _float] [m7 _float] [m11 _float] [m15 _float] ; Matrix fourth row (4 components)
+  ([m0 _float] ; Matrix first row (4 components)
+   [m4 _float] ; Matrix first row (4 components)
+   [m8 _float] ; Matrix first row (4 components)
+   [m12 _float] ; Matrix first row (4 components)
+   [m1 _float] ; Matrix second row (4 components)
+   [m5 _float] ; Matrix second row (4 components)
+   [m9 _float] ; Matrix second row (4 components)
+   [m13 _float] ; Matrix second row (4 components)
+   [m2 _float] ; Matrix third row (4 components)
+   [m6 _float] ; Matrix third row (4 components)
+   [m10 _float] ; Matrix third row (4 components)
+   [m14 _float] ; Matrix third row (4 components)
+   [m3 _float] ; Matrix fourth row (4 components)
+   [m7 _float] ; Matrix fourth row (4 components)
+   [m11 _float] ; Matrix fourth row (4 components)
+   [m15 _float] ; Matrix fourth row (4 components)
    ))
 
 ;; Color, 4 components, R8G8B8A8 (32bit)
@@ -116,7 +128,7 @@
   ([position _Vector3] ; Camera position
    [target _Vector3] ; Camera target it looks-at
    [up _Vector3] ; Camera up vector (rotation over its axis)
-   [fovy _float] ; Camera field-of-view apperture in Y (degrees) in perspective, used as near plane width in orthographic
+   [fovy _float] ; Camera field-of-view aperture in Y (degrees) in perspective, used as near plane width in orthographic
    [projection _int] ; Camera projection: CAMERA_PERSPECTIVE or CAMERA_ORTHOGRAPHIC
    ))
 
@@ -136,15 +148,17 @@
    [triangleCount _int] ; Number of triangles stored (indexed or not)
    [vertices (_pointer-to _float)] ; Vertex position (XYZ - 3 components per vertex) (shader-location = 0)
    [texcoords (_pointer-to _float)] ; Vertex texture coordinates (UV - 2 components per vertex) (shader-location = 1)
-   [texcoords2 (_pointer-to _float)] ; Vertex second texture coordinates (useful for lightmaps) (shader-location = 5)
+   [texcoords2 (_pointer-to _float)] ; Vertex texture second coordinates (UV - 2 components per vertex) (shader-location = 5)
    [normals (_pointer-to _float)] ; Vertex normals (XYZ - 3 components per vertex) (shader-location = 2)
    [tangents (_pointer-to _float)] ; Vertex tangents (XYZW - 4 components per vertex) (shader-location = 4)
    [colors (_pointer-to _ubyte)] ; Vertex colors (RGBA - 4 components per vertex) (shader-location = 3)
    [indices (_pointer-to _ushort)] ; Vertex indices (in case vertex data comes indexed)
    [animVertices (_pointer-to _float)] ; Animated vertex positions (after bones transformations)
    [animNormals (_pointer-to _float)] ; Animated normals (after bones transformations)
-   [boneIds (_pointer-to _ubyte)] ; Vertex bone ids, max 255 bone ids, up to 4 bones influence by vertex (skinning)
-   [boneWeights (_pointer-to _float)] ; Vertex bone weight, up to 4 bones influence by vertex (skinning)
+   [boneIds (_pointer-to _ubyte)] ; Vertex bone ids, max 255 bone ids, up to 4 bones influence by vertex (skinning) (shader-location = 6)
+   [boneWeights (_pointer-to _float)] ; Vertex bone weight, up to 4 bones influence by vertex (skinning) (shader-location = 7)
+   [boneMatrices (_pointer-to _Matrix)] ; Bones animated transformation matrices
+   [boneCount _int] ; Number of bones
    [vaoId _uint] ; OpenGL Vertex Array Object id
    [vboId (_pointer-to _uint)] ; OpenGL Vertex Buffer Objects id (default vertex data)
    ))
@@ -169,7 +183,7 @@
    [params (_array _float 4)] ; Material generic parameters (if required)
    ))
 
-;; Transform, vectex transformation data
+;; Transform, vertex transformation data
 (define-cstruct _Transform
   ([translation _Vector3] ; Translation
    [rotation _Quaternion] ; Rotation
@@ -201,19 +215,20 @@
    [frameCount _int] ; Number of animation frames
    [bones (_pointer-to _BoneInfo)] ; Bones information (skeleton)
    [framePoses (_pointer-to (_pointer-to _Transform))] ; Poses array by frame
+   [name (_array _byte 32)] ; Animation name
    ))
 
 ;; Ray, ray for raycasting
 (define-cstruct _Ray
   ([position _Vector3] ; Ray position (origin)
-   [direction _Vector3] ; Ray direction
+   [direction _Vector3] ; Ray direction (normalized)
    ))
 
 ;; RayCollision, ray hit information
 (define-cstruct _RayCollision
   ([hit _stdbool] ; Did the ray hit something?
-   [distance _float] ; Distance to nearest hit
-   [point _Vector3] ; Point of nearest hit
+   [distance _float] ; Distance to the nearest hit
+   [point _Vector3] ; Point of the nearest hit
    [normal _Vector3] ; Surface normal of hit
    ))
 
@@ -235,6 +250,7 @@
 ;; AudioStream, custom audio stream
 (define-cstruct _AudioStream
   ([buffer (_pointer-to _rAudioBuffer)] ; Pointer to internal data used by the audio system
+   [processor (_pointer-to _rAudioProcessor)] ; Pointer to internal data processor, useful for audio effects
    [sampleRate _uint] ; Frequency (samples per second)
    [sampleSize _uint] ; Bit depth (bits per sample): 8, 16, 32 (24 not supported)
    [channels _uint] ; Number of channels (1-mono, 2-stereo, ...)
@@ -261,7 +277,6 @@
    [vResolution _int] ; Vertical resolution in pixels
    [hScreenSize _float] ; Horizontal size in meters
    [vScreenSize _float] ; Vertical size in meters
-   [vScreenCenter _float] ; Screen center in meters
    [eyeToScreenDistance _float] ; Distance between eye and display in meters
    [lensSeparationDistance _float] ; Lens separation distance in meters
    [interpupillaryDistance _float] ; IPD (distance between pupils) in meters
@@ -281,6 +296,27 @@
    [scaleIn (_array _float 2)] ; VR distortion scale in
    ))
 
+;; File path list
+(define-cstruct _FilePathList
+  ([capacity _uint] ; Filepaths max entries
+   [count _uint] ; Filepaths entries count
+   [paths (_pointer-to (_pointer-to _byte))] ; Filepaths entries
+   ))
+
+;; Automation event
+(define-cstruct _AutomationEvent
+  ([frame _uint] ; Event frame
+   [type _uint] ; Event type (AutomationEventType)
+   [params (_array _int 4)] ; Event parameters (if required)
+   ))
+
+;; Automation event list
+(define-cstruct _AutomationEventList
+  ([capacity _uint] ; Events max entries (MAX_AUTOMATION_EVENTS)
+   [count _uint] ; Events entries count
+   [events (_pointer-to _AutomationEvent)] ; Events entries
+   ))
+
 (define _TraceLogCallback
   (_fun
    [logLevel : _int]
@@ -291,14 +327,14 @@
 (define _LoadFileDataCallback
   (_fun
    [fileName : _string]
-   [bytesRead : (_pointer-to _uint)]
+   [dataSize : (_pointer-to _int)]
    -> (_pointer-to _ubyte)))
 
 (define _SaveFileDataCallback
   (_fun
    [fileName : _string]
    [data : (_pointer-to _void)]
-   [bytesToWrite : _uint]
+   [dataSize : _int]
    -> _stdbool))
 
 (define _LoadFileTextCallback
@@ -311,3 +347,9 @@
    [fileName : _string]
    [text : (_pointer-to _byte)]
    -> _stdbool))
+
+(define _AudioCallback
+  (_fun
+   [bufferData : (_pointer-to _void)]
+   [frames : _uint]
+   -> _void))

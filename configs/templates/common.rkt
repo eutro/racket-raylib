@@ -32,6 +32,11 @@
       (define arrays* (map (λ (s) (string-trim s "]" #:left? #f)) arrays))
       (define-values (name** array-component) (parse-type name* ty-str))
       (values name** (format "(_array ~a ~a)" array-component (string-join arrays* " ")))]
+     [(string-suffix? ty-str "]")
+      (match-define (list* type* arrays) (string-split ty-str "["))
+      (define arrays* (map (λ (s) (string-trim s "]" #:left? #f)) arrays))
+      (define-values (name* array-component) (parse-type name type*))
+      (values name* (format "(_array ~a ~a)" array-component (string-join arrays* " ")))]
      [(string=? ty-str "const char *") (values name "_string")]
      [(string-prefix? ty-str "const ")
       (parse-type name (substring ty-str (string-length "const ")))]

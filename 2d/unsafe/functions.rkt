@@ -6,6 +6,8 @@
                     WaitTime
                     GetRandomValue
                     SetRandomSeed
+                    LoadRandomSequence
+                    UnloadRandomSequence
                     MemAlloc
                     MemRealloc
                     MemFree
@@ -22,20 +24,29 @@
                     FileExists
                     DirectoryExists
                     IsFileExtension
+                    GetFileLength
                     GetFileExtension
                     GetFileName
                     GetFileNameWithoutExt
                     GetDirectoryPath
                     GetPrevDirectoryPath
                     GetWorkingDirectory
-                    GetDirectoryFiles
-                    ClearDirectoryFiles
+                    GetApplicationDirectory
                     ChangeDirectory
                     GetFileModTime
+                    MakeDirectory
+                    IsFileNameValid
+                    IsPathFile
+                    LoadDirectoryFiles
+                    LoadDirectoryFilesEx
+                    UnloadDirectoryFiles
                     GetCodepointCount
                     GetCodepoint
+                    GetCodepointNext
+                    GetCodepointPrevious
                     CodepointToUTF8
-                    TextCodepointsToUTF8
+                    LoadUTF8
+                    UnloadUTF8
                     TextCopy
                     TextIsEqual
                     TextLength
@@ -49,8 +60,11 @@
                     TextFindIndex
                     TextToUpper
                     TextToLower
-                    TextToPascal
                     TextToInteger
+                    TextToFloat
+                    TextToPascal
+                    TextToSnake
+                    TextToCamel
                     SetTraceLogCallback
                     BeginVrStereoMode
                     BeginMode3D
@@ -63,12 +77,12 @@
                     DrawCircle3D
                     DrawTriangle3D
                     DrawTriangleStrip3D
+                    DrawCapsule
+                    DrawCapsuleWires
                     DrawCube
                     DrawCubeV
                     DrawCubeWires
                     DrawCubeWiresV
-                    DrawCubeTexture
-                    DrawCubeTextureRec
                     DrawSphere
                     DrawSphereEx
                     DrawSphereWires
@@ -81,13 +95,15 @@
                     DrawGrid
                     LoadModel
                     LoadModelFromMesh
+                    IsModelValid
                     UnloadModel
-                    UnloadModelKeepMeshes
                     GetModelBoundingBox
                     DrawModel
                     DrawModelEx
                     DrawModelWires
                     DrawModelWiresEx
+                    DrawModelPoints
+                    DrawModelPointsEx
                     DrawBoundingBox
                     DrawBillboard
                     DrawBillboardRec
@@ -98,9 +114,9 @@
                     DrawMesh
                     DrawMeshInstanced
                     ExportMesh
+                    ExportMeshAsCode
                     GetMeshBoundingBox
                     GenMeshTangents
-                    GenMeshBinormals
                     GenMeshPoly
                     GenMeshPlane
                     GenMeshCube
@@ -114,11 +130,13 @@
                     GenMeshCubicmap
                     LoadMaterials
                     LoadMaterialDefault
+                    IsMaterialValid
                     UnloadMaterial
                     SetMaterialTexture
                     SetModelMeshMaterial
                     LoadModelAnimations
                     UpdateModelAnimation
+                    UpdateModelAnimationBones
                     UnloadModelAnimation
                     UnloadModelAnimations
                     IsModelAnimationValid

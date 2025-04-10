@@ -22,6 +22,8 @@
 @defthing[FLAG_WINDOW_ALWAYS_RUN exact-integer? #:value 256 "Set to allow windows running while minimized"]
 @defthing[FLAG_WINDOW_TRANSPARENT exact-integer? #:value 16 "Set to allow transparent framebuffer"]
 @defthing[FLAG_WINDOW_HIGHDPI exact-integer? #:value 8192 "Set to support HighDPI"]
+@defthing[FLAG_WINDOW_MOUSE_PASSTHROUGH exact-integer? #:value 16384 "Set to support mouse passthrough, only supported when FLAG_WINDOW_UNDECORATED"]
+@defthing[FLAG_BORDERLESS_WINDOWED_MODE exact-integer? #:value 32768 "Set to run program in borderless windowed mode"]
 @defthing[FLAG_MSAA_4X_HINT exact-integer? #:value 32 "Set to try enabling MSAA 4X"]
 @defthing[FLAG_INTERLACED_HINT exact-integer? #:value 65536 "Set to try enabling interlaced video format (for V3D)"]
 
@@ -145,7 +147,7 @@
 @defthing[KEY_KP_ENTER exact-integer? #:value 335 "Key: Keypad Enter"]
 @defthing[KEY_KP_EQUAL exact-integer? #:value 336 "Key: Keypad ="]
 @defthing[KEY_BACK exact-integer? #:value 4 "Key: Android back button"]
-@defthing[KEY_MENU exact-integer? #:value 82 "Key: Android menu button"]
+@defthing[KEY_MENU exact-integer? #:value 5 "Key: Android menu button"]
 @defthing[KEY_VOLUME_UP exact-integer? #:value 24 "Key: Android volume up button"]
 @defthing[KEY_VOLUME_DOWN exact-integer? #:value 25 "Key: Android volume down button"]
 
@@ -156,7 +158,7 @@
 @defthing[MOUSE_BUTTON_MIDDLE exact-integer? #:value 2 "Mouse button middle (pressed wheel)"]
 @defthing[MOUSE_BUTTON_SIDE exact-integer? #:value 3 "Mouse button side (advanced mouse device)"]
 @defthing[MOUSE_BUTTON_EXTRA exact-integer? #:value 4 "Mouse button extra (advanced mouse device)"]
-@defthing[MOUSE_BUTTON_FORWARD exact-integer? #:value 5 "Mouse button fordward (advanced mouse device)"]
+@defthing[MOUSE_BUTTON_FORWARD exact-integer? #:value 5 "Mouse button forward (advanced mouse device)"]
 @defthing[MOUSE_BUTTON_BACK exact-integer? #:value 6 "Mouse button back (advanced mouse device)"]
 
 @section{Mouse cursor}
@@ -170,7 +172,7 @@
 @defthing[MOUSE_CURSOR_RESIZE_NS exact-integer? #:value 6 "Vertical resize/move arrow shape"]
 @defthing[MOUSE_CURSOR_RESIZE_NWSE exact-integer? #:value 7 "Top-left to bottom-right diagonal resize/move arrow shape"]
 @defthing[MOUSE_CURSOR_RESIZE_NESW exact-integer? #:value 8 "The top-right to bottom-left diagonal resize/move arrow shape"]
-@defthing[MOUSE_CURSOR_RESIZE_ALL exact-integer? #:value 9 "The omni-directional resize/move cursor shape"]
+@defthing[MOUSE_CURSOR_RESIZE_ALL exact-integer? #:value 9 "The omnidirectional resize/move cursor shape"]
 @defthing[MOUSE_CURSOR_NOT_ALLOWED exact-integer? #:value 10 "The operation-not-allowed shape"]
 
 @section{Gamepad buttons}
@@ -181,12 +183,12 @@
 @defthing[GAMEPAD_BUTTON_LEFT_FACE_DOWN exact-integer? #:value 3 "Gamepad left DPAD down button"]
 @defthing[GAMEPAD_BUTTON_LEFT_FACE_LEFT exact-integer? #:value 4 "Gamepad left DPAD left button"]
 @defthing[GAMEPAD_BUTTON_RIGHT_FACE_UP exact-integer? #:value 5 "Gamepad right button up (i.e. PS3: Triangle, Xbox: Y)"]
-@defthing[GAMEPAD_BUTTON_RIGHT_FACE_RIGHT exact-integer? #:value 6 "Gamepad right button right (i.e. PS3: Square, Xbox: X)"]
+@defthing[GAMEPAD_BUTTON_RIGHT_FACE_RIGHT exact-integer? #:value 6 "Gamepad right button right (i.e. PS3: Circle, Xbox: B)"]
 @defthing[GAMEPAD_BUTTON_RIGHT_FACE_DOWN exact-integer? #:value 7 "Gamepad right button down (i.e. PS3: Cross, Xbox: A)"]
-@defthing[GAMEPAD_BUTTON_RIGHT_FACE_LEFT exact-integer? #:value 8 "Gamepad right button left (i.e. PS3: Circle, Xbox: B)"]
+@defthing[GAMEPAD_BUTTON_RIGHT_FACE_LEFT exact-integer? #:value 8 "Gamepad right button left (i.e. PS3: Square, Xbox: X)"]
 @defthing[GAMEPAD_BUTTON_LEFT_TRIGGER_1 exact-integer? #:value 9 "Gamepad top/back trigger left (first), it could be a trailing button"]
 @defthing[GAMEPAD_BUTTON_LEFT_TRIGGER_2 exact-integer? #:value 10 "Gamepad top/back trigger left (second), it could be a trailing button"]
-@defthing[GAMEPAD_BUTTON_RIGHT_TRIGGER_1 exact-integer? #:value 11 "Gamepad top/back trigger right (one), it could be a trailing button"]
+@defthing[GAMEPAD_BUTTON_RIGHT_TRIGGER_1 exact-integer? #:value 11 "Gamepad top/back trigger right (first), it could be a trailing button"]
 @defthing[GAMEPAD_BUTTON_RIGHT_TRIGGER_2 exact-integer? #:value 12 "Gamepad top/back trigger right (second), it could be a trailing button"]
 @defthing[GAMEPAD_BUTTON_MIDDLE_LEFT exact-integer? #:value 13 "Gamepad center buttons, left one (i.e. PS3: Select)"]
 @defthing[GAMEPAD_BUTTON_MIDDLE exact-integer? #:value 14 "Gamepad center buttons, middle one (i.e. PS3: PS, Xbox: XBOX)"]
@@ -245,6 +247,9 @@
 @defthing[SHADER_LOC_MAP_IRRADIANCE exact-integer? #:value 23 "Shader location: samplerCube texture: irradiance"]
 @defthing[SHADER_LOC_MAP_PREFILTER exact-integer? #:value 24 "Shader location: samplerCube texture: prefilter"]
 @defthing[SHADER_LOC_MAP_BRDF exact-integer? #:value 25 "Shader location: sampler2d texture: brdf"]
+@defthing[SHADER_LOC_VERTEX_BONEIDS exact-integer? #:value 26 "Shader location: vertex attribute: boneIds"]
+@defthing[SHADER_LOC_VERTEX_BONEWEIGHTS exact-integer? #:value 27 "Shader location: vertex attribute: boneWeights"]
+@defthing[SHADER_LOC_BONE_MATRICES exact-integer? #:value 28 "Shader location: array of matrices uniform: boneMatrices"]
 
 @section{Shader uniform data type}
 @defthing[_ShaderUniformDataType ctype?]{Shader uniform data type}
@@ -277,21 +282,24 @@
 @defthing[PIXELFORMAT_UNCOMPRESSED_R32 exact-integer? #:value 8 "32 bpp (1 channel - float)"]
 @defthing[PIXELFORMAT_UNCOMPRESSED_R32G32B32 exact-integer? #:value 9 "32*3 bpp (3 channels - float)"]
 @defthing[PIXELFORMAT_UNCOMPRESSED_R32G32B32A32 exact-integer? #:value 10 "32*4 bpp (4 channels - float)"]
-@defthing[PIXELFORMAT_COMPRESSED_DXT1_RGB exact-integer? #:value 11 "4 bpp (no alpha)"]
-@defthing[PIXELFORMAT_COMPRESSED_DXT1_RGBA exact-integer? #:value 12 "4 bpp (1 bit alpha)"]
-@defthing[PIXELFORMAT_COMPRESSED_DXT3_RGBA exact-integer? #:value 13 "8 bpp"]
-@defthing[PIXELFORMAT_COMPRESSED_DXT5_RGBA exact-integer? #:value 14 "8 bpp"]
-@defthing[PIXELFORMAT_COMPRESSED_ETC1_RGB exact-integer? #:value 15 "4 bpp"]
-@defthing[PIXELFORMAT_COMPRESSED_ETC2_RGB exact-integer? #:value 16 "4 bpp"]
-@defthing[PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA exact-integer? #:value 17 "8 bpp"]
-@defthing[PIXELFORMAT_COMPRESSED_PVRT_RGB exact-integer? #:value 18 "4 bpp"]
-@defthing[PIXELFORMAT_COMPRESSED_PVRT_RGBA exact-integer? #:value 19 "4 bpp"]
-@defthing[PIXELFORMAT_COMPRESSED_ASTC_4x4_RGBA exact-integer? #:value 20 "8 bpp"]
-@defthing[PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA exact-integer? #:value 21 "2 bpp"]
+@defthing[PIXELFORMAT_UNCOMPRESSED_R16 exact-integer? #:value 11 "16 bpp (1 channel - half float)"]
+@defthing[PIXELFORMAT_UNCOMPRESSED_R16G16B16 exact-integer? #:value 12 "16*3 bpp (3 channels - half float)"]
+@defthing[PIXELFORMAT_UNCOMPRESSED_R16G16B16A16 exact-integer? #:value 13 "16*4 bpp (4 channels - half float)"]
+@defthing[PIXELFORMAT_COMPRESSED_DXT1_RGB exact-integer? #:value 14 "4 bpp (no alpha)"]
+@defthing[PIXELFORMAT_COMPRESSED_DXT1_RGBA exact-integer? #:value 15 "4 bpp (1 bit alpha)"]
+@defthing[PIXELFORMAT_COMPRESSED_DXT3_RGBA exact-integer? #:value 16 "8 bpp"]
+@defthing[PIXELFORMAT_COMPRESSED_DXT5_RGBA exact-integer? #:value 17 "8 bpp"]
+@defthing[PIXELFORMAT_COMPRESSED_ETC1_RGB exact-integer? #:value 18 "4 bpp"]
+@defthing[PIXELFORMAT_COMPRESSED_ETC2_RGB exact-integer? #:value 19 "4 bpp"]
+@defthing[PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA exact-integer? #:value 20 "8 bpp"]
+@defthing[PIXELFORMAT_COMPRESSED_PVRT_RGB exact-integer? #:value 21 "4 bpp"]
+@defthing[PIXELFORMAT_COMPRESSED_PVRT_RGBA exact-integer? #:value 22 "4 bpp"]
+@defthing[PIXELFORMAT_COMPRESSED_ASTC_4x4_RGBA exact-integer? #:value 23 "8 bpp"]
+@defthing[PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA exact-integer? #:value 24 "2 bpp"]
 
 @section{Texture parameters: filter mode}
 @defthing[_TextureFilter ctype?]{Texture parameters: filter mode}
-@defthing[TEXTURE_FILTER_POINT exact-integer? #:value 0 "No filter, just pixel aproximation"]
+@defthing[TEXTURE_FILTER_POINT exact-integer? #:value 0 "No filter, just pixel approximation"]
 @defthing[TEXTURE_FILTER_BILINEAR exact-integer? #:value 1 "Linear filtering"]
 @defthing[TEXTURE_FILTER_TRILINEAR exact-integer? #:value 2 "Trilinear filtering (linear with mipmaps)"]
 @defthing[TEXTURE_FILTER_ANISOTROPIC_4X exact-integer? #:value 3 "Anisotropic filtering 4x"]
@@ -309,10 +317,9 @@
 @defthing[_CubemapLayout ctype?]{Cubemap layouts}
 @defthing[CUBEMAP_LAYOUT_AUTO_DETECT exact-integer? #:value 0 "Automatically detect layout type"]
 @defthing[CUBEMAP_LAYOUT_LINE_VERTICAL exact-integer? #:value 1 "Layout is defined by a vertical line with faces"]
-@defthing[CUBEMAP_LAYOUT_LINE_HORIZONTAL exact-integer? #:value 2 "Layout is defined by an horizontal line with faces"]
+@defthing[CUBEMAP_LAYOUT_LINE_HORIZONTAL exact-integer? #:value 2 "Layout is defined by a horizontal line with faces"]
 @defthing[CUBEMAP_LAYOUT_CROSS_THREE_BY_FOUR exact-integer? #:value 3 "Layout is defined by a 3x4 cross with cubemap faces"]
 @defthing[CUBEMAP_LAYOUT_CROSS_FOUR_BY_THREE exact-integer? #:value 4 "Layout is defined by a 4x3 cross with cubemap faces"]
-@defthing[CUBEMAP_LAYOUT_PANORAMA exact-integer? #:value 5 "Layout is defined by a panorama image (equirectangular map)"]
 
 @section{Font type, defines generation method}
 @defthing[_FontType ctype?]{Font type, defines generation method}
@@ -327,7 +334,9 @@
 @defthing[BLEND_MULTIPLIED exact-integer? #:value 2 "Blend textures multiplying colors"]
 @defthing[BLEND_ADD_COLORS exact-integer? #:value 3 "Blend textures adding colors (alternative)"]
 @defthing[BLEND_SUBTRACT_COLORS exact-integer? #:value 4 "Blend textures subtracting colors (alternative)"]
-@defthing[BLEND_CUSTOM exact-integer? #:value 5 "Belnd textures using custom src/dst factors (use rlSetBlendMode())"]
+@defthing[BLEND_ALPHA_PREMULTIPLY exact-integer? #:value 5 "Blend premultiplied textures considering alpha"]
+@defthing[BLEND_CUSTOM exact-integer? #:value 6 "Blend textures using custom src/dst factors (use rlSetBlendFactors())"]
+@defthing[BLEND_CUSTOM_SEPARATE exact-integer? #:value 7 "Blend textures using custom rgb/alpha separate src/dst factors (use rlSetBlendFactorsSeparate())"]
 
 @section{Gesture}
 @defthing[_Gesture ctype?]{Gesture}
@@ -345,11 +354,11 @@
 
 @section{Camera system modes}
 @defthing[_CameraMode ctype?]{Camera system modes}
-@defthing[CAMERA_CUSTOM exact-integer? #:value 0 "Custom camera"]
-@defthing[CAMERA_FREE exact-integer? #:value 1 "Free camera"]
-@defthing[CAMERA_ORBITAL exact-integer? #:value 2 "Orbital camera"]
-@defthing[CAMERA_FIRST_PERSON exact-integer? #:value 3 "First person camera"]
-@defthing[CAMERA_THIRD_PERSON exact-integer? #:value 4 "Third person camera"]
+@defthing[CAMERA_CUSTOM exact-integer? #:value 0 "Camera custom, controlled by user (UpdateCamera() does nothing)"]
+@defthing[CAMERA_FREE exact-integer? #:value 1 "Camera free mode"]
+@defthing[CAMERA_ORBITAL exact-integer? #:value 2 "Camera orbital, around target, zoom supported"]
+@defthing[CAMERA_FIRST_PERSON exact-integer? #:value 3 "Camera first person"]
+@defthing[CAMERA_THIRD_PERSON exact-integer? #:value 4 "Camera third person"]
 
 @section{Camera projection}
 @defthing[_CameraProjection ctype?]{Camera projection}

@@ -16,7 +16,7 @@
 
 (define-ffi-definer define-raylib raylib-ffi-lib
   #:provide provide-protected
-  #:default-make-fail make-not-available)
+  #:default-make-fail raylib-make-not-available)
 @(splice
   (for/list ([parsed-function (in-list functions-parsed)])
     (match-define (api-function name description return-type parameters varargs) parsed-function)

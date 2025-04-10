@@ -18,6 +18,8 @@
            FLAG_WINDOW_ALWAYS_RUN = 256
            FLAG_WINDOW_TRANSPARENT = 16
            FLAG_WINDOW_HIGHDPI = 8192
+           FLAG_WINDOW_MOUSE_PASSTHROUGH = 16384
+           FLAG_BORDERLESS_WINDOWED_MODE = 32768
            FLAG_MSAA_4X_HINT = 32
            FLAG_INTERLACED_HINT = 65536
            )))
@@ -33,6 +35,8 @@
 (define FLAG_WINDOW_ALWAYS_RUN 256) ; Set to allow windows running while minimized
 (define FLAG_WINDOW_TRANSPARENT 16) ; Set to allow transparent framebuffer
 (define FLAG_WINDOW_HIGHDPI 8192) ; Set to support HighDPI
+(define FLAG_WINDOW_MOUSE_PASSTHROUGH 16384) ; Set to support mouse passthrough, only supported when FLAG_WINDOW_UNDECORATED
+(define FLAG_BORDERLESS_WINDOWED_MODE 32768) ; Set to run program in borderless windowed mode
 (define FLAG_MSAA_4X_HINT 32) ; Set to try enabling MSAA 4X
 (define FLAG_INTERLACED_HINT 65536) ; Set to try enabling interlaced video format (for V3D)
 
@@ -165,7 +169,7 @@
            KEY_KP_ENTER = 335
            KEY_KP_EQUAL = 336
            KEY_BACK = 4
-           KEY_MENU = 82
+           KEY_MENU = 5
            KEY_VOLUME_UP = 24
            KEY_VOLUME_DOWN = 25
            )))
@@ -276,7 +280,7 @@
 (define KEY_KP_ENTER 335) ; Key: Keypad Enter
 (define KEY_KP_EQUAL 336) ; Key: Keypad =
 (define KEY_BACK 4) ; Key: Android back button
-(define KEY_MENU 82) ; Key: Android menu button
+(define KEY_MENU 5) ; Key: Android menu button
 (define KEY_VOLUME_UP 24) ; Key: Android volume up button
 (define KEY_VOLUME_DOWN 25) ; Key: Android volume down button
 
@@ -295,7 +299,7 @@
 (define MOUSE_BUTTON_MIDDLE 2) ; Mouse button middle (pressed wheel)
 (define MOUSE_BUTTON_SIDE 3) ; Mouse button side (advanced mouse device)
 (define MOUSE_BUTTON_EXTRA 4) ; Mouse button extra (advanced mouse device)
-(define MOUSE_BUTTON_FORWARD 5) ; Mouse button fordward (advanced mouse device)
+(define MOUSE_BUTTON_FORWARD 5) ; Mouse button forward (advanced mouse device)
 (define MOUSE_BUTTON_BACK 6) ; Mouse button back (advanced mouse device)
 
 ;; Mouse cursor
@@ -321,7 +325,7 @@
 (define MOUSE_CURSOR_RESIZE_NS 6) ; Vertical resize/move arrow shape
 (define MOUSE_CURSOR_RESIZE_NWSE 7) ; Top-left to bottom-right diagonal resize/move arrow shape
 (define MOUSE_CURSOR_RESIZE_NESW 8) ; The top-right to bottom-left diagonal resize/move arrow shape
-(define MOUSE_CURSOR_RESIZE_ALL 9) ; The omni-directional resize/move cursor shape
+(define MOUSE_CURSOR_RESIZE_ALL 9) ; The omnidirectional resize/move cursor shape
 (define MOUSE_CURSOR_NOT_ALLOWED 10) ; The operation-not-allowed shape
 
 ;; Gamepad buttons
@@ -351,12 +355,12 @@
 (define GAMEPAD_BUTTON_LEFT_FACE_DOWN 3) ; Gamepad left DPAD down button
 (define GAMEPAD_BUTTON_LEFT_FACE_LEFT 4) ; Gamepad left DPAD left button
 (define GAMEPAD_BUTTON_RIGHT_FACE_UP 5) ; Gamepad right button up (i.e. PS3: Triangle, Xbox: Y)
-(define GAMEPAD_BUTTON_RIGHT_FACE_RIGHT 6) ; Gamepad right button right (i.e. PS3: Square, Xbox: X)
+(define GAMEPAD_BUTTON_RIGHT_FACE_RIGHT 6) ; Gamepad right button right (i.e. PS3: Circle, Xbox: B)
 (define GAMEPAD_BUTTON_RIGHT_FACE_DOWN 7) ; Gamepad right button down (i.e. PS3: Cross, Xbox: A)
-(define GAMEPAD_BUTTON_RIGHT_FACE_LEFT 8) ; Gamepad right button left (i.e. PS3: Circle, Xbox: B)
+(define GAMEPAD_BUTTON_RIGHT_FACE_LEFT 8) ; Gamepad right button left (i.e. PS3: Square, Xbox: X)
 (define GAMEPAD_BUTTON_LEFT_TRIGGER_1 9) ; Gamepad top/back trigger left (first), it could be a trailing button
 (define GAMEPAD_BUTTON_LEFT_TRIGGER_2 10) ; Gamepad top/back trigger left (second), it could be a trailing button
-(define GAMEPAD_BUTTON_RIGHT_TRIGGER_1 11) ; Gamepad top/back trigger right (one), it could be a trailing button
+(define GAMEPAD_BUTTON_RIGHT_TRIGGER_1 11) ; Gamepad top/back trigger right (first), it could be a trailing button
 (define GAMEPAD_BUTTON_RIGHT_TRIGGER_2 12) ; Gamepad top/back trigger right (second), it could be a trailing button
 (define GAMEPAD_BUTTON_MIDDLE_LEFT 13) ; Gamepad center buttons, left one (i.e. PS3: Select)
 (define GAMEPAD_BUTTON_MIDDLE 14) ; Gamepad center buttons, middle one (i.e. PS3: PS, Xbox: XBOX)
@@ -434,6 +438,9 @@
            SHADER_LOC_MAP_IRRADIANCE = 23
            SHADER_LOC_MAP_PREFILTER = 24
            SHADER_LOC_MAP_BRDF = 25
+           SHADER_LOC_VERTEX_BONEIDS = 26
+           SHADER_LOC_VERTEX_BONEWEIGHTS = 27
+           SHADER_LOC_BONE_MATRICES = 28
            )))
 (define SHADER_LOC_VERTEX_POSITION 0) ; Shader location: vertex attribute: position
 (define SHADER_LOC_VERTEX_TEXCOORD01 1) ; Shader location: vertex attribute: texcoord01
@@ -461,6 +468,9 @@
 (define SHADER_LOC_MAP_IRRADIANCE 23) ; Shader location: samplerCube texture: irradiance
 (define SHADER_LOC_MAP_PREFILTER 24) ; Shader location: samplerCube texture: prefilter
 (define SHADER_LOC_MAP_BRDF 25) ; Shader location: sampler2d texture: brdf
+(define SHADER_LOC_VERTEX_BONEIDS 26) ; Shader location: vertex attribute: boneIds
+(define SHADER_LOC_VERTEX_BONEWEIGHTS 27) ; Shader location: vertex attribute: boneWeights
+(define SHADER_LOC_BONE_MATRICES 28) ; Shader location: array of matrices uniform: boneMatrices
 
 ;; Shader uniform data type
 (define _ShaderUniformDataType
@@ -508,17 +518,20 @@
            PIXELFORMAT_UNCOMPRESSED_R32 = 8
            PIXELFORMAT_UNCOMPRESSED_R32G32B32 = 9
            PIXELFORMAT_UNCOMPRESSED_R32G32B32A32 = 10
-           PIXELFORMAT_COMPRESSED_DXT1_RGB = 11
-           PIXELFORMAT_COMPRESSED_DXT1_RGBA = 12
-           PIXELFORMAT_COMPRESSED_DXT3_RGBA = 13
-           PIXELFORMAT_COMPRESSED_DXT5_RGBA = 14
-           PIXELFORMAT_COMPRESSED_ETC1_RGB = 15
-           PIXELFORMAT_COMPRESSED_ETC2_RGB = 16
-           PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA = 17
-           PIXELFORMAT_COMPRESSED_PVRT_RGB = 18
-           PIXELFORMAT_COMPRESSED_PVRT_RGBA = 19
-           PIXELFORMAT_COMPRESSED_ASTC_4x4_RGBA = 20
-           PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA = 21
+           PIXELFORMAT_UNCOMPRESSED_R16 = 11
+           PIXELFORMAT_UNCOMPRESSED_R16G16B16 = 12
+           PIXELFORMAT_UNCOMPRESSED_R16G16B16A16 = 13
+           PIXELFORMAT_COMPRESSED_DXT1_RGB = 14
+           PIXELFORMAT_COMPRESSED_DXT1_RGBA = 15
+           PIXELFORMAT_COMPRESSED_DXT3_RGBA = 16
+           PIXELFORMAT_COMPRESSED_DXT5_RGBA = 17
+           PIXELFORMAT_COMPRESSED_ETC1_RGB = 18
+           PIXELFORMAT_COMPRESSED_ETC2_RGB = 19
+           PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA = 20
+           PIXELFORMAT_COMPRESSED_PVRT_RGB = 21
+           PIXELFORMAT_COMPRESSED_PVRT_RGBA = 22
+           PIXELFORMAT_COMPRESSED_ASTC_4x4_RGBA = 23
+           PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA = 24
            )))
 (define PIXELFORMAT_UNCOMPRESSED_GRAYSCALE 1) ; 8 bit per pixel (no alpha)
 (define PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA 2) ; 8*2 bpp (2 channels)
@@ -530,17 +543,20 @@
 (define PIXELFORMAT_UNCOMPRESSED_R32 8) ; 32 bpp (1 channel - float)
 (define PIXELFORMAT_UNCOMPRESSED_R32G32B32 9) ; 32*3 bpp (3 channels - float)
 (define PIXELFORMAT_UNCOMPRESSED_R32G32B32A32 10) ; 32*4 bpp (4 channels - float)
-(define PIXELFORMAT_COMPRESSED_DXT1_RGB 11) ; 4 bpp (no alpha)
-(define PIXELFORMAT_COMPRESSED_DXT1_RGBA 12) ; 4 bpp (1 bit alpha)
-(define PIXELFORMAT_COMPRESSED_DXT3_RGBA 13) ; 8 bpp
-(define PIXELFORMAT_COMPRESSED_DXT5_RGBA 14) ; 8 bpp
-(define PIXELFORMAT_COMPRESSED_ETC1_RGB 15) ; 4 bpp
-(define PIXELFORMAT_COMPRESSED_ETC2_RGB 16) ; 4 bpp
-(define PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA 17) ; 8 bpp
-(define PIXELFORMAT_COMPRESSED_PVRT_RGB 18) ; 4 bpp
-(define PIXELFORMAT_COMPRESSED_PVRT_RGBA 19) ; 4 bpp
-(define PIXELFORMAT_COMPRESSED_ASTC_4x4_RGBA 20) ; 8 bpp
-(define PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA 21) ; 2 bpp
+(define PIXELFORMAT_UNCOMPRESSED_R16 11) ; 16 bpp (1 channel - half float)
+(define PIXELFORMAT_UNCOMPRESSED_R16G16B16 12) ; 16*3 bpp (3 channels - half float)
+(define PIXELFORMAT_UNCOMPRESSED_R16G16B16A16 13) ; 16*4 bpp (4 channels - half float)
+(define PIXELFORMAT_COMPRESSED_DXT1_RGB 14) ; 4 bpp (no alpha)
+(define PIXELFORMAT_COMPRESSED_DXT1_RGBA 15) ; 4 bpp (1 bit alpha)
+(define PIXELFORMAT_COMPRESSED_DXT3_RGBA 16) ; 8 bpp
+(define PIXELFORMAT_COMPRESSED_DXT5_RGBA 17) ; 8 bpp
+(define PIXELFORMAT_COMPRESSED_ETC1_RGB 18) ; 4 bpp
+(define PIXELFORMAT_COMPRESSED_ETC2_RGB 19) ; 4 bpp
+(define PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA 20) ; 8 bpp
+(define PIXELFORMAT_COMPRESSED_PVRT_RGB 21) ; 4 bpp
+(define PIXELFORMAT_COMPRESSED_PVRT_RGBA 22) ; 4 bpp
+(define PIXELFORMAT_COMPRESSED_ASTC_4x4_RGBA 23) ; 8 bpp
+(define PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA 24) ; 2 bpp
 
 ;; Texture parameters: filter mode
 (define _TextureFilter
@@ -551,7 +567,7 @@
            TEXTURE_FILTER_ANISOTROPIC_8X = 4
            TEXTURE_FILTER_ANISOTROPIC_16X = 5
            )))
-(define TEXTURE_FILTER_POINT 0) ; No filter, just pixel aproximation
+(define TEXTURE_FILTER_POINT 0) ; No filter, just pixel approximation
 (define TEXTURE_FILTER_BILINEAR 1) ; Linear filtering
 (define TEXTURE_FILTER_TRILINEAR 2) ; Trilinear filtering (linear with mipmaps)
 (define TEXTURE_FILTER_ANISOTROPIC_4X 3) ; Anisotropic filtering 4x
@@ -577,14 +593,12 @@
            CUBEMAP_LAYOUT_LINE_HORIZONTAL = 2
            CUBEMAP_LAYOUT_CROSS_THREE_BY_FOUR = 3
            CUBEMAP_LAYOUT_CROSS_FOUR_BY_THREE = 4
-           CUBEMAP_LAYOUT_PANORAMA = 5
            )))
 (define CUBEMAP_LAYOUT_AUTO_DETECT 0) ; Automatically detect layout type
 (define CUBEMAP_LAYOUT_LINE_VERTICAL 1) ; Layout is defined by a vertical line with faces
-(define CUBEMAP_LAYOUT_LINE_HORIZONTAL 2) ; Layout is defined by an horizontal line with faces
+(define CUBEMAP_LAYOUT_LINE_HORIZONTAL 2) ; Layout is defined by a horizontal line with faces
 (define CUBEMAP_LAYOUT_CROSS_THREE_BY_FOUR 3) ; Layout is defined by a 3x4 cross with cubemap faces
 (define CUBEMAP_LAYOUT_CROSS_FOUR_BY_THREE 4) ; Layout is defined by a 4x3 cross with cubemap faces
-(define CUBEMAP_LAYOUT_PANORAMA 5) ; Layout is defined by a panorama image (equirectangular map)
 
 ;; Font type, defines generation method
 (define _FontType
@@ -603,14 +617,18 @@
            BLEND_MULTIPLIED = 2
            BLEND_ADD_COLORS = 3
            BLEND_SUBTRACT_COLORS = 4
-           BLEND_CUSTOM = 5
+           BLEND_ALPHA_PREMULTIPLY = 5
+           BLEND_CUSTOM = 6
+           BLEND_CUSTOM_SEPARATE = 7
            )))
 (define BLEND_ALPHA 0) ; Blend textures considering alpha (default)
 (define BLEND_ADDITIVE 1) ; Blend textures adding colors
 (define BLEND_MULTIPLIED 2) ; Blend textures multiplying colors
 (define BLEND_ADD_COLORS 3) ; Blend textures adding colors (alternative)
 (define BLEND_SUBTRACT_COLORS 4) ; Blend textures subtracting colors (alternative)
-(define BLEND_CUSTOM 5) ; Belnd textures using custom src/dst factors (use rlSetBlendMode())
+(define BLEND_ALPHA_PREMULTIPLY 5) ; Blend premultiplied textures considering alpha
+(define BLEND_CUSTOM 6) ; Blend textures using custom src/dst factors (use rlSetBlendFactors())
+(define BLEND_CUSTOM_SEPARATE 7) ; Blend textures using custom rgb/alpha separate src/dst factors (use rlSetBlendFactorsSeparate())
 
 ;; Gesture
 (define _Gesture
@@ -646,11 +664,11 @@
            CAMERA_FIRST_PERSON = 3
            CAMERA_THIRD_PERSON = 4
            )))
-(define CAMERA_CUSTOM 0) ; Custom camera
-(define CAMERA_FREE 1) ; Free camera
-(define CAMERA_ORBITAL 2) ; Orbital camera
-(define CAMERA_FIRST_PERSON 3) ; First person camera
-(define CAMERA_THIRD_PERSON 4) ; Third person camera
+(define CAMERA_CUSTOM 0) ; Camera custom, controlled by user (UpdateCamera() does nothing)
+(define CAMERA_FREE 1) ; Camera free mode
+(define CAMERA_ORBITAL 2) ; Camera orbital, around target, zoom supported
+(define CAMERA_FIRST_PERSON 3) ; Camera first person
+(define CAMERA_THIRD_PERSON 4) ; Camera third person
 
 ;; Camera projection
 (define _CameraProjection

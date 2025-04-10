@@ -6,3 +6,5 @@ compiled/
 /doc/
 /working/
 /raylib-git/
+/raylib-parser/output/
+/raylib-parser/raylib_parser

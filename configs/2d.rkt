@@ -64,7 +64,9 @@
    (exclusion
     #:reason @list{@"@"racket[clipboard<%>] should be used instead}
     "SetClipboardText"
-    "GetClipboardText")
+    "GetClipboardText"
+    ;; GetClipboardImage gets a pass
+    )
 
    #;; There's open-url in DrRacket but I'm against suggesting it
    (exclusion
@@ -78,7 +80,9 @@
    (exclusion
     #:reason @list{@"@"racket[random] should be used instead}
     "GetRandomValue"
-    "SetRandomSeed")
+    "SetRandomSeed"
+    "LoadRandomSequence"
+    "UnloadRandomSequence")
 
    (exclusion
     #:reason @list{
@@ -124,14 +128,26 @@
     "GetDirectoryFiles"
     "ClearDirectoryFiles"
     "ChangeDirectory"
-    "GetFileModTime")
+    "GetFileModTime"
+    "MakeDirectory"
+    "IsFileNameValid"
+
+    "GetFileSize"
+    "IsPathFile"
+    "LoadDirectoryFiles"
+    "LoadDirectoryFilesEx"
+    "UnloadDirectoryFiles")
 
    (exclusion
     #:reason @list{Racket's own string functions should be used instead}
     "GetCodepointCount"
     "GetCodepoint"
+    "GetCodepointNext"
+    "GetCodepointPrevious"
     "CodepointToUTF8"
-    "TextCodepointsToUTF8"
+    "LoadUTF8"
+    "UnloadUTF8"
+
     "TextCopy"
     "TextIsEqual"
     "TextLength"
@@ -145,8 +161,11 @@
     "TextFindIndex"
     "TextToUpper"
     "TextToLower"
+    "TextToInteger"
+    "TextToFloat"
     "TextToPascal"
-    "TextToInteger")
+    "TextToSnake"
+    "TextToCamel")
 
    (exclusion
     #:reason @list{
@@ -169,6 +188,8 @@
     "DrawCircle3D"
     "DrawTriangle3D"
     "DrawTriangleStrip3D"
+    "DrawCapsule"
+    "DrawCapsuleWires"
     "DrawCube"
     "DrawCubeV"
     "DrawCubeWires"
@@ -187,6 +208,7 @@
     "DrawGrid"
     "LoadModel"
     "LoadModelFromMesh"
+    "IsModelValid"
     "UnloadModel"
     "UnloadModelKeepMeshes"
     "GetModelBoundingBox"
@@ -194,6 +216,8 @@
     "DrawModelEx"
     "DrawModelWires"
     "DrawModelWiresEx"
+    "DrawModelPoints"
+    "DrawModelPointsEx"
     "DrawBoundingBox"
     "DrawBillboard"
     "DrawBillboardRec"
@@ -204,6 +228,7 @@
     "DrawMesh"
     "DrawMeshInstanced"
     "ExportMesh"
+    "ExportMeshAsCode"
     "GetMeshBoundingBox"
     "GenMeshTangents"
     "GenMeshBinormals"
@@ -220,11 +245,13 @@
     "GenMeshCubicmap"
     "LoadMaterials"
     "LoadMaterialDefault"
+    "IsMaterialValid"
     "UnloadMaterial"
     "SetMaterialTexture"
     "SetModelMeshMaterial"
     "LoadModelAnimations"
     "UpdateModelAnimation"
+    "UpdateModelAnimationBones"
     "UnloadModelAnimation"
     "UnloadModelAnimations"
     "IsModelAnimationValid"

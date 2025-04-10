@@ -4,7 +4,7 @@
 
 (define-ffi-definer define-raylib raylib-ffi-lib
   #:provide provide-protected
-  #:default-make-fail make-not-available)
+  #:default-make-fail raylib-make-not-available)
 
 ;; Initialize window and OpenGL context
 (define-raylib InitWindow
@@ -14,15 +14,15 @@
    [title : _string]
    -> _void))
 
-;; Check if KEY_ESCAPE pressed or Close icon pressed
-(define-raylib WindowShouldClose
-  (_fun
-   -> _stdbool))
-
 ;; Close window and unload OpenGL context
 (define-raylib CloseWindow
   (_fun
    -> _void))
+
+;; Check if application should close (KEY_ESCAPE pressed or windows close icon clicked)
+(define-raylib WindowShouldClose
+  (_fun
+   -> _stdbool))
 
 ;; Check if window has been initialized successfully
 (define-raylib IsWindowReady
@@ -34,22 +34,22 @@
   (_fun
    -> _stdbool))
 
-;; Check if window is currently hidden (only PLATFORM_DESKTOP)
+;; Check if window is currently hidden
 (define-raylib IsWindowHidden
   (_fun
    -> _stdbool))
 
-;; Check if window is currently minimized (only PLATFORM_DESKTOP)
+;; Check if window is currently minimized
 (define-raylib IsWindowMinimized
   (_fun
    -> _stdbool))
 
-;; Check if window is currently maximized (only PLATFORM_DESKTOP)
+;; Check if window is currently maximized
 (define-raylib IsWindowMaximized
   (_fun
    -> _stdbool))
 
-;; Check if window is currently focused (only PLATFORM_DESKTOP)
+;; Check if window is currently focused
 (define-raylib IsWindowFocused
   (_fun
    -> _stdbool))
@@ -77,46 +77,58 @@
    [flags : _uint]
    -> _void))
 
-;; Toggle window state: fullscreen/windowed (only PLATFORM_DESKTOP)
+;; Toggle window state: fullscreen/windowed, resizes monitor to match window resolution
 (define-raylib ToggleFullscreen
   (_fun
    -> _void))
 
-;; Set window state: maximized, if resizable (only PLATFORM_DESKTOP)
+;; Toggle window state: borderless windowed, resizes window to match monitor resolution
+(define-raylib ToggleBorderlessWindowed
+  (_fun
+   -> _void))
+
+;; Set window state: maximized, if resizable
 (define-raylib MaximizeWindow
   (_fun
    -> _void))
 
-;; Set window state: minimized, if resizable (only PLATFORM_DESKTOP)
+;; Set window state: minimized, if resizable
 (define-raylib MinimizeWindow
   (_fun
    -> _void))
 
-;; Set window state: not minimized/maximized (only PLATFORM_DESKTOP)
+;; Set window state: not minimized/maximized
 (define-raylib RestoreWindow
   (_fun
    -> _void))
 
-;; Set icon for window (only PLATFORM_DESKTOP)
+;; Set icon for window (single image, RGBA 32bit)
 (define-raylib SetWindowIcon
   (_fun
    [image : _Image]
    -> _void))
 
-;; Set title for window (only PLATFORM_DESKTOP)
+;; Set icon for window (multiple images, RGBA 32bit)
+(define-raylib SetWindowIcons
+  (_fun
+   [images : (_pointer-to _Image)]
+   [count : _int]
+   -> _void))
+
+;; Set title for window
 (define-raylib SetWindowTitle
   (_fun
    [title : _string]
    -> _void))
 
-;; Set window position on screen (only PLATFORM_DESKTOP)
+;; Set window position on screen
 (define-raylib SetWindowPosition
   (_fun
    [x : _int]
    [y : _int]
    -> _void))
 
-;; Set monitor for the current window (fullscreen mode)
+;; Set monitor for the current window
 (define-raylib SetWindowMonitor
   (_fun
    [monitor : _int]
@@ -129,11 +141,29 @@
    [height : _int]
    -> _void))
 
+;; Set window maximum dimensions (for FLAG_WINDOW_RESIZABLE)
+(define-raylib SetWindowMaxSize
+  (_fun
+   [width : _int]
+   [height : _int]
+   -> _void))
+
 ;; Set window dimensions
 (define-raylib SetWindowSize
   (_fun
    [width : _int]
    [height : _int]
+   -> _void))
+
+;; Set window opacity [0.0f..1.0f]
+(define-raylib SetWindowOpacity
+  (_fun
+   [opacity : _float]
+   -> _void))
+
+;; Set window focused
+(define-raylib SetWindowFocused
+  (_fun
    -> _void))
 
 ;; Get native window handle
@@ -151,12 +181,22 @@
   (_fun
    -> _int))
 
+;; Get current render width (it considers HiDPI)
+(define-raylib GetRenderWidth
+  (_fun
+   -> _int))
+
+;; Get current render height (it considers HiDPI)
+(define-raylib GetRenderHeight
+  (_fun
+   -> _int))
+
 ;; Get number of connected monitors
 (define-raylib GetMonitorCount
   (_fun
    -> _int))
 
-;; Get current connected monitor
+;; Get current monitor where window is placed
 (define-raylib GetCurrentMonitor
   (_fun
    -> _int))
@@ -167,13 +207,13 @@
    [monitor : _int]
    -> _Vector2))
 
-;; Get specified monitor width (max available by monitor)
+;; Get specified monitor width (current video mode used by monitor)
 (define-raylib GetMonitorWidth
   (_fun
    [monitor : _int]
    -> _int))
 
-;; Get specified monitor height (max available by monitor)
+;; Get specified monitor height (current video mode used by monitor)
 (define-raylib GetMonitorHeight
   (_fun
    [monitor : _int]
@@ -207,7 +247,7 @@
   (_fun
    -> _Vector2))
 
-;; Get the human-readable, UTF-8 encoded name of the primary monitor
+;; Get the human-readable, UTF-8 encoded name of the specified monitor
 (define-raylib GetMonitorName
   (_fun
    [monitor : _int]
@@ -224,20 +264,19 @@
   (_fun
    -> _string))
 
-;; Swap back buffer with front buffer (screen drawing)
-(define-raylib SwapScreenBuffer
+;; Get clipboard image content
+(define-raylib GetClipboardImage
+  (_fun
+   -> _Image))
+
+;; Enable waiting for events on EndDrawing(), no automatic event polling
+(define-raylib EnableEventWaiting
   (_fun
    -> _void))
 
-;; Register all input events
-(define-raylib PollInputEvents
+;; Disable waiting for events on EndDrawing(), automatic events polling
+(define-raylib DisableEventWaiting
   (_fun
-   -> _void))
-
-;; Wait for some milliseconds (halt program execution)
-(define-raylib WaitTime
-  (_fun
-   [ms : _float]
    -> _void))
 
 ;; Shows cursor
@@ -392,6 +431,12 @@
    [fsCode : _string]
    -> _Shader))
 
+;; Check if a shader is valid (loaded on GPU)
+(define-raylib IsShaderValid
+  (_fun
+   [shader : _Shader]
+   -> _stdbool))
+
 ;; Get shader uniform location
 (define-raylib GetShaderLocation
   (_fun
@@ -447,24 +492,21 @@
    [shader : _Shader]
    -> _void))
 
-;; Get a ray trace from mouse position
-(define-raylib GetMouseRay
+;; Get a ray trace from screen position (i.e mouse)
+(define-raylib GetScreenToWorldRay
   (_fun
-   [mousePosition : _Vector2]
+   [position : _Vector2]
    [camera : _Camera]
    -> _Ray))
 
-;; Get camera transform matrix (view matrix)
-(define-raylib GetCameraMatrix
+;; Get a ray trace from screen position (i.e mouse) in a viewport
+(define-raylib GetScreenToWorldRayEx
   (_fun
+   [position : _Vector2]
    [camera : _Camera]
-   -> _Matrix))
-
-;; Get camera 2d transform matrix
-(define-raylib GetCameraMatrix2D
-  (_fun
-   [camera : _Camera2D]
-   -> _Matrix))
+   [width : _int]
+   [height : _int]
+   -> _Ray))
 
 ;; Get the screen space position for a 3d world space position
 (define-raylib GetWorldToScreen
@@ -496,16 +538,23 @@
    [camera : _Camera2D]
    -> _Vector2))
 
+;; Get camera transform matrix (view matrix)
+(define-raylib GetCameraMatrix
+  (_fun
+   [camera : _Camera]
+   -> _Matrix))
+
+;; Get camera 2d transform matrix
+(define-raylib GetCameraMatrix2D
+  (_fun
+   [camera : _Camera2D]
+   -> _Matrix))
+
 ;; Set target FPS (maximum)
 (define-raylib SetTargetFPS
   (_fun
    [fps : _int]
    -> _void))
-
-;; Get current FPS
-(define-raylib GetFPS
-  (_fun
-   -> _int))
 
 ;; Get time in seconds for last frame drawn (delta time)
 (define-raylib GetFrameTime
@@ -517,6 +566,33 @@
   (_fun
    -> _double))
 
+;; Get current FPS
+(define-raylib GetFPS
+  (_fun
+   -> _int))
+
+;; Swap back buffer with front buffer (screen drawing)
+(define-raylib SwapScreenBuffer
+  (_fun
+   -> _void))
+
+;; Register all input events
+(define-raylib PollInputEvents
+  (_fun
+   -> _void))
+
+;; Wait for some time (halt program execution)
+(define-raylib WaitTime
+  (_fun
+   [seconds : _double]
+   -> _void))
+
+;; Set the seed for the random number generator
+(define-raylib SetRandomSeed
+  (_fun
+   [seed : _uint]
+   -> _void))
+
 ;; Get a random value between min and max (both included)
 (define-raylib GetRandomValue
   (_fun
@@ -524,10 +600,18 @@
    [max : _int]
    -> _int))
 
-;; Set the seed for the random number generator
-(define-raylib SetRandomSeed
+;; Load random values sequence, no values repeated
+(define-raylib LoadRandomSequence
   (_fun
-   [seed : _uint]
+   [count : _uint]
+   [min : _int]
+   [max : _int]
+   -> (_pointer-to _int)))
+
+;; Unload random values sequence
+(define-raylib UnloadRandomSequence
+  (_fun
+   [sequence : (_pointer-to _int)]
    -> _void))
 
 ;; Takes a screenshot of current screen (filename extension defines format)
@@ -540,6 +624,12 @@
 (define-raylib SetConfigFlags
   (_fun
    [flags : _uint]
+   -> _void))
+
+;; Open URL with default system browser (if available)
+(define-raylib OpenURL
+  (_fun
+   [url : _string]
    -> _void))
 
 ;; Show trace log messages (LOG_DEBUG, LOG_INFO, LOG_WARNING, LOG_ERROR...)
@@ -560,14 +650,14 @@
 ;; Internal memory allocator
 (define-raylib MemAlloc
   (_fun
-   [size : _int]
+   [size : _uint]
    -> (_pointer-to _void)))
 
 ;; Internal memory reallocator
 (define-raylib MemRealloc
   (_fun
    [ptr : (_pointer-to _void)]
-   [size : _int]
+   [size : _uint]
    -> (_pointer-to _void)))
 
 ;; Internal memory free
@@ -610,7 +700,7 @@
 (define-raylib LoadFileData
   (_fun
    [fileName : _string]
-   [bytesRead : (_pointer-to _uint)]
+   [dataSize : (_pointer-to _int)]
    -> (_pointer-to _ubyte)))
 
 ;; Unload file data allocated by LoadFileData()
@@ -624,7 +714,15 @@
   (_fun
    [fileName : _string]
    [data : (_pointer-to _void)]
-   [bytesToWrite : _uint]
+   [dataSize : _int]
+   -> _stdbool))
+
+;; Export data to code (.h), returns true on success
+(define-raylib ExportDataAsCode
+  (_fun
+   [data : (_pointer-to _ubyte)]
+   [dataSize : _int]
+   [fileName : _string]
    -> _stdbool))
 
 ;; Load text data from file (read), returns a '\0' terminated string
@@ -665,6 +763,12 @@
    [ext : _string]
    -> _stdbool))
 
+;; Get file length in bytes (NOTE: GetFileSize() conflicts with windows.h)
+(define-raylib GetFileLength
+  (_fun
+   [fileName : _string]
+   -> _int))
+
 ;; Get pointer to extension for a filename string (includes dot: '.png')
 (define-raylib GetFileExtension
   (_fun
@@ -700,17 +804,16 @@
   (_fun
    -> _string))
 
-;; Get filenames in a directory path (memory should be freed)
-(define-raylib GetDirectoryFiles
+;; Get the directory of the running application (uses static string)
+(define-raylib GetApplicationDirectory
+  (_fun
+   -> _string))
+
+;; Create directories (including full path requested), returns 0 on success
+(define-raylib MakeDirectory
   (_fun
    [dirPath : _string]
-   [count : (_pointer-to _int)]
-   -> (_pointer-to (_pointer-to _byte))))
-
-;; Clear directory files paths buffers (free memory)
-(define-raylib ClearDirectoryFiles
-  (_fun
-   -> _void))
+   -> _int))
 
 ;; Change working directory, return true on success
 (define-raylib ChangeDirectory
@@ -718,20 +821,52 @@
    [dir : _string]
    -> _stdbool))
 
+;; Check if a given path is a file or a directory
+(define-raylib IsPathFile
+  (_fun
+   [path : _string]
+   -> _stdbool))
+
+;; Check if fileName is valid for the platform/OS
+(define-raylib IsFileNameValid
+  (_fun
+   [fileName : _string]
+   -> _stdbool))
+
+;; Load directory filepaths
+(define-raylib LoadDirectoryFiles
+  (_fun
+   [dirPath : _string]
+   -> _FilePathList))
+
+;; Load directory filepaths with extension filtering and recursive directory scan. Use 'DIR' in the filter string to include directories in the result
+(define-raylib LoadDirectoryFilesEx
+  (_fun
+   [basePath : _string]
+   [filter : _string]
+   [scanSubdirs : _stdbool]
+   -> _FilePathList))
+
+;; Unload filepaths
+(define-raylib UnloadDirectoryFiles
+  (_fun
+   [files : _FilePathList]
+   -> _void))
+
 ;; Check if a file has been dropped into window
 (define-raylib IsFileDropped
   (_fun
    -> _stdbool))
 
-;; Get dropped files names (memory should be freed)
-(define-raylib GetDroppedFiles
+;; Load dropped filepaths
+(define-raylib LoadDroppedFiles
   (_fun
-   [count : (_pointer-to _int)]
-   -> (_pointer-to (_pointer-to _byte))))
+   -> _FilePathList))
 
-;; Clear dropped files paths buffer (free memory)
-(define-raylib ClearDroppedFiles
+;; Unload dropped filepaths
+(define-raylib UnloadDroppedFiles
   (_fun
+   [files : _FilePathList]
    -> _void))
 
 ;; Get file modification time (last write time)
@@ -740,58 +875,113 @@
    [fileName : _string]
    -> _long))
 
-;; Compress data (DEFLATE algorithm)
+;; Compress data (DEFLATE algorithm), memory must be MemFree()
 (define-raylib CompressData
   (_fun
    [data : (_pointer-to _ubyte)]
-   [dataLength : _int]
-   [compDataLength : (_pointer-to _int)]
+   [dataSize : _int]
+   [compDataSize : (_pointer-to _int)]
    -> (_pointer-to _ubyte)))
 
-;; Decompress data (DEFLATE algorithm)
+;; Decompress data (DEFLATE algorithm), memory must be MemFree()
 (define-raylib DecompressData
   (_fun
    [compData : (_pointer-to _ubyte)]
-   [compDataLength : _int]
-   [dataLength : (_pointer-to _int)]
+   [compDataSize : _int]
+   [dataSize : (_pointer-to _int)]
    -> (_pointer-to _ubyte)))
 
-;; Encode data to Base64 string
+;; Encode data to Base64 string, memory must be MemFree()
 (define-raylib EncodeDataBase64
   (_fun
    [data : (_pointer-to _ubyte)]
-   [dataLength : _int]
-   [outputLength : (_pointer-to _int)]
+   [dataSize : _int]
+   [outputSize : (_pointer-to _int)]
    -> (_pointer-to _byte)))
 
-;; Decode Base64 string data
+;; Decode Base64 string data, memory must be MemFree()
 (define-raylib DecodeDataBase64
   (_fun
    [data : (_pointer-to _ubyte)]
-   [outputLength : (_pointer-to _int)]
+   [outputSize : (_pointer-to _int)]
    -> (_pointer-to _ubyte)))
 
-;; Save integer value to storage file (to defined position), returns true on success
-(define-raylib SaveStorageValue
+;; Compute CRC32 hash code
+(define-raylib ComputeCRC32
   (_fun
-   [position : _uint]
-   [value : _int]
+   [data : (_pointer-to _ubyte)]
+   [dataSize : _int]
+   -> _uint))
+
+;; Compute MD5 hash code, returns static int[4] (16 bytes)
+(define-raylib ComputeMD5
+  (_fun
+   [data : (_pointer-to _ubyte)]
+   [dataSize : _int]
+   -> (_pointer-to _uint)))
+
+;; Compute SHA1 hash code, returns static int[5] (20 bytes)
+(define-raylib ComputeSHA1
+  (_fun
+   [data : (_pointer-to _ubyte)]
+   [dataSize : _int]
+   -> (_pointer-to _uint)))
+
+;; Load automation events list from file, NULL for empty list, capacity = MAX_AUTOMATION_EVENTS
+(define-raylib LoadAutomationEventList
+  (_fun
+   [fileName : _string]
+   -> _AutomationEventList))
+
+;; Unload automation events list from file
+(define-raylib UnloadAutomationEventList
+  (_fun
+   [list : _AutomationEventList]
+   -> _void))
+
+;; Export automation events list as text file
+(define-raylib ExportAutomationEventList
+  (_fun
+   [list : _AutomationEventList]
+   [fileName : _string]
    -> _stdbool))
 
-;; Load integer value from storage file (from defined position)
-(define-raylib LoadStorageValue
+;; Set automation event list to record to
+(define-raylib SetAutomationEventList
   (_fun
-   [position : _uint]
-   -> _int))
+   [list : (_pointer-to _AutomationEventList)]
+   -> _void))
 
-;; Open URL with default system browser (if available)
-(define-raylib OpenURL
+;; Set automation event internal base frame to start recording
+(define-raylib SetAutomationEventBaseFrame
   (_fun
-   [url : _string]
+   [frame : _int]
+   -> _void))
+
+;; Start recording automation events (AutomationEventList must be set)
+(define-raylib StartAutomationEventRecording
+  (_fun
+   -> _void))
+
+;; Stop recording automation events
+(define-raylib StopAutomationEventRecording
+  (_fun
+   -> _void))
+
+;; Play a recorded automation event
+(define-raylib PlayAutomationEvent
+  (_fun
+   [event : _AutomationEvent]
    -> _void))
 
 ;; Check if a key has been pressed once
 (define-raylib IsKeyPressed
+  (_fun
+   [key : _int]
+   -> _stdbool))
+
+;; Check if a key has been pressed again
+(define-raylib IsKeyPressedRepeat
   (_fun
    [key : _int]
    -> _stdbool))
@@ -814,12 +1004,6 @@
    [key : _int]
    -> _stdbool))
 
-;; Set a custom key to exit program (default is ESC)
-(define-raylib SetExitKey
-  (_fun
-   [key : _int]
-   -> _void))
-
 ;; Get key pressed (keycode), call it multiple times for keys queued, returns 0 when the queue is empty
 (define-raylib GetKeyPressed
   (_fun
@@ -829,6 +1013,12 @@
 (define-raylib GetCharPressed
   (_fun
    -> _int))
+
+;; Set a custom key to exit program (default is ESC)
+(define-raylib SetExitKey
+  (_fun
+   [key : _int]
+   -> _void))
 
 ;; Check if a gamepad is available
 (define-raylib IsGamepadAvailable
@@ -893,6 +1083,15 @@
   (_fun
    [mappings : _string]
    -> _int))
+
+;; Set gamepad vibration for both motors (duration in seconds)
+(define-raylib SetGamepadVibration
+  (_fun
+   [gamepad : _int]
+   [leftMotor : _float]
+   [rightMotor : _float]
+   [duration : _float]
+   -> _void))
 
 ;; Check if a mouse button has been pressed once
 (define-raylib IsMouseButtonPressed
@@ -959,10 +1158,15 @@
    [scaleY : _float]
    -> _void))
 
-;; Get mouse wheel movement Y
+;; Get mouse wheel movement for X or Y, whichever is larger
 (define-raylib GetMouseWheelMove
   (_fun
    -> _float))
+
+;; Get mouse wheel movement for both X and Y
+(define-raylib GetMouseWheelMoveV
+  (_fun
+   -> _Vector2))
 
 ;; Set mouse cursor
 (define-raylib SetMouseCursor
@@ -1006,7 +1210,7 @@
 ;; Check if a gesture have been detected
 (define-raylib IsGestureDetected
   (_fun
-   [gesture : _int]
+   [gesture : _uint]
    -> _stdbool))
 
 ;; Get latest detected gesture
@@ -1014,7 +1218,7 @@
   (_fun
    -> _int))
 
-;; Get gesture hold time in milliseconds
+;; Get gesture hold time in seconds
 (define-raylib GetGestureHoldDuration
   (_fun
    -> _float))
@@ -1039,46 +1243,20 @@
   (_fun
    -> _float))
 
-;; Set camera mode (multiple camera modes available)
-(define-raylib SetCameraMode
-  (_fun
-   [camera : _Camera]
-   [mode : _int]
-   -> _void))
-
 ;; Update camera position for selected mode
 (define-raylib UpdateCamera
   (_fun
    [camera : (_pointer-to _Camera)]
+   [mode : _int]
    -> _void))
 
-;; Set camera pan key to combine with mouse movement (free camera)
-(define-raylib SetCameraPanControl
+;; Update camera movement/rotation
+(define-raylib UpdateCameraPro
   (_fun
-   [keyPan : _int]
-   -> _void))
-
-;; Set camera alt key to combine with mouse movement (free camera)
-(define-raylib SetCameraAltControl
-  (_fun
-   [keyAlt : _int]
-   -> _void))
-
-;; Set camera smooth zoom key to combine with mouse (free camera)
-(define-raylib SetCameraSmoothZoomControl
-  (_fun
-   [keySmoothZoom : _int]
-   -> _void))
-
-;; Set camera move controls (1st person and 3rd person cameras)
-(define-raylib SetCameraMoveControls
-  (_fun
-   [keyFront : _int]
-   [keyBack : _int]
-   [keyRight : _int]
-   [keyLeft : _int]
-   [keyUp : _int]
-   [keyDown : _int]
+   [camera : (_pointer-to _Camera)]
+   [movement : _Vector3]
+   [rotation : _Vector3]
+   [zoom : _float]
    -> _void))
 
 ;; Set texture and rectangle to be used on shapes drawing
@@ -1088,7 +1266,17 @@
    [source : _Rectangle]
    -> _void))
 
-;; Draw a pixel
+;; Get texture that is used for shapes drawing
+(define-raylib GetShapesTexture
+  (_fun
+   -> _Texture2D))
+
+;; Get texture source rectangle that is used for shapes drawing
+(define-raylib GetShapesTextureRectangle
+  (_fun
+   -> _Rectangle))
+
+;; Draw a pixel using geometry [Can be slow, use with care]
 (define-raylib DrawPixel
   (_fun
    [posX : _int]
@@ -1096,7 +1284,7 @@
    [color : _Color]
    -> _void))
 
-;; Draw a pixel (Vector version)
+;; Draw a pixel using geometry (Vector version) [Can be slow, use with care]
 (define-raylib DrawPixelV
   (_fun
    [position : _Vector2]
@@ -1113,7 +1301,7 @@
    [color : _Color]
    -> _void))
 
-;; Draw a line (Vector version)
+;; Draw a line (using gl lines)
 (define-raylib DrawLineV
   (_fun
    [startPos : _Vector2]
@@ -1121,7 +1309,7 @@
    [color : _Color]
    -> _void))
 
-;; Draw a line defining thickness
+;; Draw a line (using triangles/quads)
 (define-raylib DrawLineEx
   (_fun
    [startPos : _Vector2]
@@ -1130,41 +1318,20 @@
    [color : _Color]
    -> _void))
 
-;; Draw a line using cubic-bezier curves in-out
+;; Draw lines sequence (using gl lines)
+(define-raylib DrawLineStrip
+  (_fun
+   [points : (_pointer-to _Vector2)]
+   [pointCount : _int]
+   [color : _Color]
+   -> _void))
+
+;; Draw line segment cubic-bezier in-out interpolation
 (define-raylib DrawLineBezier
   (_fun
    [startPos : _Vector2]
    [endPos : _Vector2]
    [thick : _float]
-   [color : _Color]
-   -> _void))
-
-;; Draw line using quadratic bezier curves with a control point
-(define-raylib DrawLineBezierQuad
-  (_fun
-   [startPos : _Vector2]
-   [endPos : _Vector2]
-   [controlPos : _Vector2]
-   [thick : _float]
-   [color : _Color]
-   -> _void))
-
-;; Draw line using cubic bezier curves with 2 control points
-(define-raylib DrawLineBezierCubic
-  (_fun
-   [startPos : _Vector2]
-   [endPos : _Vector2]
-   [startControlPos : _Vector2]
-   [endControlPos : _Vector2]
-   [thick : _float]
-   [color : _Color]
-   -> _void))
-
-;; Draw lines sequence
-(define-raylib DrawLineStrip
-  (_fun
-   [points : (_pointer-to _Vector2)]
-   [pointCount : _int]
    [color : _Color]
    -> _void))
 
@@ -1205,8 +1372,8 @@
    [centerX : _int]
    [centerY : _int]
    [radius : _float]
-   [color1 : _Color]
-   [color2 : _Color]
+   [inner : _Color]
+   [outer : _Color]
    -> _void))
 
 ;; Draw a color-filled circle (Vector version)
@@ -1222,6 +1389,14 @@
   (_fun
    [centerX : _int]
    [centerY : _int]
+   [radius : _float]
+   [color : _Color]
+   -> _void))
+
+;; Draw circle outline (Vector version)
+(define-raylib DrawCircleLinesV
+  (_fun
+   [center : _Vector2]
    [radius : _float]
    [color : _Color]
    -> _void))
@@ -1311,8 +1486,8 @@
    [posY : _int]
    [width : _int]
    [height : _int]
-   [color1 : _Color]
-   [color2 : _Color]
+   [top : _Color]
+   [bottom : _Color]
    -> _void))
 
 ;; Draw a horizontal-gradient-filled rectangle
@@ -1322,18 +1497,18 @@
    [posY : _int]
    [width : _int]
    [height : _int]
-   [color1 : _Color]
-   [color2 : _Color]
+   [left : _Color]
+   [right : _Color]
    -> _void))
 
 ;; Draw a gradient-filled rectangle with custom vertex colors
 (define-raylib DrawRectangleGradientEx
   (_fun
    [rec : _Rectangle]
-   [col1 : _Color]
-   [col2 : _Color]
-   [col3 : _Color]
-   [col4 : _Color]
+   [topLeft : _Color]
+   [bottomLeft : _Color]
+   [topRight : _Color]
+   [bottomRight : _Color]
    -> _void))
 
 ;; Draw rectangle outline
@@ -1363,8 +1538,17 @@
    [color : _Color]
    -> _void))
 
-;; Draw rectangle with rounded edges outline
+;; Draw rectangle lines with rounded edges
 (define-raylib DrawRectangleRoundedLines
+  (_fun
+   [rec : _Rectangle]
+   [roundness : _float]
+   [segments : _int]
+   [color : _Color]
+   -> _void))
+
+;; Draw rectangle with rounded edges outline
+(define-raylib DrawRectangleRoundedLinesEx
   (_fun
    [rec : _Rectangle]
    [roundness : _float]
@@ -1438,6 +1622,150 @@
    [color : _Color]
    -> _void))
 
+;; Draw spline: Linear, minimum 2 points
+(define-raylib DrawSplineLinear
+  (_fun
+   [points : (_pointer-to _Vector2)]
+   [pointCount : _int]
+   [thick : _float]
+   [color : _Color]
+   -> _void))
+
+;; Draw spline: B-Spline, minimum 4 points
+(define-raylib DrawSplineBasis
+  (_fun
+   [points : (_pointer-to _Vector2)]
+   [pointCount : _int]
+   [thick : _float]
+   [color : _Color]
+   -> _void))
+
+;; Draw spline: Catmull-Rom, minimum 4 points
+(define-raylib DrawSplineCatmullRom
+  (_fun
+   [points : (_pointer-to _Vector2)]
+   [pointCount : _int]
+   [thick : _float]
+   [color : _Color]
+   -> _void))
+
+;; Draw spline: Quadratic Bezier, minimum 3 points (1 control point): [p1, c2, p3, c4...]
+(define-raylib DrawSplineBezierQuadratic
+  (_fun
+   [points : (_pointer-to _Vector2)]
+   [pointCount : _int]
+   [thick : _float]
+   [color : _Color]
+   -> _void))
+
+;; Draw spline: Cubic Bezier, minimum 4 points (2 control points): [p1, c2, c3, p4, c5, c6...]
+(define-raylib DrawSplineBezierCubic
+  (_fun
+   [points : (_pointer-to _Vector2)]
+   [pointCount : _int]
+   [thick : _float]
+   [color : _Color]
+   -> _void))
+
+;; Draw spline segment: Linear, 2 points
+(define-raylib DrawSplineSegmentLinear
+  (_fun
+   [p1 : _Vector2]
+   [p2 : _Vector2]
+   [thick : _float]
+   [color : _Color]
+   -> _void))
+
+;; Draw spline segment: B-Spline, 4 points
+(define-raylib DrawSplineSegmentBasis
+  (_fun
+   [p1 : _Vector2]
+   [p2 : _Vector2]
+   [p3 : _Vector2]
+   [p4 : _Vector2]
+   [thick : _float]
+   [color : _Color]
+   -> _void))
+
+;; Draw spline segment: Catmull-Rom, 4 points
+(define-raylib DrawSplineSegmentCatmullRom
+  (_fun
+   [p1 : _Vector2]
+   [p2 : _Vector2]
+   [p3 : _Vector2]
+   [p4 : _Vector2]
+   [thick : _float]
+   [color : _Color]
+   -> _void))
+
+;; Draw spline segment: Quadratic Bezier, 2 points, 1 control point
+(define-raylib DrawSplineSegmentBezierQuadratic
+  (_fun
+   [p1 : _Vector2]
+   [c2 : _Vector2]
+   [p3 : _Vector2]
+   [thick : _float]
+   [color : _Color]
+   -> _void))
+
+;; Draw spline segment: Cubic Bezier, 2 points, 2 control points
+(define-raylib DrawSplineSegmentBezierCubic
+  (_fun
+   [p1 : _Vector2]
+   [c2 : _Vector2]
+   [c3 : _Vector2]
+   [p4 : _Vector2]
+   [thick : _float]
+   [color : _Color]
+   -> _void))
+
+;; Get (evaluate) spline point: Linear
+(define-raylib GetSplinePointLinear
+  (_fun
+   [startPos : _Vector2]
+   [endPos : _Vector2]
+   [t : _float]
+   -> _Vector2))
+
+;; Get (evaluate) spline point: B-Spline
+(define-raylib GetSplinePointBasis
+  (_fun
+   [p1 : _Vector2]
+   [p2 : _Vector2]
+   [p3 : _Vector2]
+   [p4 : _Vector2]
+   [t : _float]
+   -> _Vector2))
+
+;; Get (evaluate) spline point: Catmull-Rom
+(define-raylib GetSplinePointCatmullRom
+  (_fun
+   [p1 : _Vector2]
+   [p2 : _Vector2]
+   [p3 : _Vector2]
+   [p4 : _Vector2]
+   [t : _float]
+   -> _Vector2))
+
+;; Get (evaluate) spline point: Quadratic Bezier
+(define-raylib GetSplinePointBezierQuad
+  (_fun
+   [p1 : _Vector2]
+   [c2 : _Vector2]
+   [p3 : _Vector2]
+   [t : _float]
+   -> _Vector2))
+
+;; Get (evaluate) spline point: Cubic Bezier
+(define-raylib GetSplinePointBezierCubic
+  (_fun
+   [p1 : _Vector2]
+   [c2 : _Vector2]
+   [c3 : _Vector2]
+   [p4 : _Vector2]
+   [t : _float]
+   -> _Vector2))
+
 ;; Check collision between two rectangles
 (define-raylib CheckCollisionRecs
   (_fun
@@ -1460,6 +1788,15 @@
    [center : _Vector2]
    [radius : _float]
    [rec : _Rectangle]
+   -> _stdbool))
+
+;; Check if circle collides with a line created betweeen two points [p1] and [p2]
+(define-raylib CheckCollisionCircleLine
+  (_fun
+   [center : _Vector2]
+   [radius : _float]
+   [p1 : _Vector2]
+   [p2 : _Vector2]
    -> _stdbool))
 
 ;; Check if point is inside rectangle
@@ -1486,6 +1823,23 @@
    [p3 : _Vector2]
    -> _stdbool))
 
+;; Check if point belongs to line created between two points [p1] and [p2] with defined margin in pixels [threshold]
+(define-raylib CheckCollisionPointLine
+  (_fun
+   [point : _Vector2]
+   [p1 : _Vector2]
+   [p2 : _Vector2]
+   [threshold : _int]
+   -> _stdbool))
+
+;; Check if point is within a polygon described by array of vertices
+(define-raylib CheckCollisionPointPoly
+  (_fun
+   [point : _Vector2]
+   [points : (_pointer-to _Vector2)]
+   [pointCount : _int]
+   -> _stdbool))
+
 ;; Check the collision between two lines defined by two points each, returns collision point by reference
 (define-raylib CheckCollisionLines
   (_fun
@@ -1494,15 +1848,6 @@
    [startPos2 : _Vector2]
    [endPos2 : _Vector2]
    [collisionPoint : (_pointer-to _Vector2)]
-   -> _stdbool))
-
-;; Check if point belongs to line created between two points [p1] and [p2] with defined margin in pixels [threshold]
-(define-raylib CheckCollisionPointLine
-  (_fun
-   [point : _Vector2]
-   [p1 : _Vector2]
-   [p2 : _Vector2]
-   [threshold : _int]
    -> _stdbool))
 
 ;; Get collision rectangle for two rectangles collision
@@ -1535,6 +1880,15 @@
    [frames : (_pointer-to _int)]
    -> _Image))
 
+;; Load image sequence from memory buffer
+(define-raylib LoadImageAnimFromMemory
+  (_fun
+   [fileType : _string]
+   [fileData : (_pointer-to _ubyte)]
+   [dataSize : _int]
+   [frames : (_pointer-to _int)]
+   -> _Image))
+
 ;; Load image from memory buffer, fileType refers to extension: i.e. '.png'
 (define-raylib LoadImageFromMemory
   (_fun
@@ -1554,6 +1908,12 @@
   (_fun
    -> _Image))
 
+;; Check if an image is valid (data and parameters)
+(define-raylib IsImageValid
+  (_fun
+   [image : _Image]
+   -> _stdbool))
+
 ;; Unload image from CPU memory (RAM)
 (define-raylib UnloadImage
   (_fun
@@ -1566,6 +1926,14 @@
    [image : _Image]
    [fileName : _string]
    -> _stdbool))
+
+;; Export image to memory buffer
+(define-raylib ExportImageToMemory
+  (_fun
+   [image : _Image]
+   [fileType : _string]
+   [fileSize : (_pointer-to _int)]
+   -> (_pointer-to _ubyte)))
 
 ;; Export image as code file defining an array of bytes, returns true on success
 (define-raylib ExportImageAsCode
@@ -1582,26 +1950,28 @@
    [color : _Color]
    -> _Image))
 
-;; Generate image: vertical gradient
-(define-raylib GenImageGradientV
+;; Generate image: linear gradient, direction in degrees [0..360], 0=Vertical gradient
+(define-raylib GenImageGradientLinear
   (_fun
    [width : _int]
    [height : _int]
-   [top : _Color]
-   [bottom : _Color]
-   -> _Image))
-
-;; Generate image: horizontal gradient
-(define-raylib GenImageGradientH
-  (_fun
-   [width : _int]
-   [height : _int]
-   [left : _Color]
-   [right : _Color]
+   [direction : _int]
+   [start : _Color]
+   [end : _Color]
    -> _Image))
 
 ;; Generate image: radial gradient
 (define-raylib GenImageGradientRadial
+  (_fun
+   [width : _int]
+   [height : _int]
+   [density : _float]
+   [inner : _Color]
+   [outer : _Color]
+   -> _Image))
+
+;; Generate image: square gradient
+(define-raylib GenImageGradientSquare
   (_fun
    [width : _int]
    [height : _int]
@@ -1629,12 +1999,30 @@
    [factor : _float]
    -> _Image))
 
+;; Generate image: perlin noise
+(define-raylib GenImagePerlinNoise
+  (_fun
+   [width : _int]
+   [height : _int]
+   [offsetX : _int]
+   [offsetY : _int]
+   [scale : _float]
+   -> _Image))
+
 ;; Generate image: cellular algorithm, bigger tileSize means bigger cells
 (define-raylib GenImageCellular
   (_fun
    [width : _int]
    [height : _int]
    [tileSize : _int]
+   -> _Image))
+
+;; Generate image: grayscale image from text data
+(define-raylib GenImageText
+  (_fun
+   [width : _int]
+   [height : _int]
+   [text : _string]
    -> _Image))
 
 ;; Create an image duplicate (useful for transformations)
@@ -1648,6 +2036,13 @@
   (_fun
    [image : _Image]
    [rec : _Rectangle]
+   -> _Image))
+
+;; Create an image from a selected channel of another image (GRAYSCALE)
+(define-raylib ImageFromChannel
+  (_fun
+   [image : _Image]
+   [selectedChannel : _int]
    -> _Image))
 
 ;; Create an image from text (default font)
@@ -1717,6 +2112,21 @@
    [image : (_pointer-to _Image)]
    -> _void))
 
+;; Apply Gaussian blur using a box blur approximation
+(define-raylib ImageBlurGaussian
+  (_fun
+   [image : (_pointer-to _Image)]
+   [blurSize : _int]
+   -> _void))
+
+;; Apply custom square convolution kernel to image
+(define-raylib ImageKernelConvolution
+  (_fun
+   [image : (_pointer-to _Image)]
+   [kernel : (_pointer-to _float)]
+   [kernelSize : _int]
+   -> _void))
+
 ;; Resize image (Bicubic scaling algorithm)
 (define-raylib ImageResize
   (_fun
@@ -1770,6 +2180,13 @@
 (define-raylib ImageFlipHorizontal
   (_fun
    [image : (_pointer-to _Image)]
+   -> _void))
+
+;; Rotate image by input angle in degrees (-359 to 359)
+(define-raylib ImageRotate
+  (_fun
+   [image : (_pointer-to _Image)]
+   [degrees : _int]
    -> _void))
 
 ;; Rotate image clockwise 90deg
@@ -1910,7 +2327,17 @@
    [color : _Color]
    -> _void))
 
-;; Draw circle within an image
+;; Draw a line defining thickness within an image
+(define-raylib ImageDrawLineEx
+  (_fun
+   [dst : (_pointer-to _Image)]
+   [start : _Vector2]
+   [end : _Vector2]
+   [thick : _int]
+   [color : _Color]
+   -> _void))
+
+;; Draw a filled circle within an image
 (define-raylib ImageDrawCircle
   (_fun
    [dst : (_pointer-to _Image)]
@@ -1920,8 +2347,27 @@
    [color : _Color]
    -> _void))
 
-;; Draw circle within an image (Vector version)
+;; Draw a filled circle within an image (Vector version)
 (define-raylib ImageDrawCircleV
+  (_fun
+   [dst : (_pointer-to _Image)]
+   [center : _Vector2]
+   [radius : _int]
+   [color : _Color]
+   -> _void))
+
+;; Draw circle outline within an image
+(define-raylib ImageDrawCircleLines
+  (_fun
+   [dst : (_pointer-to _Image)]
+   [centerX : _int]
+   [centerY : _int]
+   [radius : _int]
+   [color : _Color]
+   -> _void))
+
+;; Draw circle outline within an image (Vector version)
+(define-raylib ImageDrawCircleLinesV
   (_fun
    [dst : (_pointer-to _Image)]
    [center : _Vector2]
@@ -1963,6 +2409,56 @@
    [dst : (_pointer-to _Image)]
    [rec : _Rectangle]
    [thick : _int]
+   [color : _Color]
+   -> _void))
+
+;; Draw triangle within an image
+(define-raylib ImageDrawTriangle
+  (_fun
+   [dst : (_pointer-to _Image)]
+   [v1 : _Vector2]
+   [v2 : _Vector2]
+   [v3 : _Vector2]
+   [color : _Color]
+   -> _void))
+
+;; Draw triangle with interpolated colors within an image
+(define-raylib ImageDrawTriangleEx
+  (_fun
+   [dst : (_pointer-to _Image)]
+   [v1 : _Vector2]
+   [v2 : _Vector2]
+   [v3 : _Vector2]
+   [c1 : _Color]
+   [c2 : _Color]
+   [c3 : _Color]
+   -> _void))
+
+;; Draw triangle outline within an image
+(define-raylib ImageDrawTriangleLines
+  (_fun
+   [dst : (_pointer-to _Image)]
+   [v1 : _Vector2]
+   [v2 : _Vector2]
+   [v3 : _Vector2]
+   [color : _Color]
+   -> _void))
+
+;; Draw a triangle fan defined by points within an image (first vertex is the center)
+(define-raylib ImageDrawTriangleFan
+  (_fun
+   [dst : (_pointer-to _Image)]
+   [points : (_pointer-to _Vector2)]
+   [pointCount : _int]
+   [color : _Color]
+   -> _void))
+
+;; Draw a triangle strip defined by points within an image
+(define-raylib ImageDrawTriangleStrip
+  (_fun
+   [dst : (_pointer-to _Image)]
+   [points : (_pointer-to _Vector2)]
+   [pointCount : _int]
    [color : _Color]
    -> _void))
 
@@ -2025,11 +2521,23 @@
    [height : _int]
    -> _RenderTexture2D))
 
+;; Check if a texture is valid (loaded in GPU)
+(define-raylib IsTextureValid
+  (_fun
+   [texture : _Texture2D]
+   -> _stdbool))
+
 ;; Unload texture from GPU memory (VRAM)
 (define-raylib UnloadTexture
   (_fun
    [texture : _Texture2D]
    -> _void))
+
+;; Check if a render texture is valid (loaded in GPU)
+(define-raylib IsRenderTextureValid
+  (_fun
+   [target : _RenderTexture2D]
+   -> _stdbool))
 
 ;; Unload render texture from GPU memory (VRAM)
 (define-raylib UnloadRenderTexture
@@ -2108,28 +2616,6 @@
    [tint : _Color]
    -> _void))
 
-;; Draw texture quad with tiling and offset parameters
-(define-raylib DrawTextureQuad
-  (_fun
-   [texture : _Texture2D]
-   [tiling : _Vector2]
-   [offset : _Vector2]
-   [quad : _Rectangle]
-   [tint : _Color]
-   -> _void))
-
-;; Draw part of a texture (defined by a rectangle) with rotation and scale tiled into dest.
-(define-raylib DrawTextureTiled
-  (_fun
-   [texture : _Texture2D]
-   [source : _Rectangle]
-   [dest : _Rectangle]
-   [origin : _Vector2]
-   [rotation : _float]
-   [scale : _float]
-   [tint : _Color]
-   -> _void))
-
 ;; Draw a part of a texture defined by a rectangle with 'pro' parameters
 (define-raylib DrawTexturePro
   (_fun
@@ -2152,16 +2638,12 @@
    [tint : _Color]
    -> _void))
 
-;; Draw a textured polygon
-(define-raylib DrawTexturePoly
+;; Check if two colors are equal
+(define-raylib ColorIsEqual
   (_fun
-   [texture : _Texture2D]
-   [center : _Vector2]
-   [points : (_pointer-to _Vector2)]
-   [texcoords : (_pointer-to _Vector2)]
-   [pointCount : _int]
-   [tint : _Color]
-   -> _void))
+   [col1 : _Color]
+   [col2 : _Color]
+   -> _stdbool))
 
 ;; Get color with alpha applied, alpha goes from 0.0f to 1.0f
 (define-raylib Fade
@@ -2170,7 +2652,7 @@
    [alpha : _float]
    -> _Color))
 
-;; Get hexadecimal value for a Color
+;; Get hexadecimal value for a Color (0xRRGGBBAA)
 (define-raylib ColorToInt
   (_fun
    [color : _Color]
@@ -2202,6 +2684,27 @@
    [value : _float]
    -> _Color))
 
+;; Get color multiplied with another color
+(define-raylib ColorTint
+  (_fun
+   [color : _Color]
+   [tint : _Color]
+   -> _Color))
+
+;; Get color with brightness correction, brightness factor goes from -1.0f to 1.0f
+(define-raylib ColorBrightness
+  (_fun
+   [color : _Color]
+   [factor : _float]
+   -> _Color))
+
+;; Get color with contrast correction, contrast values between -1.0f and 1.0f
+(define-raylib ColorContrast
+  (_fun
+   [color : _Color]
+   [contrast : _float]
+   -> _Color))
+
 ;; Get color with alpha applied, alpha goes from 0.0f to 1.0f
 (define-raylib ColorAlpha
   (_fun
@@ -2215,6 +2718,14 @@
    [dst : _Color]
    [src : _Color]
    [tint : _Color]
+   -> _Color))
+
+;; Get color lerp interpolation between two colors, factor [0.0f..1.0f]
+(define-raylib ColorLerp
+  (_fun
+   [color1 : _Color]
+   [color2 : _Color]
+   [factor : _float]
    -> _Color))
 
 ;; Get Color structure from hexadecimal value
@@ -2257,13 +2768,13 @@
    [fileName : _string]
    -> _Font))
 
-;; Load font from file with extended parameters
+;; Load font from file with extended parameters, use NULL for codepoints and 0 for codepointCount to load the default character set, font size is provided in pixels height
 (define-raylib LoadFontEx
   (_fun
    [fileName : _string]
    [fontSize : _int]
-   [fontChars : (_pointer-to _int)]
-   [glyphCount : _int]
+   [codepoints : (_pointer-to _int)]
+   [codepointCount : _int]
    -> _Font))
 
 ;; Load font from Image (XNA style)
@@ -2281,9 +2792,15 @@
    [fileData : (_pointer-to _ubyte)]
    [dataSize : _int]
    [fontSize : _int]
-   [fontChars : (_pointer-to _int)]
-   [glyphCount : _int]
+   [codepoints : (_pointer-to _int)]
+   [codepointCount : _int]
    -> _Font))
+
+;; Check if a font is valid (font data loaded, WARNING: GPU texture not checked)
+(define-raylib IsFontValid
+  (_fun
+   [font : _Font]
+   -> _stdbool))
 
 ;; Load font data for further use
 (define-raylib LoadFontData
@@ -2291,16 +2808,16 @@
    [fileData : (_pointer-to _ubyte)]
    [dataSize : _int]
    [fontSize : _int]
-   [fontChars : (_pointer-to _int)]
-   [glyphCount : _int]
+   [codepoints : (_pointer-to _int)]
+   [codepointCount : _int]
    [type : _int]
    -> (_pointer-to _GlyphInfo)))
 
 ;; Generate image font atlas using chars info
 (define-raylib GenImageFontAtlas
   (_fun
-   [chars : (_pointer-to _GlyphInfo)]
-   [recs : (_pointer-to (_pointer-to _Rectangle))]
+   [glyphs : (_pointer-to _GlyphInfo)]
+   [glyphRecs : (_pointer-to (_pointer-to _Rectangle))]
    [glyphCount : _int]
    [fontSize : _int]
    [padding : _int]
@@ -2310,15 +2827,22 @@
 ;; Unload font chars info data (RAM)
 (define-raylib UnloadFontData
   (_fun
-   [chars : (_pointer-to _GlyphInfo)]
+   [glyphs : (_pointer-to _GlyphInfo)]
    [glyphCount : _int]
    -> _void))
 
-;; Unload Font from GPU memory (VRAM)
+;; Unload font from GPU memory (VRAM)
 (define-raylib UnloadFont
   (_fun
    [font : _Font]
    -> _void))
+
+;; Export font as code file, returns true on success
+(define-raylib ExportFontAsCode
+  (_fun
+   [font : _Font]
+   [fileName : _string]
+   -> _stdbool))
 
 ;; Draw current FPS
 (define-raylib DrawFPS
@@ -2371,6 +2895,24 @@
    [tint : _Color]
    -> _void))
 
+;; Draw multiple character (codepoint)
+(define-raylib DrawTextCodepoints
+  (_fun
+   [font : _Font]
+   [codepoints : (_pointer-to _int)]
+   [codepointCount : _int]
+   [position : _Vector2]
+   [fontSize : _float]
+   [spacing : _float]
+   [tint : _Color]
+   -> _void))
+
+;; Set vertical line spacing when drawing with line-breaks
+(define-raylib SetTextLineSpacing
+  (_fun
+   [spacing : _int]
+   -> _void))
+
 ;; Measure string width for default font
 (define-raylib MeasureText
   (_fun
@@ -2408,6 +2950,19 @@
    [codepoint : _int]
    -> _Rectangle))
 
+;; Load UTF-8 text encoded from codepoints array
+(define-raylib LoadUTF8
+  (_fun
+   [codepoints : (_pointer-to _int)]
+   [length : _int]
+   -> (_pointer-to _byte)))
+
+;; Unload UTF-8 text encoded from codepoints array
+(define-raylib UnloadUTF8
+  (_fun
+   [text : (_pointer-to _byte)]
+   -> _void))
+
 ;; Load all codepoints from a UTF-8 text string, codepoints count returned by parameter
 (define-raylib LoadCodepoints
   (_fun
@@ -2431,22 +2986,29 @@
 (define-raylib GetCodepoint
   (_fun
    [text : _string]
-   [bytesProcessed : (_pointer-to _int)]
+   [codepointSize : (_pointer-to _int)]
+   -> _int))
+
+;; Get next codepoint in a UTF-8 encoded string, 0x3f('?') is returned on failure
+(define-raylib GetCodepointNext
+  (_fun
+   [text : _string]
+   [codepointSize : (_pointer-to _int)]
+   -> _int))
+
+;; Get previous codepoint in a UTF-8 encoded string, 0x3f('?') is returned on failure
+(define-raylib GetCodepointPrevious
+  (_fun
+   [text : _string]
+   [codepointSize : (_pointer-to _int)]
    -> _int))
 
 ;; Encode one codepoint into UTF-8 byte array (array length returned as parameter)
 (define-raylib CodepointToUTF8
   (_fun
    [codepoint : _int]
-   [byteSize : (_pointer-to _int)]
+   [utf8Size : (_pointer-to _int)]
    -> _string))
-
-;; Encode text as codepoints array into UTF-8 text string (WARNING: memory must be freed!)
-(define-raylib TextCodepointsToUTF8
-  (_fun
-   [codepoints : (_pointer-to _int)]
-   [length : _int]
-   -> (_pointer-to _byte)))
 
 ;; Copy one string to another, returns bytes copied
 (define-raylib TextCopy
@@ -2487,7 +3049,7 @@
 ;; Replace text string (WARNING: memory must be freed!)
 (define-raylib TextReplace
   (_fun
-   [text : (_pointer-to _byte)]
+   [text : _string]
    [replace : _string]
    [by : _string]
    -> (_pointer-to _byte)))
@@ -2549,11 +3111,29 @@
    [text : _string]
    -> _string))
 
+;; Get Snake case notation version of provided string
+(define-raylib TextToSnake
+  (_fun
+   [text : _string]
+   -> _string))
+
+;; Get Camel case notation version of provided string
+(define-raylib TextToCamel
+  (_fun
+   [text : _string]
+   -> _string))
+
 ;; Get integer value from text (negative values not supported)
 (define-raylib TextToInteger
   (_fun
    [text : _string]
    -> _int))
+
+;; Get float value from text (negative values not supported)
+(define-raylib TextToFloat
+  (_fun
+   [text : _string]
+   -> _float))
 
 ;; Draw a line in 3D world space
 (define-raylib DrawLine3D
@@ -2633,29 +3213,6 @@
    [color : _Color]
    -> _void))
 
-;; Draw cube textured
-(define-raylib DrawCubeTexture
-  (_fun
-   [texture : _Texture2D]
-   [position : _Vector3]
-   [width : _float]
-   [height : _float]
-   [length : _float]
-   [color : _Color]
-   -> _void))
-
-;; Draw cube with a region of a texture
-(define-raylib DrawCubeTextureRec
-  (_fun
-   [texture : _Texture2D]
-   [source : _Rectangle]
-   [position : _Vector3]
-   [width : _float]
-   [height : _float]
-   [length : _float]
-   [color : _Color]
-   -> _void))
-
 ;; Draw sphere
 (define-raylib DrawSphere
   (_fun
@@ -2728,6 +3285,28 @@
    [color : _Color]
    -> _void))
 
+;; Draw a capsule with the center of its sphere caps at startPos and endPos
+(define-raylib DrawCapsule
+  (_fun
+   [startPos : _Vector3]
+   [endPos : _Vector3]
+   [radius : _float]
+   [slices : _int]
+   [rings : _int]
+   [color : _Color]
+   -> _void))
+
+;; Draw capsule wireframe with the center of its sphere caps at startPos and endPos
+(define-raylib DrawCapsuleWires
+  (_fun
+   [startPos : _Vector3]
+   [endPos : _Vector3]
+   [radius : _float]
+   [slices : _int]
+   [rings : _int]
+   [color : _Color]
+   -> _void))
+
 ;; Draw a plane XZ
 (define-raylib DrawPlane
   (_fun
@@ -2762,14 +3341,14 @@
    [mesh : _Mesh]
    -> _Model))
 
-;; Unload model (including meshes) from memory (RAM and/or VRAM)
-(define-raylib UnloadModel
+;; Check if a model is valid (loaded in GPU, VAO/VBOs)
+(define-raylib IsModelValid
   (_fun
    [model : _Model]
-   -> _void))
+   -> _stdbool))
 
-;; Unload model (but not meshes) from memory (RAM and/or VRAM)
-(define-raylib UnloadModelKeepMeshes
+;; Unload model (including meshes) from memory (RAM and/or VRAM)
+(define-raylib UnloadModel
   (_fun
    [model : _Model]
    -> _void))
@@ -2820,6 +3399,26 @@
    [tint : _Color]
    -> _void))
 
+;; Draw a model as points
+(define-raylib DrawModelPoints
+  (_fun
+   [model : _Model]
+   [position : _Vector3]
+   [scale : _float]
+   [tint : _Color]
+   -> _void))
+
+;; Draw a model as points with extended parameters
+(define-raylib DrawModelPointsEx
+  (_fun
+   [model : _Model]
+   [position : _Vector3]
+   [rotationAxis : _Vector3]
+   [rotationAngle : _float]
+   [scale : _Vector3]
+   [tint : _Color]
+   -> _void))
+
 ;; Draw bounding box (wires)
 (define-raylib DrawBoundingBox
   (_fun
@@ -2833,7 +3432,7 @@
    [camera : _Camera]
    [texture : _Texture2D]
    [position : _Vector3]
-   [size : _float]
+   [scale : _float]
    [tint : _Color]
    -> _void))
 
@@ -2902,13 +3501,6 @@
    [instances : _int]
    -> _void))
 
-;; Export mesh data to file, returns true on success
-(define-raylib ExportMesh
-  (_fun
-   [mesh : _Mesh]
-   [fileName : _string]
-   -> _stdbool))
-
 ;; Compute mesh bounding box limits
 (define-raylib GetMeshBoundingBox
   (_fun
@@ -2921,11 +3513,19 @@
    [mesh : (_pointer-to _Mesh)]
    -> _void))
 
-;; Compute mesh binormals
-(define-raylib GenMeshBinormals
+;; Export mesh data to file, returns true on success
+(define-raylib ExportMesh
   (_fun
-   [mesh : (_pointer-to _Mesh)]
-   -> _void))
+   [mesh : _Mesh]
+   [fileName : _string]
+   -> _stdbool))
+
+;; Export mesh as code file (.h) defining multiple arrays of vertex attributes
+(define-raylib ExportMeshAsCode
+  (_fun
+   [mesh : _Mesh]
+   [fileName : _string]
+   -> _stdbool))
 
 ;; Generate polygonal mesh
 (define-raylib GenMeshPoly
@@ -3027,6 +3627,12 @@
   (_fun
    -> _Material))
 
+;; Check if a material is valid (shader assigned, map textures loaded in GPU)
+(define-raylib IsMaterialValid
+  (_fun
+   [material : _Material]
+   -> _stdbool))
+
 ;; Unload material from GPU memory (VRAM)
 (define-raylib UnloadMaterial
   (_fun
@@ -3053,11 +3659,19 @@
 (define-raylib LoadModelAnimations
   (_fun
    [fileName : _string]
-   [animCount : (_pointer-to _uint)]
+   [animCount : (_pointer-to _int)]
    -> (_pointer-to _ModelAnimation)))
 
-;; Update model animation pose
+;; Update model animation pose (CPU)
 (define-raylib UpdateModelAnimation
+  (_fun
+   [model : _Model]
+   [anim : _ModelAnimation]
+   [frame : _int]
+   -> _void))
+
+;; Update model animation mesh bone matrices (GPU skinning)
+(define-raylib UpdateModelAnimationBones
   (_fun
    [model : _Model]
    [anim : _ModelAnimation]
@@ -3074,7 +3688,7 @@
 (define-raylib UnloadModelAnimations
   (_fun
    [animations : (_pointer-to _ModelAnimation)]
-   [count : _uint]
+   [animCount : _int]
    -> _void))
 
 ;; Check model animation skeleton match
@@ -3121,13 +3735,6 @@
   (_fun
    [ray : _Ray]
    [box : _BoundingBox]
-   -> _RayCollision))
-
-;; Get collision info between ray and model
-(define-raylib GetRayCollisionModel
-  (_fun
-   [ray : _Ray]
-   [model : _Model]
    -> _RayCollision))
 
 ;; Get collision info between ray and mesh
@@ -3178,6 +3785,11 @@
    [volume : _float]
    -> _void))
 
+;; Get master volume (listener)
+(define-raylib GetMasterVolume
+  (_fun
+   -> _float))
+
 ;; Load wave data from file
 (define-raylib LoadWave
   (_fun
@@ -3192,6 +3804,12 @@
    [dataSize : _int]
    -> _Wave))
 
+;; Checks if wave data is valid (data loaded and parameters)
+(define-raylib IsWaveValid
+  (_fun
+   [wave : _Wave]
+   -> _stdbool))
+
 ;; Load sound from file
 (define-raylib LoadSound
   (_fun
@@ -3203,6 +3821,18 @@
   (_fun
    [wave : _Wave]
    -> _Sound))
+
+;; Create a new sound that shares the same sample data as the source sound, does not own the sound data
+(define-raylib LoadSoundAlias
+  (_fun
+   [source : _Sound]
+   -> _Sound))
+
+;; Checks if a sound is valid (data loaded and buffers initialized)
+(define-raylib IsSoundValid
+  (_fun
+   [sound : _Sound]
+   -> _stdbool))
 
 ;; Update sound buffer with new data
 (define-raylib UpdateSound
@@ -3222,6 +3852,12 @@
 (define-raylib UnloadSound
   (_fun
    [sound : _Sound]
+   -> _void))
+
+;; Unload a sound alias (does not deallocate sample data)
+(define-raylib UnloadSoundAlias
+  (_fun
+   [alias : _Sound]
    -> _void))
 
 ;; Export wave data to file, returns true on success
@@ -3262,22 +3898,6 @@
    [sound : _Sound]
    -> _void))
 
-;; Play a sound (using multichannel buffer pool)
-(define-raylib PlaySoundMulti
-  (_fun
-   [sound : _Sound]
-   -> _void))
-
-;; Stop any sound playing (using multichannel buffer pool)
-(define-raylib StopSoundMulti
-  (_fun
-   -> _void))
-
-;; Get number of sounds playing in the multichannel
-(define-raylib GetSoundsPlaying
-  (_fun
-   -> _int))
-
 ;; Check if a sound is currently playing
 (define-raylib IsSoundPlaying
   (_fun
@@ -3298,6 +3918,27 @@
    [pitch : _float]
    -> _void))
 
+;; Set pan for a sound (0.5 is center)
+(define-raylib SetSoundPan
+  (_fun
+   [sound : _Sound]
+   [pan : _float]
+   -> _void))
+
+;; Copy a wave to a new wave
+(define-raylib WaveCopy
+  (_fun
+   [wave : _Wave]
+   -> _Wave))
+
+;; Crop a wave to defined frames range
+(define-raylib WaveCrop
+  (_fun
+   [wave : (_pointer-to _Wave)]
+   [initFrame : _int]
+   [finalFrame : _int]
+   -> _void))
+
 ;; Convert wave data to desired format
 (define-raylib WaveFormat
   (_fun
@@ -3307,21 +3948,7 @@
    [channels : _int]
    -> _void))
 
-;; Copy a wave to a new wave
-(define-raylib WaveCopy
-  (_fun
-   [wave : _Wave]
-   -> _Wave))
-
-;; Crop a wave to defined samples range
-(define-raylib WaveCrop
-  (_fun
-   [wave : (_pointer-to _Wave)]
-   [initSample : _int]
-   [finalSample : _int]
-   -> _void))
-
-;; Load samples data from wave as a floats array
+;; Load samples data from wave as a 32bit float data array
 (define-raylib LoadWaveSamples
   (_fun
    [wave : _Wave]
@@ -3346,6 +3973,12 @@
    [data : (_pointer-to _ubyte)]
    [dataSize : _int]
    -> _Music))
+
+;; Checks if a music stream is valid (context and buffers initialized)
+(define-raylib IsMusicValid
+  (_fun
+   [music : _Music]
+   -> _stdbool))
 
 ;; Unload music stream
 (define-raylib UnloadMusicStream
@@ -3410,6 +4043,13 @@
    [pitch : _float]
    -> _void))
 
+;; Set pan for a music (0.5 is center)
+(define-raylib SetMusicPan
+  (_fun
+   [music : _Music]
+   [pan : _float]
+   -> _void))
+
 ;; Get music time length (in seconds)
 (define-raylib GetMusicTimeLength
   (_fun
@@ -3429,6 +4069,12 @@
    [sampleSize : _uint]
    [channels : _uint]
    -> _AudioStream))
+
+;; Checks if an audio stream is valid (buffers initialized)
+(define-raylib IsAudioStreamValid
+  (_fun
+   [stream : _AudioStream]
+   -> _stdbool))
 
 ;; Unload audio stream and free memory
 (define-raylib UnloadAudioStream
@@ -3494,8 +4140,48 @@
    [pitch : _float]
    -> _void))
 
+;; Set pan for audio stream (0.5 is centered)
+(define-raylib SetAudioStreamPan
+  (_fun
+   [stream : _AudioStream]
+   [pan : _float]
+   -> _void))
+
 ;; Default size for new audio streams
 (define-raylib SetAudioStreamBufferSizeDefault
   (_fun
    [size : _int]
+   -> _void))
+
+;; Audio thread callback to request new data
+(define-raylib SetAudioStreamCallback
+  (_fun
+   [stream : _AudioStream]
+   [callback : _AudioCallback]
+   -> _void))
+
+;; Attach audio stream processor to stream, receives the samples as 'float'
+(define-raylib AttachAudioStreamProcessor
+  (_fun
+   [stream : _AudioStream]
+   [processor : _AudioCallback]
+   -> _void))
+
+;; Detach audio stream processor from stream
+(define-raylib DetachAudioStreamProcessor
+  (_fun
+   [stream : _AudioStream]
+   [processor : _AudioCallback]
+   -> _void))
+
+;; Attach audio stream processor to the entire audio pipeline, receives the samples as 'float'
+(define-raylib AttachAudioMixedProcessor
+  (_fun
+   [processor : _AudioCallback]
+   -> _void))
+
+;; Detach audio stream processor from the entire audio pipeline
+(define-raylib DetachAudioMixedProcessor
+  (_fun
+   [processor : _AudioCallback]
    -> _void))

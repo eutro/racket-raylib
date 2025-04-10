@@ -60,4 +60,5 @@ These are converted to and from @racket[flvector?]s of the given length.
             {~@ description "\n" "\n"} ...)
           (define-raymath etc ...)))]))
 
-@(include "./private/defs.rkt")
+@(require "private/parser.rkt")
+@(parse-from-file define-raymath "private/defs.h")

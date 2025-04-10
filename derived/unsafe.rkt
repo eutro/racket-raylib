@@ -9,18 +9,12 @@
   #:provide provide-protected
   #:default-make-fail make-not-available)
 
-(define-raylib GetDroppedFiles*
-  (_fun
-   [count : (_ptr o _int)]
-   -> (_vector o _string count))
-  #:c-id GetDroppedFiles
-  #:wrap
-  (lambda (proc)
-    (define (GetDroppedFiles*)
-      (define ret (proc))
-      (ClearDroppedFiles)
-      ret)
-    GetDroppedFiles*))
+(provide-protected FilePathList->vector)
+(define (FilePathList->vector fpl)
+  (cblock->vector
+   (FilePathList-paths fpl)
+   _string
+   (FilePathList-count fpl)))
 
 (define-raylib DrawLineStrip*
   (_fun
