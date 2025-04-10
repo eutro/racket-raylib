@@ -180,13 +180,14 @@
    (displayln "And for my next magic trick, I will print a series of values!")
    #t)
 
-  (require rackunit)
+  (define (check f . args)
+    (unless (apply f args)
+      (error 'check "Check failed: ~s" (cons f args))))
 
-  (test-case "define-ptr"
-    (define-ptr x _int 5)
-    (check-equal? x 5)
-    (check-true (cpointer? (borrow x)))
-    (set! x 10)
-    (check-equal? (ptr-ref (borrow x) _int) 10))
+  (define-ptr x _int 5)
+  (check equal? x 5)
+  (check cpointer? (borrow x))
+  (set! x 10)
+  (check equal? (ptr-ref (borrow x) _int) 10)
 
   )
