@@ -8,8 +8,8 @@ Racket bindings for @hyperlink["https://www.raylib.com/"]{Raylib}.
 
 These bindings are currently for
 @(hyperlink
-  @(format "https://github.com/raysan5/raylib/releases/tag/~a.0" RAYLIB_VERSION)
-  @list{Raylib @|RAYLIB_VERSION|.0}).
+  @(format "https://github.com/raysan5/raylib/releases/tag/~a" RAYLIB_VERSION)
+  @list{Raylib @|RAYLIB_VERSION|}).
 
 @table-of-contents[]
 
