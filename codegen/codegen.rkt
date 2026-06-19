@@ -84,10 +84,10 @@
   (log-codegen-info "Fetching API")
   (define api-json
     ((compose1 read-json open-input-string fetch-api-url)
-     "parser/output/raylib_api.json"))
+     "tools/rlparser/raylib_api.json"))
   (define api-xexpr
     ((compose1 xml->xexpr document-element read-xml open-input-string fetch-api-url)
-     "parser/output/raylib_api.xml"))
+     "tools/rlparser/raylib_api.xml"))
   (define api-header (fetch-api-url "src/raylib.h"))
 
   (log-codegen-info "Parsing structs")

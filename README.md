@@ -1,7 +1,7 @@
 # racket-raylib
 
 [![CI](https://github.com/eutro/racket-raylib/actions/workflows/ci.yml/badge.svg)](https://github.com/eutro/racket-raylib/actions/workflows/ci.yml)
-[![Raylib](https://img.shields.io/badge/raylib-5.5.0-green)](https://github.com/raysan5/raylib/releases/tag/5.5)
+[![Raylib](https://img.shields.io/badge/raylib-6.0-green)](https://github.com/raysan5/raylib/releases/tag/6.0)
 [![Collection](https://img.shields.io/badge/collection-raylib-blueviolet)](https://pkgs.racket-lang.org/package/raylib)
 [![Documentation](https://img.shields.io/badge/docs-published-teal)](https://docs.racket-lang.org/raylib/)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)](#license)

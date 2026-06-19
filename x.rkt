@@ -142,7 +142,7 @@
      #:transport 'https))
 
   (when (parse-api)
-    (define git-parser-path (build-path git-path "parser"))
+    (define git-parser-path (build-path git-path "tools/rlparser"))
 
     (delete-directory/files git-parser-path #:must-exist? #f)
     (copy-directory/files parser-path git-parser-path)
@@ -153,7 +153,7 @@
 
     (displayln "--- Parsing Raylib Header")
     (parameterize ([current-directory git-parser-path])
-      (assert-success (system*/exit-code make))))
+      (assert-success (system*/exit-code make "all"))))
 
   (raylib-raw-root (url->string (path->url git-path)))
 
