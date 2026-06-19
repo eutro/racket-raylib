@@ -392,7 +392,7 @@ Automation event list
               @defthing[_TextureCubemap ctype? #:value _Texture]
               @defthing[_RenderTexture2D ctype? #:value _RenderTexture]
               @defthing[_Camera ctype? #:value _Camera3D]
-              @defthing[_ModelAnimPose ctype? #:value _Transform *])]{
+              @defthing[_ModelAnimPose ctype? #:value (_pointer-to _Transform)])]{
 Aliases for some struct types.
 }
 

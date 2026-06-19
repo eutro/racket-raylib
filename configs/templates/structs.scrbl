@@ -49,7 +49,8 @@
                  @(add-newlines
                    (for/list ([typedef-parsed (in-list typedefs-parsed)])
                      (match-define (api-typedef name _desc type) typedef-parsed)
-                     @list{@"@"defthing[_@|name| ctype? #:value _@|type|]}))})]{
+                     (define-values (name* type*) (parse-type name type))
+                     @list{@"@"defthing[_@|name*| ctype? #:value @|type*|]}))})]{
 Aliases for some struct types.
 }
 
