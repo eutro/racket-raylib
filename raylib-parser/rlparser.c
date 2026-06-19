@@ -778,11 +778,12 @@ int main(int argc, char *argv[])
         // Type
         int typeStart = c;
         while(linePtr[c] != ' ') c++;
+        if(linePtr[c] == ' ' && linePtr[c + 1] == '*') c += 2;
         int typeLen = c - typeStart;
         MemoryCopy(aliases[i].type, &linePtr[typeStart], typeLen);
 
         // Skip space
-        c++;
+        while(linePtr[c] == ' ') c++;
 
         // Name
         int nameStart = c;

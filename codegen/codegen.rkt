@@ -92,7 +92,7 @@
 
   (log-codegen-info "Parsing structs")
   (define structs-parsed (map parse-struct (hash-ref api-json 'structs)))
-  (define typedefs-parsed (parse-typedefs api-header))
+  (define typedefs-parsed (map parse-typedef (hash-ref api-json 'aliases)))
   (define function-typedefs-parsed (parse-function-typedefs api-header))
 
   (log-codegen-info "Parsing enums")
@@ -143,13 +143,11 @@
        params*
        varargs))]))
 
-(define (parse-typedefs header)
-  (define typedef-lines
-    (regexp-match* #px"\ntypedef ([^ ]+) ([^ ]+);" header
-                   #:match-select values))
-  (for/list ([typedef typedef-lines])
-    (match-define (list _ aliased-type alias-name) typedef)
-    (make-api-typedef alias-name #f aliased-type)))
+(define (parse-typedef alias-json)
+  (make-api-typedef
+   (hash-ref alias-json 'name)
+   (hash-ref alias-json 'description)
+   (hash-ref alias-json 'type)))
 
 (define (parse-function-typedefs header)
   (define typedef-lines
