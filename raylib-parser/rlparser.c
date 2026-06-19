@@ -191,6 +191,7 @@ static bool IsTextEqual(const char *text1, const char *text2, unsigned int count
 static int TextFindIndex(const char *text, const char *find); // Find first text occurrence within a string
 static void MemoryCopy(void *dest, const void *src, unsigned int count); // Memory copy, memcpy() replacement to avoid <string.h>
 static char *EscapeBackslashes(char *text);                 // Replace '\' by "\\" when exporting to JSON and XML
+static char *EscapeQuotes(char *text);                      // Replace '"' by '\'' when exporting to XML
 static const char *StrDefineType(DefineType type);          // Get string of define type
 
 static void ExportParsedData(const char *fileName, int format); // Export parsed data in desired format
@@ -1419,6 +1420,28 @@ static char *EscapeBackslashes(char *text)
     return buffer;
 }
 
+// Escape quotes in a string, writing the escaped string into a static buffer
+static char *EscapeQuotes(char *text)
+{
+    static char buffer[256] = { 0 };
+
+    int count = 0;
+
+    for (int i = 0; (text[i] != '\0') && (i < 255); i++, count++)
+    {
+        buffer[count] = text[i];
+
+        if (text[i] == '"')
+        {
+            buffer[count] = '\'';
+        }
+    }
+
+    buffer[count] = '\0';
+
+    return buffer;
+}
+
 // Get string of define type
 static const char *StrDefineType(DefineType type)
 {
@@ -1846,7 +1869,7 @@ static void ExportParsedData(const char *fileName, int format)
             fprintf(outFile, "    <Functions count=\"%i\">\n", funcCount);
             for (int i = 0; i < funcCount; i++)
             {
-                fprintf(outFile, "        <Function name=\"%s\" retType=\"%s\" paramCount=\"%i\" desc=\"%s\">\n", funcs[i].name, funcs[i].retType, funcs[i].paramCount, funcs[i].desc);
+                fprintf(outFile, "        <Function name=\"%s\" retType=\"%s\" paramCount=\"%i\" desc=\"%s\">\n", funcs[i].name, funcs[i].retType, funcs[i].paramCount, EscapeQuotes(funcs[i].desc));
                 for (int p = 0; p < funcs[i].paramCount; p++)
                 {
                     fprintf(outFile, "            <Param type=\"%s\" name=\"%s\" desc=\"%s\" />\n", funcs[i].paramType[p], funcs[i].paramName[p], funcs[i].paramDesc[p]);
