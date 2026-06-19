@@ -5,7 +5,7 @@
 @defmodule[raylib/generated/unsafe]
 Unsafe, automatically generated bindings for
 @hyperlink["https://www.raylib.com/"]{Raylib}
-5.5.
+6.0.
 
 This module re-exports all of
 @racketmodname[raylib/generated/unsafe/functions],

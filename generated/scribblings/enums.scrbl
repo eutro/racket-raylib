@@ -177,7 +177,7 @@
 
 @section{Gamepad buttons}
 @defthing[_GamepadButton ctype?]{Gamepad buttons}
-@defthing[GAMEPAD_BUTTON_UNKNOWN exact-integer? #:value 0 "Unknown button, just for error checking"]
+@defthing[GAMEPAD_BUTTON_UNKNOWN exact-integer? #:value 0 "Unknown button, for error checking"]
 @defthing[GAMEPAD_BUTTON_LEFT_FACE_UP exact-integer? #:value 1 "Gamepad left DPAD up button"]
 @defthing[GAMEPAD_BUTTON_LEFT_FACE_RIGHT exact-integer? #:value 2 "Gamepad left DPAD right button"]
 @defthing[GAMEPAD_BUTTON_LEFT_FACE_DOWN exact-integer? #:value 3 "Gamepad left DPAD down button"]
@@ -196,8 +196,8 @@
 @defthing[GAMEPAD_BUTTON_LEFT_THUMB exact-integer? #:value 16 "Gamepad joystick pressed button left"]
 @defthing[GAMEPAD_BUTTON_RIGHT_THUMB exact-integer? #:value 17 "Gamepad joystick pressed button right"]
 
-@section{Gamepad axis}
-@defthing[_GamepadAxis ctype?]{Gamepad axis}
+@section{Gamepad axes}
+@defthing[_GamepadAxis ctype?]{Gamepad axes}
 @defthing[GAMEPAD_AXIS_LEFT_X exact-integer? #:value 0 "Gamepad left stick X axis"]
 @defthing[GAMEPAD_AXIS_LEFT_Y exact-integer? #:value 1 "Gamepad left stick Y axis"]
 @defthing[GAMEPAD_AXIS_RIGHT_X exact-integer? #:value 2 "Gamepad right stick X axis"]
@@ -242,14 +242,15 @@
 @defthing[SHADER_LOC_MAP_ROUGHNESS exact-integer? #:value 18 "Shader location: sampler2d texture: roughness"]
 @defthing[SHADER_LOC_MAP_OCCLUSION exact-integer? #:value 19 "Shader location: sampler2d texture: occlusion"]
 @defthing[SHADER_LOC_MAP_EMISSION exact-integer? #:value 20 "Shader location: sampler2d texture: emission"]
-@defthing[SHADER_LOC_MAP_HEIGHT exact-integer? #:value 21 "Shader location: sampler2d texture: height"]
+@defthing[SHADER_LOC_MAP_HEIGHT exact-integer? #:value 21 "Shader location: sampler2d texture: heightmap"]
 @defthing[SHADER_LOC_MAP_CUBEMAP exact-integer? #:value 22 "Shader location: samplerCube texture: cubemap"]
 @defthing[SHADER_LOC_MAP_IRRADIANCE exact-integer? #:value 23 "Shader location: samplerCube texture: irradiance"]
 @defthing[SHADER_LOC_MAP_PREFILTER exact-integer? #:value 24 "Shader location: samplerCube texture: prefilter"]
 @defthing[SHADER_LOC_MAP_BRDF exact-integer? #:value 25 "Shader location: sampler2d texture: brdf"]
-@defthing[SHADER_LOC_VERTEX_BONEIDS exact-integer? #:value 26 "Shader location: vertex attribute: boneIds"]
-@defthing[SHADER_LOC_VERTEX_BONEWEIGHTS exact-integer? #:value 27 "Shader location: vertex attribute: boneWeights"]
-@defthing[SHADER_LOC_BONE_MATRICES exact-integer? #:value 28 "Shader location: array of matrices uniform: boneMatrices"]
+@defthing[SHADER_LOC_VERTEX_BONEIDS exact-integer? #:value 26 "Shader location: vertex attribute: bone indices"]
+@defthing[SHADER_LOC_VERTEX_BONEWEIGHTS exact-integer? #:value 27 "Shader location: vertex attribute: bone weights"]
+@defthing[SHADER_LOC_MATRIX_BONETRANSFORMS exact-integer? #:value 28 "Shader location: matrix attribute: bone transforms (animation)"]
+@defthing[SHADER_LOC_VERTEX_INSTANCETRANSFORM exact-integer? #:value 29 "Shader location: vertex attribute: instance transforms"]
 
 @section{Shader uniform data type}
 @defthing[_ShaderUniformDataType ctype?]{Shader uniform data type}
@@ -261,7 +262,11 @@
 @defthing[SHADER_UNIFORM_IVEC2 exact-integer? #:value 5 "Shader uniform type: ivec2 (2 int)"]
 @defthing[SHADER_UNIFORM_IVEC3 exact-integer? #:value 6 "Shader uniform type: ivec3 (3 int)"]
 @defthing[SHADER_UNIFORM_IVEC4 exact-integer? #:value 7 "Shader uniform type: ivec4 (4 int)"]
-@defthing[SHADER_UNIFORM_SAMPLER2D exact-integer? #:value 8 "Shader uniform type: sampler2d"]
+@defthing[SHADER_UNIFORM_UINT exact-integer? #:value 8 "Shader uniform type: unsigned int"]
+@defthing[SHADER_UNIFORM_UIVEC2 exact-integer? #:value 9 "Shader uniform type: uivec2 (2 unsigned int)"]
+@defthing[SHADER_UNIFORM_UIVEC3 exact-integer? #:value 10 "Shader uniform type: uivec3 (3 unsigned int)"]
+@defthing[SHADER_UNIFORM_UIVEC4 exact-integer? #:value 11 "Shader uniform type: uivec4 (4 unsigned int)"]
+@defthing[SHADER_UNIFORM_SAMPLER2D exact-integer? #:value 12 "Shader uniform type: sampler2d"]
 
 @section{Shader attribute data types}
 @defthing[_ShaderAttributeDataType ctype?]{Shader attribute data types}
@@ -299,7 +304,7 @@
 
 @section{Texture parameters: filter mode}
 @defthing[_TextureFilter ctype?]{Texture parameters: filter mode}
-@defthing[TEXTURE_FILTER_POINT exact-integer? #:value 0 "No filter, just pixel approximation"]
+@defthing[TEXTURE_FILTER_POINT exact-integer? #:value 0 "No filter, pixel approximation"]
 @defthing[TEXTURE_FILTER_BILINEAR exact-integer? #:value 1 "Linear filtering"]
 @defthing[TEXTURE_FILTER_TRILINEAR exact-integer? #:value 2 "Trilinear filtering (linear with mipmaps)"]
 @defthing[TEXTURE_FILTER_ANISOTROPIC_4X exact-integer? #:value 3 "Anisotropic filtering 4x"]

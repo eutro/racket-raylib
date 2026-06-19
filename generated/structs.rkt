@@ -128,7 +128,7 @@
   ([position _Vector3] ; Camera position
    [target _Vector3] ; Camera target it looks-at
    [up _Vector3] ; Camera up vector (rotation over its axis)
-   [fovy _float] ; Camera field-of-view aperture in Y (degrees) in perspective, used as near plane width in orthographic
+   [fovy _float] ; Camera field-of-view aperture in Y (degrees) in perspective, used as near plane height in world units in orthographic
    [projection _int] ; Camera projection: CAMERA_PERSPECTIVE or CAMERA_ORTHOGRAPHIC
    ))
 
@@ -136,10 +136,10 @@
 
 ;; Camera2D, defines position/orientation in 2d space
 (define-cstruct _Camera2D
-  ([offset _Vector2] ; Camera offset (displacement from target)
-   [target _Vector2] ; Camera target (rotation and zoom origin)
-   [rotation _float] ; Camera rotation in degrees
-   [zoom _float] ; Camera zoom (scaling), should be 1.0f by default
+  ([offset _Vector2] ; Camera offset (screen space offset from window origin)
+   [target _Vector2] ; Camera target (world space target point that is mapped to screen space offset)
+   [rotation _float] ; Camera rotation in degrees (pivots around target)
+   [zoom _float] ; Camera zoom (scaling around target), must not be set to 0, set to 1.0f for no scale
    ))
 
 ;; Mesh, vertex data and vao/vbo
@@ -153,12 +153,11 @@
    [tangents (_pointer-to _float)] ; Vertex tangents (XYZW - 4 components per vertex) (shader-location = 4)
    [colors (_pointer-to _ubyte)] ; Vertex colors (RGBA - 4 components per vertex) (shader-location = 3)
    [indices (_pointer-to _ushort)] ; Vertex indices (in case vertex data comes indexed)
+   [boneCount _int] ; Number of bones (MAX: 256 bones)
+   [boneIndices (_pointer-to _ubyte)] ; Vertex bone indices, up to 4 bones influence by vertex (skinning) (shader-location = 6)
+   [boneWeights (_pointer-to _float)] ; Vertex bone weight, up to 4 bones influence by vertex (skinning) (shader-location = 7)
    [animVertices (_pointer-to _float)] ; Animated vertex positions (after bones transformations)
    [animNormals (_pointer-to _float)] ; Animated normals (after bones transformations)
-   [boneIds (_pointer-to _ubyte)] ; Vertex bone ids, max 255 bone ids, up to 4 bones influence by vertex (skinning) (shader-location = 6)
-   [boneWeights (_pointer-to _float)] ; Vertex bone weight, up to 4 bones influence by vertex (skinning) (shader-location = 7)
-   [boneMatrices (_pointer-to _Matrix)] ; Bones animated transformation matrices
-   [boneCount _int] ; Number of bones
    [vaoId _uint] ; OpenGL Vertex Array Object id
    [vboId (_pointer-to _uint)] ; OpenGL Vertex Buffer Objects id (default vertex data)
    ))
@@ -190,10 +189,19 @@
    [scale _Vector3] ; Scale
    ))
 
+(define _ModelAnimPose (_pointer-to _Transform))
+
 ;; Bone, skeletal animation bone
 (define-cstruct _BoneInfo
   ([name (_array _byte 32)] ; Bone name
    [parent _int] ; Bone parent
+   ))
+
+;; Skeleton, animation bones hierarchy
+(define-cstruct _ModelSkeleton
+  ([boneCount _int] ; Number of bones
+   [bones (_pointer-to _BoneInfo)] ; Bones information (skeleton)
+   [bindPose _ModelAnimPose] ; Bones base transformation (Transform[])
    ))
 
 ;; Model, meshes, materials and animation data
@@ -204,18 +212,17 @@
    [meshes (_pointer-to _Mesh)] ; Meshes array
    [materials (_pointer-to _Material)] ; Materials array
    [meshMaterial (_pointer-to _int)] ; Mesh material number
-   [boneCount _int] ; Number of bones
-   [bones (_pointer-to _BoneInfo)] ; Bones information (skeleton)
-   [bindPose (_pointer-to _Transform)] ; Bones base transformation (pose)
+   [skeleton _ModelSkeleton] ; Skeleton for animation
+   [currentPose _ModelAnimPose] ; Current animation pose (Transform[])
+   [boneMatrices (_pointer-to _Matrix)] ; Bones animated transformation matrices
    ))
 
-;; ModelAnimation
+;; ModelAnimation, contains a full animation sequence
 (define-cstruct _ModelAnimation
-  ([boneCount _int] ; Number of bones
-   [frameCount _int] ; Number of animation frames
-   [bones (_pointer-to _BoneInfo)] ; Bones information (skeleton)
-   [framePoses (_pointer-to (_pointer-to _Transform))] ; Poses array by frame
-   [name (_array _byte 32)] ; Animation name
+  ([name (_array _byte 32)] ; Animation name
+   [boneCount _int] ; Number of bones (per pose)
+   [keyframeCount _int] ; Number of animation key frames
+   [keyframePoses (_pointer-to _ModelAnimPose)] ; Animation sequence keyframe poses [keyframe][pose]
    ))
 
 ;; Ray, ray for raycasting
@@ -298,8 +305,7 @@
 
 ;; File path list
 (define-cstruct _FilePathList
-  ([capacity _uint] ; Filepaths max entries
-   [count _uint] ; Filepaths entries count
+  ([count _uint] ; Filepaths entries count
    [paths (_pointer-to (_pointer-to _byte))] ; Filepaths entries
    ))
 
@@ -345,7 +351,7 @@
 (define _SaveFileTextCallback
   (_fun
    [fileName : _string]
-   [text : (_pointer-to _byte)]
+   [text : _string]
    -> _stdbool))
 
 (define _AudioCallback

@@ -49,8 +49,8 @@
      (for/list
          ([parsed-typedef (in-list typedefs-parsed)]
           #:when
-          (string=? (api-object-name parsed-struct)
-                    (api-typedef-type parsed-typedef)))
+          (string-prefix? (api-typedef-type parsed-typedef)
+                          (api-object-name parsed-struct)))
        (define-values (name type)
          (parse-type (api-object-name parsed-typedef)
                      (api-typedef-type parsed-typedef)))

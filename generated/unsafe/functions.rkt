@@ -97,7 +97,7 @@
   (_fun
    -> _void))
 
-;; Set window state: not minimized/maximized
+;; Restore window from being minimized/maximized
 (define-raylib RestoreWindow
   (_fun
    -> _void))
@@ -478,7 +478,7 @@
    [mat : _Matrix]
    -> _void))
 
-;; Set shader uniform value for texture (sampler2d)
+;; Set shader uniform value and bind the texture (sampler2d)
 (define-raylib SetShaderValueTexture
   (_fun
    [shader : _Shader]
@@ -632,6 +632,12 @@
    [url : _string]
    -> _void))
 
+;; Set the current threshold (minimum) log level
+(define-raylib SetTraceLogLevel
+  (_fun
+   [logLevel : _int]
+   -> _void))
+
 ;; Show trace log messages (LOG_DEBUG, LOG_INFO, LOG_WARNING, LOG_ERROR...)
 (define-raylib TraceLog
   (_fun
@@ -641,10 +647,10 @@
    ;; ... varargs
    -> _void))
 
-;; Set the current threshold (minimum) log level
-(define-raylib SetTraceLogLevel
+;; Set custom trace log
+(define-raylib SetTraceLogCallback
   (_fun
-   [logLevel : _int]
+   [callback : _TraceLogCallback]
    -> _void))
 
 ;; Internal memory allocator
@@ -664,36 +670,6 @@
 (define-raylib MemFree
   (_fun
    [ptr : (_pointer-to _void)]
-   -> _void))
-
-;; Set custom trace log
-(define-raylib SetTraceLogCallback
-  (_fun
-   [callback : _TraceLogCallback]
-   -> _void))
-
-;; Set custom file binary data loader
-(define-raylib SetLoadFileDataCallback
-  (_fun
-   [callback : _LoadFileDataCallback]
-   -> _void))
-
-;; Set custom file binary data saver
-(define-raylib SetSaveFileDataCallback
-  (_fun
-   [callback : _SaveFileDataCallback]
-   -> _void))
-
-;; Set custom file text data loader
-(define-raylib SetLoadFileTextCallback
-  (_fun
-   [callback : _LoadFileTextCallback]
-   -> _void))
-
-;; Set custom file text data saver
-(define-raylib SetSaveFileTextCallback
-  (_fun
-   [callback : _SaveFileTextCallback]
    -> _void))
 
 ;; Load file data as byte array (read)
@@ -741,8 +717,74 @@
 (define-raylib SaveFileText
   (_fun
    [fileName : _string]
-   [text : (_pointer-to _byte)]
+   [text : _string]
    -> _stdbool))
+
+;; Set custom file binary data loader
+(define-raylib SetLoadFileDataCallback
+  (_fun
+   [callback : _LoadFileDataCallback]
+   -> _void))
+
+;; Set custom file binary data saver
+(define-raylib SetSaveFileDataCallback
+  (_fun
+   [callback : _SaveFileDataCallback]
+   -> _void))
+
+;; Set custom file text data loader
+(define-raylib SetLoadFileTextCallback
+  (_fun
+   [callback : _LoadFileTextCallback]
+   -> _void))
+
+;; Set custom file text data saver
+(define-raylib SetSaveFileTextCallback
+  (_fun
+   [callback : _SaveFileTextCallback]
+   -> _void))
+
+;; Rename file (if exists)
+(define-raylib FileRename
+  (_fun
+   [fileName : _string]
+   [fileRename : _string]
+   -> _int))
+
+;; Remove file (if exists)
+(define-raylib FileRemove
+  (_fun
+   [fileName : _string]
+   -> _int))
+
+;; Copy file from one path to another, dstPath created if it doesn't exist
+(define-raylib FileCopy
+  (_fun
+   [srcPath : _string]
+   [dstPath : _string]
+   -> _int))
+
+;; Move file from one directory to another, dstPath created if it doesn't exist
+(define-raylib FileMove
+  (_fun
+   [srcPath : _string]
+   [dstPath : _string]
+   -> _int))
+
+;; Replace text in an existing file
+(define-raylib FileTextReplace
+  (_fun
+   [fileName : _string]
+   [search : _string]
+   [replacement : _string]
+   -> _int))
+
+;; Find text in existing file
+(define-raylib FileTextFindIndex
+  (_fun
+   [fileName : _string]
+   [search : _string]
+   -> _int))
 
 ;; Check if file exists
 (define-raylib FileExists
@@ -756,7 +798,7 @@
    [dirPath : _string]
    -> _stdbool))
 
-;; Check file extension (including point: .png, .wav)
+;; Check file extension (recommended include point: .png, .wav)
 (define-raylib IsFileExtension
   (_fun
    [fileName : _string]
@@ -768,6 +810,12 @@
   (_fun
    [fileName : _string]
    -> _int))
+
+;; Get file modification time (last write time)
+(define-raylib GetFileModTime
+  (_fun
+   [fileName : _string]
+   -> _long))
 
 ;; Get pointer to extension for a filename string (includes dot: '.png')
 (define-raylib GetFileExtension
@@ -818,7 +866,7 @@
 ;; Change working directory, return true on success
 (define-raylib ChangeDirectory
   (_fun
-   [dir : _string]
+   [dirPath : _string]
    -> _stdbool))
 
 ;; Check if a given path is a file or a directory
@@ -833,13 +881,13 @@
    [fileName : _string]
    -> _stdbool))
 
-;; Load directory filepaths
+;; Load directory filepaths, files and directories, no subdirs scan
 (define-raylib LoadDirectoryFiles
   (_fun
    [dirPath : _string]
    -> _FilePathList))
 
-;; Load directory filepaths with extension filtering and recursive directory scan. Use 'DIR' in the filter string to include directories in the result
+;; Load directory filepaths with extension filtering and subdir scan; some filters available: '*.*', 'FILES*', 'DIRS*'
 (define-raylib LoadDirectoryFilesEx
   (_fun
    [basePath : _string]
@@ -869,11 +917,19 @@
    [files : _FilePathList]
    -> _void))
 
-;; Get file modification time (last write time)
-(define-raylib GetFileModTime
+;; Get the file count in a directory
+(define-raylib GetDirectoryFileCount
   (_fun
-   [fileName : _string]
-   -> _long))
+   [dirPath : _string]
+   -> _uint))
+
+;; Get the file count in a directory with extension filtering and recursive directory scan. Use 'DIR' in the filter string to include directories in the result
+(define-raylib GetDirectoryFileCountEx
+  (_fun
+   [basePath : _string]
+   [filter : _string]
+   [scanSubdirs : _stdbool]
+   -> _uint))
 
 ;; Compress data (DEFLATE algorithm), memory must be MemFree()
 (define-raylib CompressData
@@ -891,7 +947,7 @@
    [dataSize : (_pointer-to _int)]
    -> (_pointer-to _ubyte)))
 
-;; Encode data to Base64 string, memory must be MemFree()
+;; Encode data to Base64 string (includes NULL terminator), memory must be MemFree()
 (define-raylib EncodeDataBase64
   (_fun
    [data : (_pointer-to _ubyte)]
@@ -899,10 +955,10 @@
    [outputSize : (_pointer-to _int)]
    -> (_pointer-to _byte)))
 
-;; Decode Base64 string data, memory must be MemFree()
+;; Decode Base64 string (expected NULL terminated), memory must be MemFree()
 (define-raylib DecodeDataBase64
   (_fun
-   [data : (_pointer-to _ubyte)]
+   [text : _string]
    [outputSize : (_pointer-to _int)]
    -> (_pointer-to _ubyte)))
 
@@ -922,6 +978,13 @@
 
 ;; Compute SHA1 hash code, returns static int[5] (20 bytes)
 (define-raylib ComputeSHA1
+  (_fun
+   [data : (_pointer-to _ubyte)]
+   [dataSize : _int]
+   -> (_pointer-to _uint)))
+
+;; Compute SHA256 hash code, returns static int[8] (32 bytes)
+(define-raylib ComputeSHA256
   (_fun
    [data : (_pointer-to _ubyte)]
    [dataSize : _int]
@@ -1014,6 +1077,12 @@
   (_fun
    -> _int))
 
+;; Get name of a QWERTY key on the current keyboard layout (eg returns string 'q' for KEY_A on an AZERTY keyboard)
+(define-raylib GetKeyName
+  (_fun
+   [key : _int]
+   -> _string))
+
 ;; Set a custom key to exit program (default is ESC)
 (define-raylib SetExitKey
   (_fun
@@ -1065,13 +1134,13 @@
   (_fun
    -> _int))
 
-;; Get gamepad axis count for a gamepad
+;; Get axis count for a gamepad
 (define-raylib GetGamepadAxisCount
   (_fun
    [gamepad : _int]
    -> _int))
 
-;; Get axis movement value for a gamepad axis
+;; Get movement value for a gamepad axis
 (define-raylib GetGamepadAxisMovement
   (_fun
    [gamepad : _int]
@@ -1335,6 +1404,16 @@
    [color : _Color]
    -> _void))
 
+;; Draw a dashed line
+(define-raylib DrawLineDashed
+  (_fun
+   [startPos : _Vector2]
+   [endPos : _Vector2]
+   [dashSize : _int]
+   [spaceSize : _int]
+   [color : _Color]
+   -> _void))
+
 ;; Draw a color-filled circle
 (define-raylib DrawCircle
   (_fun
@@ -1342,6 +1421,23 @@
    [centerY : _int]
    [radius : _float]
    [color : _Color]
+   -> _void))
+
+;; Draw a color-filled circle (Vector version)
+(define-raylib DrawCircleV
+  (_fun
+   [center : _Vector2]
+   [radius : _float]
+   [color : _Color]
+   -> _void))
+
+;; Draw a gradient-filled circle
+(define-raylib DrawCircleGradient
+  (_fun
+   [center : _Vector2]
+   [radius : _float]
+   [inner : _Color]
+   [outer : _Color]
    -> _void))
 
 ;; Draw a piece of a circle
@@ -1363,24 +1459,6 @@
    [startAngle : _float]
    [endAngle : _float]
    [segments : _int]
-   [color : _Color]
-   -> _void))
-
-;; Draw a gradient-filled circle
-(define-raylib DrawCircleGradient
-  (_fun
-   [centerX : _int]
-   [centerY : _int]
-   [radius : _float]
-   [inner : _Color]
-   [outer : _Color]
-   -> _void))
-
-;; Draw a color-filled circle (Vector version)
-(define-raylib DrawCircleV
-  (_fun
-   [center : _Vector2]
-   [radius : _float]
    [color : _Color]
    -> _void))
 
@@ -1411,11 +1489,29 @@
    [color : _Color]
    -> _void))
 
+;; Draw ellipse (Vector version)
+(define-raylib DrawEllipseV
+  (_fun
+   [center : _Vector2]
+   [radiusH : _float]
+   [radiusV : _float]
+   [color : _Color]
+   -> _void))
+
 ;; Draw ellipse outline
 (define-raylib DrawEllipseLines
   (_fun
    [centerX : _int]
    [centerY : _int]
+   [radiusH : _float]
+   [radiusV : _float]
+   [color : _Color]
+   -> _void))
+
+;; Draw ellipse outline (Vector version)
+(define-raylib DrawEllipseLinesV
+  (_fun
+   [center : _Vector2]
    [radiusH : _float]
    [radiusV : _float]
    [color : _Color]
@@ -1507,8 +1603,8 @@
    [rec : _Rectangle]
    [topLeft : _Color]
    [bottomLeft : _Color]
-   [topRight : _Color]
    [bottomRight : _Color]
+   [topRight : _Color]
    -> _void))
 
 ;; Draw rectangle outline
@@ -1927,7 +2023,7 @@
    [fileName : _string]
    -> _stdbool))
 
-;; Export image to memory buffer
+;; Export image to memory buffer, memory must be MemFree()
 (define-raylib ExportImageToMemory
   (_fun
    [image : _Image]
@@ -2545,14 +2641,14 @@
    [target : _RenderTexture2D]
    -> _void))
 
-;; Update GPU texture with new data
+;; Update GPU texture with new data (pixels should be able to fill texture)
 (define-raylib UpdateTexture
   (_fun
    [texture : _Texture2D]
    [pixels : (_pointer-to _void)]
    -> _void))
 
-;; Update GPU texture rectangle with new data
+;; Update GPU texture rectangle with new data (pixels and rec should fit in texture)
 (define-raylib UpdateTextureRec
   (_fun
    [texture : _Texture2D]
@@ -2811,6 +2907,7 @@
    [codepoints : (_pointer-to _int)]
    [codepointCount : _int]
    [type : _int]
+   [glyphCount : (_pointer-to _int)]
    -> (_pointer-to _GlyphInfo)))
 
 ;; Generate image font atlas using chars info
@@ -2929,6 +3026,16 @@
    [spacing : _float]
    -> _Vector2))
 
+;; Measure string size for an existing array of codepoints for Font
+(define-raylib MeasureTextCodepoints
+  (_fun
+   [font : _Font]
+   [codepoints : (_pointer-to _int)]
+   [length : _int]
+   [fontSize : _float]
+   [spacing : _float]
+   -> _Vector2))
+
 ;; Get glyph index position in font for a codepoint (unicode character), fallback to '?' if not found
 (define-raylib GetGlyphIndex
   (_fun
@@ -3010,6 +3117,20 @@
    [utf8Size : (_pointer-to _int)]
    -> _string))
 
+;; Load text as separate lines ('\n')
+(define-raylib LoadTextLines
+  (_fun
+   [text : _string]
+   [count : (_pointer-to _int)]
+   -> (_pointer-to (_pointer-to _byte))))
+
+;; Unload text lines
+(define-raylib UnloadTextLines
+  (_fun
+   [text : (_pointer-to (_pointer-to _byte))]
+   [lineCount : _int]
+   -> _void))
+
 ;; Copy one string to another, returns bytes copied
 (define-raylib TextCopy
   (_fun
@@ -3046,16 +3167,64 @@
    [length : _int]
    -> _string))
 
-;; Replace text string (WARNING: memory must be freed!)
+;; Remove text spaces, concat words
+(define-raylib TextRemoveSpaces
+  (_fun
+   [text : _string]
+   -> _string))
+
+;; Get text between two strings
+(define-raylib GetTextBetween
+  (_fun
+   [text : _string]
+   [begin : _string]
+   [end : _string]
+   -> (_pointer-to _byte)))
+
+;; Replace text string with new string
 (define-raylib TextReplace
   (_fun
    [text : _string]
-   [replace : _string]
-   [by : _string]
+   [search : _string]
+   [replacement : _string]
    -> (_pointer-to _byte)))
 
-;; Insert text in a position (WARNING: memory must be freed!)
+;; Replace text string with new string, memory must be MemFree()
+(define-raylib TextReplaceAlloc
+  (_fun
+   [text : _string]
+   [search : _string]
+   [replacement : _string]
+   -> (_pointer-to _byte)))
+
+;; Replace text between two specific strings
+(define-raylib TextReplaceBetween
+  (_fun
+   [text : _string]
+   [begin : _string]
+   [end : _string]
+   [replacement : _string]
+   -> (_pointer-to _byte)))
+
+;; Replace text between two specific strings, memory must be MemFree()
+(define-raylib TextReplaceBetweenAlloc
+  (_fun
+   [text : _string]
+   [begin : _string]
+   [end : _string]
+   [replacement : _string]
+   -> (_pointer-to _byte)))
+
+;; Insert text in a defined byte position
 (define-raylib TextInsert
+  (_fun
+   [text : _string]
+   [insert : _string]
+   [position : _int]
+   -> (_pointer-to _byte)))
+
+;; Insert text in a defined byte position, memory must be MemFree()
+(define-raylib TextInsertAlloc
   (_fun
    [text : _string]
    [insert : _string]
@@ -3068,9 +3237,9 @@
    [textList : (_pointer-to (_pointer-to _byte))]
    [count : _int]
    [delimiter : _string]
-   -> _string))
+   -> (_pointer-to _byte)))
 
-;; Split text into multiple strings
+;; Split text into multiple strings, using MAX_TEXTSPLIT_COUNT static strings
 (define-raylib TextSplit
   (_fun
    [text : _string]
@@ -3078,7 +3247,7 @@
    [count : (_pointer-to _int)]
    -> (_pointer-to (_pointer-to _byte))))
 
-;; Append text at specific position and move cursor!
+;; Append text at specific position and move cursor
 (define-raylib TextAppend
   (_fun
    [text : (_pointer-to _byte)]
@@ -3086,50 +3255,50 @@
    [position : (_pointer-to _int)]
    -> _void))
 
-;; Find first text occurrence within a string
+;; Find first text occurrence within a string, -1 if not found
 (define-raylib TextFindIndex
   (_fun
    [text : _string]
-   [find : _string]
+   [search : _string]
    -> _int))
 
 ;; Get upper case version of provided string
 (define-raylib TextToUpper
   (_fun
    [text : _string]
-   -> _string))
+   -> (_pointer-to _byte)))
 
 ;; Get lower case version of provided string
 (define-raylib TextToLower
   (_fun
    [text : _string]
-   -> _string))
+   -> (_pointer-to _byte)))
 
 ;; Get Pascal case notation version of provided string
 (define-raylib TextToPascal
   (_fun
    [text : _string]
-   -> _string))
+   -> (_pointer-to _byte)))
 
 ;; Get Snake case notation version of provided string
 (define-raylib TextToSnake
   (_fun
    [text : _string]
-   -> _string))
+   -> (_pointer-to _byte)))
 
 ;; Get Camel case notation version of provided string
 (define-raylib TextToCamel
   (_fun
    [text : _string]
-   -> _string))
+   -> (_pointer-to _byte)))
 
-;; Get integer value from text (negative values not supported)
+;; Get integer value from text
 (define-raylib TextToInteger
   (_fun
    [text : _string]
    -> _int))
 
-;; Get float value from text (negative values not supported)
+;; Get float value from text
 (define-raylib TextToFloat
   (_fun
    [text : _string]
@@ -3399,26 +3568,6 @@
    [tint : _Color]
    -> _void))
 
-;; Draw a model as points
-(define-raylib DrawModelPoints
-  (_fun
-   [model : _Model]
-   [position : _Vector3]
-   [scale : _float]
-   [tint : _Color]
-   -> _void))
-
-;; Draw a model as points with extended parameters
-(define-raylib DrawModelPointsEx
-  (_fun
-   [model : _Model]
-   [position : _Vector3]
-   [rotationAxis : _Vector3]
-   [rotationAngle : _float]
-   [scale : _Vector3]
-   [tint : _Color]
-   -> _void))
-
 ;; Draw bounding box (wires)
 (define-raylib DrawBoundingBox
   (_fun
@@ -3662,26 +3811,23 @@
    [animCount : (_pointer-to _int)]
    -> (_pointer-to _ModelAnimation)))
 
-;; Update model animation pose (CPU)
+;; Update model animation pose (vertex buffers and bone matrices)
 (define-raylib UpdateModelAnimation
   (_fun
    [model : _Model]
    [anim : _ModelAnimation]
-   [frame : _int]
+   [frame : _float]
    -> _void))
 
-;; Update model animation mesh bone matrices (GPU skinning)
-(define-raylib UpdateModelAnimationBones
+;; Update model animation pose, blending two animations
+(define-raylib UpdateModelAnimationEx
   (_fun
    [model : _Model]
-   [anim : _ModelAnimation]
-   [frame : _int]
-   -> _void))
-
-;; Unload animation data
-(define-raylib UnloadModelAnimation
-  (_fun
-   [anim : _ModelAnimation]
+   [animA : _ModelAnimation]
+   [frameA : _float]
+   [animB : _ModelAnimation]
+   [frameB : _float]
+   [blend : _float]
    -> _void))
 
 ;; Unload animation array data
@@ -3834,7 +3980,7 @@
    [sound : _Sound]
    -> _stdbool))
 
-;; Update sound buffer with new data
+;; Update sound buffer with new data (default data format: 32 bit float, stereo)
 (define-raylib UpdateSound
   (_fun
    [sound : _Sound]
@@ -3918,7 +4064,7 @@
    [pitch : _float]
    -> _void))
 
-;; Set pan for a sound (0.5 is center)
+;; Set pan for a sound (-1.0 left, 0.0 center, 1.0 right)
 (define-raylib SetSoundPan
   (_fun
    [sound : _Sound]
@@ -4043,7 +4189,7 @@
    [pitch : _float]
    -> _void))
 
-;; Set pan for a music (0.5 is center)
+;; Set pan for a music (-1.0 left, 0.0 center, 1.0 right)
 (define-raylib SetMusicPan
   (_fun
    [music : _Music]
@@ -4140,7 +4286,7 @@
    [pitch : _float]
    -> _void))
 
-;; Set pan for audio stream (0.5 is centered)
+;; Set pan for audio stream (-1.0 to 1.0 range, 0.0 is centered)
 (define-raylib SetAudioStreamPan
   (_fun
    [stream : _AudioStream]
@@ -4160,7 +4306,7 @@
    [callback : _AudioCallback]
    -> _void))
 
-;; Attach audio stream processor to stream, receives the samples as 'float'
+;; Attach audio stream processor to stream, receives frames x 2 samples as 'float' (stereo)
 (define-raylib AttachAudioStreamProcessor
   (_fun
    [stream : _AudioStream]
@@ -4174,7 +4320,7 @@
    [processor : _AudioCallback]
    -> _void))
 
-;; Attach audio stream processor to the entire audio pipeline, receives the samples as 'float'
+;; Attach audio stream processor to the entire audio pipeline, receives frames x 2 samples as 'float' (stereo)
 (define-raylib AttachAudioMixedProcessor
   (_fun
    [processor : _AudioCallback]

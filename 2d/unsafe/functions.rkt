@@ -102,8 +102,6 @@
                     DrawModelEx
                     DrawModelWires
                     DrawModelWiresEx
-                    DrawModelPoints
-                    DrawModelPointsEx
                     DrawBoundingBox
                     DrawBillboard
                     DrawBillboardRec
@@ -136,8 +134,6 @@
                     SetModelMeshMaterial
                     LoadModelAnimations
                     UpdateModelAnimation
-                    UpdateModelAnimationBones
-                    UnloadModelAnimation
                     UnloadModelAnimations
                     IsModelAnimationValid
                     CheckCollisionSpheres

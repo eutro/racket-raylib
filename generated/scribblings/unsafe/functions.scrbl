@@ -102,7 +102,7 @@ Set window state: minimized, if resizable
 
 @defproc[(RestoreWindow)
          _void]{
-Set window state: not minimized/maximized
+Restore window from being minimized/maximized
 }
 
 @defproc[(SetWindowIcon
@@ -486,7 +486,7 @@ Set shader uniform value (matrix 4x4)
           [locIndex _int]
           [texture _Texture2D])
          _void]{
-Set shader uniform value for texture (sampler2d)
+Set shader uniform value and bind the texture (sampler2d)
 }
 
 @defproc[(UnloadShader
@@ -635,6 +635,12 @@ Setup init configuration flags (view FLAGS)
 Open URL with default system browser (if available)
 }
 
+@defproc[(SetTraceLogLevel
+          [logLevel _int])
+         _void]{
+Set the current threshold (minimum) log level
+}
+
 @defproc[(TraceLog
           [logLevel _int]
           [text _string])
@@ -642,10 +648,10 @@ Open URL with default system browser (if available)
 Show trace log messages (LOG_DEBUG, LOG_INFO, LOG_WARNING, LOG_ERROR...)
 }
 
-@defproc[(SetTraceLogLevel
-          [logLevel _int])
+@defproc[(SetTraceLogCallback
+          [callback _TraceLogCallback])
          _void]{
-Set the current threshold (minimum) log level
+Set custom trace log
 }
 
 @defproc[(MemAlloc
@@ -665,36 +671,6 @@ Internal memory reallocator
           [ptr (_pointer-to _void)])
          _void]{
 Internal memory free
-}
-
-@defproc[(SetTraceLogCallback
-          [callback _TraceLogCallback])
-         _void]{
-Set custom trace log
-}
-
-@defproc[(SetLoadFileDataCallback
-          [callback _LoadFileDataCallback])
-         _void]{
-Set custom file binary data loader
-}
-
-@defproc[(SetSaveFileDataCallback
-          [callback _SaveFileDataCallback])
-         _void]{
-Set custom file binary data saver
-}
-
-@defproc[(SetLoadFileTextCallback
-          [callback _LoadFileTextCallback])
-         _void]{
-Set custom file text data loader
-}
-
-@defproc[(SetSaveFileTextCallback
-          [callback _SaveFileTextCallback])
-         _void]{
-Set custom file text data saver
 }
 
 @defproc[(LoadFileData
@@ -740,9 +716,75 @@ Unload file text data allocated by LoadFileText()
 
 @defproc[(SaveFileText
           [fileName _string]
-          [text (_pointer-to _byte)])
+          [text _string])
          _stdbool]{
 Save text data to file (write), string must be '\0' terminated, returns true on success
+}
+
+@defproc[(SetLoadFileDataCallback
+          [callback _LoadFileDataCallback])
+         _void]{
+Set custom file binary data loader
+}
+
+@defproc[(SetSaveFileDataCallback
+          [callback _SaveFileDataCallback])
+         _void]{
+Set custom file binary data saver
+}
+
+@defproc[(SetLoadFileTextCallback
+          [callback _LoadFileTextCallback])
+         _void]{
+Set custom file text data loader
+}
+
+@defproc[(SetSaveFileTextCallback
+          [callback _SaveFileTextCallback])
+         _void]{
+Set custom file text data saver
+}
+
+@defproc[(FileRename
+          [fileName _string]
+          [fileRename _string])
+         _int]{
+Rename file (if exists)
+}
+
+@defproc[(FileRemove
+          [fileName _string])
+         _int]{
+Remove file (if exists)
+}
+
+@defproc[(FileCopy
+          [srcPath _string]
+          [dstPath _string])
+         _int]{
+Copy file from one path to another, dstPath created if it doesn't exist
+}
+
+@defproc[(FileMove
+          [srcPath _string]
+          [dstPath _string])
+         _int]{
+Move file from one directory to another, dstPath created if it doesn't exist
+}
+
+@defproc[(FileTextReplace
+          [fileName _string]
+          [search _string]
+          [replacement _string])
+         _int]{
+Replace text in an existing file
+}
+
+@defproc[(FileTextFindIndex
+          [fileName _string]
+          [search _string])
+         _int]{
+Find text in existing file
 }
 
 @defproc[(FileExists
@@ -761,13 +803,19 @@ Check if a directory path exists
           [fileName _string]
           [ext _string])
          _stdbool]{
-Check file extension (including point: .png, .wav)
+Check file extension (recommended include point: .png, .wav)
 }
 
 @defproc[(GetFileLength
           [fileName _string])
          _int]{
 Get file length in bytes (NOTE: GetFileSize() conflicts with windows.h)
+}
+
+@defproc[(GetFileModTime
+          [fileName _string])
+         _long]{
+Get file modification time (last write time)
 }
 
 @defproc[(GetFileExtension
@@ -817,7 +865,7 @@ Create directories (including full path requested), returns 0 on success
 }
 
 @defproc[(ChangeDirectory
-          [dir _string])
+          [dirPath _string])
          _stdbool]{
 Change working directory, return true on success
 }
@@ -837,7 +885,7 @@ Check if fileName is valid for the platform/OS
 @defproc[(LoadDirectoryFiles
           [dirPath _string])
          _FilePathList]{
-Load directory filepaths
+Load directory filepaths, files and directories, no subdirs scan
 }
 
 @defproc[(LoadDirectoryFilesEx
@@ -845,7 +893,7 @@ Load directory filepaths
           [filter _string]
           [scanSubdirs _stdbool])
          _FilePathList]{
-Load directory filepaths with extension filtering and recursive directory scan. Use 'DIR' in the filter string to include directories in the result
+Load directory filepaths with extension filtering and subdir scan; some filters available: '*.*', 'FILES*', 'DIRS*'
 }
 
 @defproc[(UnloadDirectoryFiles
@@ -870,10 +918,18 @@ Load dropped filepaths
 Unload dropped filepaths
 }
 
-@defproc[(GetFileModTime
-          [fileName _string])
-         _long]{
-Get file modification time (last write time)
+@defproc[(GetDirectoryFileCount
+          [dirPath _string])
+         _uint]{
+Get the file count in a directory
+}
+
+@defproc[(GetDirectoryFileCountEx
+          [basePath _string]
+          [filter _string]
+          [scanSubdirs _stdbool])
+         _uint]{
+Get the file count in a directory with extension filtering and recursive directory scan. Use 'DIR' in the filter string to include directories in the result
 }
 
 @defproc[(CompressData
@@ -897,14 +953,14 @@ Decompress data (DEFLATE algorithm), memory must be MemFree()
           [dataSize _int]
           [outputSize (_pointer-to _int)])
          (_pointer-to _byte)]{
-Encode data to Base64 string, memory must be MemFree()
+Encode data to Base64 string (includes NULL terminator), memory must be MemFree()
 }
 
 @defproc[(DecodeDataBase64
-          [data (_pointer-to _ubyte)]
+          [text _string]
           [outputSize (_pointer-to _int)])
          (_pointer-to _ubyte)]{
-Decode Base64 string data, memory must be MemFree()
+Decode Base64 string (expected NULL terminated), memory must be MemFree()
 }
 
 @defproc[(ComputeCRC32
@@ -926,6 +982,13 @@ Compute MD5 hash code, returns static int[4] (16 bytes)
           [dataSize _int])
          (_pointer-to _uint)]{
 Compute SHA1 hash code, returns static int[5] (20 bytes)
+}
+
+@defproc[(ComputeSHA256
+          [data (_pointer-to _ubyte)]
+          [dataSize _int])
+         (_pointer-to _uint)]{
+Compute SHA256 hash code, returns static int[8] (32 bytes)
 }
 
 @defproc[(LoadAutomationEventList
@@ -1015,6 +1078,12 @@ Get key pressed (keycode), call it multiple times for keys queued, returns 0 whe
 Get char pressed (unicode), call it multiple times for chars queued, returns 0 when the queue is empty
 }
 
+@defproc[(GetKeyName
+          [key _int])
+         _string]{
+Get name of a QWERTY key on the current keyboard layout (eg returns string 'q' for KEY_A on an AZERTY keyboard)
+}
+
 @defproc[(SetExitKey
           [key _int])
          _void]{
@@ -1069,14 +1138,14 @@ Get the last gamepad button pressed
 @defproc[(GetGamepadAxisCount
           [gamepad _int])
          _int]{
-Get gamepad axis count for a gamepad
+Get axis count for a gamepad
 }
 
 @defproc[(GetGamepadAxisMovement
           [gamepad _int]
           [axis _int])
          _float]{
-Get axis movement value for a gamepad axis
+Get movement value for a gamepad axis
 }
 
 @defproc[(SetGamepadMappings
@@ -1336,6 +1405,16 @@ Draw lines sequence (using gl lines)
 Draw line segment cubic-bezier in-out interpolation
 }
 
+@defproc[(DrawLineDashed
+          [startPos _Vector2]
+          [endPos _Vector2]
+          [dashSize _int]
+          [spaceSize _int]
+          [color _Color])
+         _void]{
+Draw a dashed line
+}
+
 @defproc[(DrawCircle
           [centerX _int]
           [centerY _int]
@@ -1343,6 +1422,23 @@ Draw line segment cubic-bezier in-out interpolation
           [color _Color])
          _void]{
 Draw a color-filled circle
+}
+
+@defproc[(DrawCircleV
+          [center _Vector2]
+          [radius _float]
+          [color _Color])
+         _void]{
+Draw a color-filled circle (Vector version)
+}
+
+@defproc[(DrawCircleGradient
+          [center _Vector2]
+          [radius _float]
+          [inner _Color]
+          [outer _Color])
+         _void]{
+Draw a gradient-filled circle
 }
 
 @defproc[(DrawCircleSector
@@ -1365,24 +1461,6 @@ Draw a piece of a circle
           [color _Color])
          _void]{
 Draw circle sector outline
-}
-
-@defproc[(DrawCircleGradient
-          [centerX _int]
-          [centerY _int]
-          [radius _float]
-          [inner _Color]
-          [outer _Color])
-         _void]{
-Draw a gradient-filled circle
-}
-
-@defproc[(DrawCircleV
-          [center _Vector2]
-          [radius _float]
-          [color _Color])
-         _void]{
-Draw a color-filled circle (Vector version)
 }
 
 @defproc[(DrawCircleLines
@@ -1412,6 +1490,15 @@ Draw circle outline (Vector version)
 Draw ellipse
 }
 
+@defproc[(DrawEllipseV
+          [center _Vector2]
+          [radiusH _float]
+          [radiusV _float]
+          [color _Color])
+         _void]{
+Draw ellipse (Vector version)
+}
+
 @defproc[(DrawEllipseLines
           [centerX _int]
           [centerY _int]
@@ -1420,6 +1507,15 @@ Draw ellipse
           [color _Color])
          _void]{
 Draw ellipse outline
+}
+
+@defproc[(DrawEllipseLinesV
+          [center _Vector2]
+          [radiusH _float]
+          [radiusV _float]
+          [color _Color])
+         _void]{
+Draw ellipse outline (Vector version)
 }
 
 @defproc[(DrawRing
@@ -1506,8 +1602,8 @@ Draw a horizontal-gradient-filled rectangle
           [rec _Rectangle]
           [topLeft _Color]
           [bottomLeft _Color]
-          [topRight _Color]
-          [bottomRight _Color])
+          [bottomRight _Color]
+          [topRight _Color])
          _void]{
 Draw a gradient-filled rectangle with custom vertex colors
 }
@@ -1933,7 +2029,7 @@ Export image data to file, returns true on success
           [fileType _string]
           [fileSize (_pointer-to _int)])
          (_pointer-to _ubyte)]{
-Export image to memory buffer
+Export image to memory buffer, memory must be MemFree()
 }
 
 @defproc[(ExportImageAsCode
@@ -2550,7 +2646,7 @@ Unload render texture from GPU memory (VRAM)
           [texture _Texture2D]
           [pixels (_pointer-to _void)])
          _void]{
-Update GPU texture with new data
+Update GPU texture with new data (pixels should be able to fill texture)
 }
 
 @defproc[(UpdateTextureRec
@@ -2558,7 +2654,7 @@ Update GPU texture with new data
           [rec _Rectangle]
           [pixels (_pointer-to _void)])
          _void]{
-Update GPU texture rectangle with new data
+Update GPU texture rectangle with new data (pixels and rec should fit in texture)
 }
 
 @defproc[(GenTextureMipmaps
@@ -2809,7 +2905,8 @@ Check if a font is valid (font data loaded, WARNING: GPU texture not checked)
           [fontSize _int]
           [codepoints (_pointer-to _int)]
           [codepointCount _int]
-          [type _int])
+          [type _int]
+          [glyphCount (_pointer-to _int)])
          (_pointer-to _GlyphInfo)]{
 Load font data for further use
 }
@@ -2930,6 +3027,16 @@ Measure string width for default font
 Measure string size for Font
 }
 
+@defproc[(MeasureTextCodepoints
+          [font _Font]
+          [codepoints (_pointer-to _int)]
+          [length _int]
+          [fontSize _float]
+          [spacing _float])
+         _Vector2]{
+Measure string size for an existing array of codepoints for Font
+}
+
 @defproc[(GetGlyphIndex
           [font _Font]
           [codepoint _int])
@@ -3011,6 +3118,20 @@ Get previous codepoint in a UTF-8 encoded string, 0x3f('?') is returned on failu
 Encode one codepoint into UTF-8 byte array (array length returned as parameter)
 }
 
+@defproc[(LoadTextLines
+          [text _string]
+          [count (_pointer-to _int)])
+         (_pointer-to (_pointer-to _byte))]{
+Load text as separate lines ('\n')
+}
+
+@defproc[(UnloadTextLines
+          [text (_pointer-to (_pointer-to _byte))]
+          [lineCount _int])
+         _void]{
+Unload text lines
+}
+
 @defproc[(TextCopy
           [dst (_pointer-to _byte)]
           [src _string])
@@ -3045,12 +3166,52 @@ Text formatting with variables (sprintf() style)
 Get a piece of a text string
 }
 
+@defproc[(TextRemoveSpaces
+          [text _string])
+         _string]{
+Remove text spaces, concat words
+}
+
+@defproc[(GetTextBetween
+          [text _string]
+          [begin _string]
+          [end _string])
+         (_pointer-to _byte)]{
+Get text between two strings
+}
+
 @defproc[(TextReplace
           [text _string]
-          [replace _string]
-          [by _string])
+          [search _string]
+          [replacement _string])
          (_pointer-to _byte)]{
-Replace text string (WARNING: memory must be freed!)
+Replace text string with new string
+}
+
+@defproc[(TextReplaceAlloc
+          [text _string]
+          [search _string]
+          [replacement _string])
+         (_pointer-to _byte)]{
+Replace text string with new string, memory must be MemFree()
+}
+
+@defproc[(TextReplaceBetween
+          [text _string]
+          [begin _string]
+          [end _string]
+          [replacement _string])
+         (_pointer-to _byte)]{
+Replace text between two specific strings
+}
+
+@defproc[(TextReplaceBetweenAlloc
+          [text _string]
+          [begin _string]
+          [end _string]
+          [replacement _string])
+         (_pointer-to _byte)]{
+Replace text between two specific strings, memory must be MemFree()
 }
 
 @defproc[(TextInsert
@@ -3058,14 +3219,22 @@ Replace text string (WARNING: memory must be freed!)
           [insert _string]
           [position _int])
          (_pointer-to _byte)]{
-Insert text in a position (WARNING: memory must be freed!)
+Insert text in a defined byte position
+}
+
+@defproc[(TextInsertAlloc
+          [text _string]
+          [insert _string]
+          [position _int])
+         (_pointer-to _byte)]{
+Insert text in a defined byte position, memory must be MemFree()
 }
 
 @defproc[(TextJoin
           [textList (_pointer-to (_pointer-to _byte))]
           [count _int]
           [delimiter _string])
-         _string]{
+         (_pointer-to _byte)]{
 Join text strings with delimiter
 }
 
@@ -3074,7 +3243,7 @@ Join text strings with delimiter
           [delimiter _byte]
           [count (_pointer-to _int)])
          (_pointer-to (_pointer-to _byte))]{
-Split text into multiple strings
+Split text into multiple strings, using MAX_TEXTSPLIT_COUNT static strings
 }
 
 @defproc[(TextAppend
@@ -3082,56 +3251,56 @@ Split text into multiple strings
           [append _string]
           [position (_pointer-to _int)])
          _void]{
-Append text at specific position and move cursor!
+Append text at specific position and move cursor
 }
 
 @defproc[(TextFindIndex
           [text _string]
-          [find _string])
+          [search _string])
          _int]{
-Find first text occurrence within a string
+Find first text occurrence within a string, -1 if not found
 }
 
 @defproc[(TextToUpper
           [text _string])
-         _string]{
+         (_pointer-to _byte)]{
 Get upper case version of provided string
 }
 
 @defproc[(TextToLower
           [text _string])
-         _string]{
+         (_pointer-to _byte)]{
 Get lower case version of provided string
 }
 
 @defproc[(TextToPascal
           [text _string])
-         _string]{
+         (_pointer-to _byte)]{
 Get Pascal case notation version of provided string
 }
 
 @defproc[(TextToSnake
           [text _string])
-         _string]{
+         (_pointer-to _byte)]{
 Get Snake case notation version of provided string
 }
 
 @defproc[(TextToCamel
           [text _string])
-         _string]{
+         (_pointer-to _byte)]{
 Get Camel case notation version of provided string
 }
 
 @defproc[(TextToInteger
           [text _string])
          _int]{
-Get integer value from text (negative values not supported)
+Get integer value from text
 }
 
 @defproc[(TextToFloat
           [text _string])
          _float]{
-Get float value from text (negative values not supported)
+Get float value from text
 }
 
 @defproc[(DrawLine3D
@@ -3398,26 +3567,6 @@ Draw a model wires (with texture if set)
 Draw a model wires (with texture if set) with extended parameters
 }
 
-@defproc[(DrawModelPoints
-          [model _Model]
-          [position _Vector3]
-          [scale _float]
-          [tint _Color])
-         _void]{
-Draw a model as points
-}
-
-@defproc[(DrawModelPointsEx
-          [model _Model]
-          [position _Vector3]
-          [rotationAxis _Vector3]
-          [rotationAngle _float]
-          [scale _Vector3]
-          [tint _Color])
-         _void]{
-Draw a model as points with extended parameters
-}
-
 @defproc[(DrawBoundingBox
           [box _BoundingBox]
           [color _Color])
@@ -3664,23 +3813,20 @@ Load model animations from file
 @defproc[(UpdateModelAnimation
           [model _Model]
           [anim _ModelAnimation]
-          [frame _int])
+          [frame _float])
          _void]{
-Update model animation pose (CPU)
+Update model animation pose (vertex buffers and bone matrices)
 }
 
-@defproc[(UpdateModelAnimationBones
+@defproc[(UpdateModelAnimationEx
           [model _Model]
-          [anim _ModelAnimation]
-          [frame _int])
+          [animA _ModelAnimation]
+          [frameA _float]
+          [animB _ModelAnimation]
+          [frameB _float]
+          [blend _float])
          _void]{
-Update model animation mesh bone matrices (GPU skinning)
-}
-
-@defproc[(UnloadModelAnimation
-          [anim _ModelAnimation])
-         _void]{
-Unload animation data
+Update model animation pose, blending two animations
 }
 
 @defproc[(UnloadModelAnimations
@@ -3838,7 +3984,7 @@ Checks if a sound is valid (data loaded and buffers initialized)
           [data (_pointer-to _void)]
           [sampleCount _int])
          _void]{
-Update sound buffer with new data
+Update sound buffer with new data (default data format: 32 bit float, stereo)
 }
 
 @defproc[(UnloadWave
@@ -3921,7 +4067,7 @@ Set pitch for a sound (1.0 is base level)
           [sound _Sound]
           [pan _float])
          _void]{
-Set pan for a sound (0.5 is center)
+Set pan for a sound (-1.0 left, 0.0 center, 1.0 right)
 }
 
 @defproc[(WaveCopy
@@ -4046,7 +4192,7 @@ Set pitch for a music (1.0 is base level)
           [music _Music]
           [pan _float])
          _void]{
-Set pan for a music (0.5 is center)
+Set pan for a music (-1.0 left, 0.0 center, 1.0 right)
 }
 
 @defproc[(GetMusicTimeLength
@@ -4143,7 +4289,7 @@ Set pitch for audio stream (1.0 is base level)
           [stream _AudioStream]
           [pan _float])
          _void]{
-Set pan for audio stream (0.5 is centered)
+Set pan for audio stream (-1.0 to 1.0 range, 0.0 is centered)
 }
 
 @defproc[(SetAudioStreamBufferSizeDefault
@@ -4163,7 +4309,7 @@ Audio thread callback to request new data
           [stream _AudioStream]
           [processor _AudioCallback])
          _void]{
-Attach audio stream processor to stream, receives the samples as 'float'
+Attach audio stream processor to stream, receives frames x 2 samples as 'float' (stereo)
 }
 
 @defproc[(DetachAudioStreamProcessor
@@ -4176,7 +4322,7 @@ Detach audio stream processor from stream
 @defproc[(AttachAudioMixedProcessor
           [processor _AudioCallback])
          _void]{
-Attach audio stream processor to the entire audio pipeline, receives the samples as 'float'
+Attach audio stream processor to the entire audio pipeline, receives frames x 2 samples as 'float' (stereo)
 }
 
 @defproc[(DetachAudioMixedProcessor

@@ -20,9 +20,9 @@
 
       (DrawText "some basic shapes available on raylib" 20 20 20 DARKGRAY)
 
-      (DrawCircle         (/ screen-width 5) 120 35.0 DARKBLUE)
-      (DrawCircleGradient (/ screen-width 5) 220 60.0 GREEN SKYBLUE)
-      (DrawCircleLines    (/ screen-width 5) 340 80.0 DARKBLUE)
+      (DrawCircleV        (make-Vector2 (/ screen-width 5.0) 120.0) 35.0 DARKBLUE)
+      (DrawCircleGradient (make-Vector2 (/ screen-width 5.0) 220.0) 60.0 GREEN SKYBLUE)
+      (DrawCircleLinesV   (make-Vector2 (/ screen-width 5.0) 340.0) 80.0 DARKBLUE)
 
       ; Rectangle shapes and lines
       (DrawRectangle          (- (* (/ screen-width 4) 2) 60) 100 120 60 RED)

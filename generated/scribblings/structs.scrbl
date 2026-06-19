@@ -176,12 +176,11 @@ Camera2D, defines position/orientation in 2d space
                           [tangents (_pointer-to _float)]
                           [colors (_pointer-to _ubyte)]
                           [indices (_pointer-to _ushort)]
+                          [boneCount _int]
+                          [boneIndices (_pointer-to _ubyte)]
+                          [boneWeights (_pointer-to _float)]
                           [animVertices (_pointer-to _float)]
                           [animNormals (_pointer-to _float)]
-                          [boneIds (_pointer-to _ubyte)]
-                          [boneWeights (_pointer-to _float)]
-                          [boneMatrices (_pointer-to _Matrix)]
-                          [boneCount _int]
                           [vaoId _uint]
                           [vboId (_pointer-to _uint)])
                          #:constructor-name make-Mesh])]{
@@ -231,6 +230,15 @@ Transform, vertex transformation data
 Bone, skeletal animation bone
 }
 
+@deftogether[(@defthing[_ModelSkeleton ctype?]
+              @defstruct[ModelSkeleton
+                         ([boneCount _int]
+                          [bones (_pointer-to _BoneInfo)]
+                          [bindPose _ModelAnimPose])
+                         #:constructor-name make-ModelSkeleton])]{
+Skeleton, animation bones hierarchy
+}
+
 @deftogether[(@defthing[_Model ctype?]
               @defstruct[Model
                          ([transform _Matrix]
@@ -239,22 +247,21 @@ Bone, skeletal animation bone
                           [meshes (_pointer-to _Mesh)]
                           [materials (_pointer-to _Material)]
                           [meshMaterial (_pointer-to _int)]
-                          [boneCount _int]
-                          [bones (_pointer-to _BoneInfo)]
-                          [bindPose (_pointer-to _Transform)])
+                          [skeleton _ModelSkeleton]
+                          [currentPose _ModelAnimPose]
+                          [boneMatrices (_pointer-to _Matrix)])
                          #:constructor-name make-Model])]{
 Model, meshes, materials and animation data
 }
 
 @deftogether[(@defthing[_ModelAnimation ctype?]
               @defstruct[ModelAnimation
-                         ([boneCount _int]
-                          [frameCount _int]
-                          [bones (_pointer-to _BoneInfo)]
-                          [framePoses (_pointer-to (_pointer-to _Transform))]
-                          [name (_array _byte 32)])
+                         ([name (_array _byte 32)]
+                          [boneCount _int]
+                          [keyframeCount _int]
+                          [keyframePoses (_pointer-to _ModelAnimPose)])
                          #:constructor-name make-ModelAnimation])]{
-ModelAnimation
+ModelAnimation, contains a full animation sequence
 }
 
 @deftogether[(@defthing[_Ray ctype?]
@@ -355,8 +362,7 @@ VrStereoConfig, VR stereo rendering configuration for simulator
 
 @deftogether[(@defthing[_FilePathList ctype?]
               @defstruct[FilePathList
-                         ([capacity _uint]
-                          [count _uint]
+                         ([count _uint]
                           [paths (_pointer-to (_pointer-to _byte))])
                          #:constructor-name make-FilePathList])]{
 File path list
@@ -385,7 +391,8 @@ Automation event list
               @defthing[_Texture2D ctype? #:value _Texture]
               @defthing[_TextureCubemap ctype? #:value _Texture]
               @defthing[_RenderTexture2D ctype? #:value _RenderTexture]
-              @defthing[_Camera ctype? #:value _Camera3D])]{
+              @defthing[_Camera ctype? #:value _Camera3D]
+              @defthing[_ModelAnimPose ctype? #:value _Transform *])]{
 Aliases for some struct types.
 }
 
@@ -419,7 +426,7 @@ Aliases for some struct types.
                         #:value
                         (_fun
                          [fileName : _string]
-                         [text : (_pointer-to _byte)]
+                         [text : _string]
                          -> _stdbool)]
               @defthing[_AudioCallback ctype?
                         #:value

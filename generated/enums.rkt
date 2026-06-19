@@ -349,7 +349,7 @@
            GAMEPAD_BUTTON_LEFT_THUMB = 16
            GAMEPAD_BUTTON_RIGHT_THUMB = 17
            )))
-(define GAMEPAD_BUTTON_UNKNOWN 0) ; Unknown button, just for error checking
+(define GAMEPAD_BUTTON_UNKNOWN 0) ; Unknown button, for error checking
 (define GAMEPAD_BUTTON_LEFT_FACE_UP 1) ; Gamepad left DPAD up button
 (define GAMEPAD_BUTTON_LEFT_FACE_RIGHT 2) ; Gamepad left DPAD right button
 (define GAMEPAD_BUTTON_LEFT_FACE_DOWN 3) ; Gamepad left DPAD down button
@@ -368,7 +368,7 @@
 (define GAMEPAD_BUTTON_LEFT_THUMB 16) ; Gamepad joystick pressed button left
 (define GAMEPAD_BUTTON_RIGHT_THUMB 17) ; Gamepad joystick pressed button right
 
-;; Gamepad axis
+;; Gamepad axes
 (define _GamepadAxis
   (_enum '(GAMEPAD_AXIS_LEFT_X = 0
            GAMEPAD_AXIS_LEFT_Y = 1
@@ -440,7 +440,8 @@
            SHADER_LOC_MAP_BRDF = 25
            SHADER_LOC_VERTEX_BONEIDS = 26
            SHADER_LOC_VERTEX_BONEWEIGHTS = 27
-           SHADER_LOC_BONE_MATRICES = 28
+           SHADER_LOC_MATRIX_BONETRANSFORMS = 28
+           SHADER_LOC_VERTEX_INSTANCETRANSFORM = 29
            )))
 (define SHADER_LOC_VERTEX_POSITION 0) ; Shader location: vertex attribute: position
 (define SHADER_LOC_VERTEX_TEXCOORD01 1) ; Shader location: vertex attribute: texcoord01
@@ -463,14 +464,15 @@
 (define SHADER_LOC_MAP_ROUGHNESS 18) ; Shader location: sampler2d texture: roughness
 (define SHADER_LOC_MAP_OCCLUSION 19) ; Shader location: sampler2d texture: occlusion
 (define SHADER_LOC_MAP_EMISSION 20) ; Shader location: sampler2d texture: emission
-(define SHADER_LOC_MAP_HEIGHT 21) ; Shader location: sampler2d texture: height
+(define SHADER_LOC_MAP_HEIGHT 21) ; Shader location: sampler2d texture: heightmap
 (define SHADER_LOC_MAP_CUBEMAP 22) ; Shader location: samplerCube texture: cubemap
 (define SHADER_LOC_MAP_IRRADIANCE 23) ; Shader location: samplerCube texture: irradiance
 (define SHADER_LOC_MAP_PREFILTER 24) ; Shader location: samplerCube texture: prefilter
 (define SHADER_LOC_MAP_BRDF 25) ; Shader location: sampler2d texture: brdf
-(define SHADER_LOC_VERTEX_BONEIDS 26) ; Shader location: vertex attribute: boneIds
-(define SHADER_LOC_VERTEX_BONEWEIGHTS 27) ; Shader location: vertex attribute: boneWeights
-(define SHADER_LOC_BONE_MATRICES 28) ; Shader location: array of matrices uniform: boneMatrices
+(define SHADER_LOC_VERTEX_BONEIDS 26) ; Shader location: vertex attribute: bone indices
+(define SHADER_LOC_VERTEX_BONEWEIGHTS 27) ; Shader location: vertex attribute: bone weights
+(define SHADER_LOC_MATRIX_BONETRANSFORMS 28) ; Shader location: matrix attribute: bone transforms (animation)
+(define SHADER_LOC_VERTEX_INSTANCETRANSFORM 29) ; Shader location: vertex attribute: instance transforms
 
 ;; Shader uniform data type
 (define _ShaderUniformDataType
@@ -482,7 +484,11 @@
            SHADER_UNIFORM_IVEC2 = 5
            SHADER_UNIFORM_IVEC3 = 6
            SHADER_UNIFORM_IVEC4 = 7
-           SHADER_UNIFORM_SAMPLER2D = 8
+           SHADER_UNIFORM_UINT = 8
+           SHADER_UNIFORM_UIVEC2 = 9
+           SHADER_UNIFORM_UIVEC3 = 10
+           SHADER_UNIFORM_UIVEC4 = 11
+           SHADER_UNIFORM_SAMPLER2D = 12
            )))
 (define SHADER_UNIFORM_FLOAT 0) ; Shader uniform type: float
 (define SHADER_UNIFORM_VEC2 1) ; Shader uniform type: vec2 (2 float)
@@ -492,7 +498,11 @@
 (define SHADER_UNIFORM_IVEC2 5) ; Shader uniform type: ivec2 (2 int)
 (define SHADER_UNIFORM_IVEC3 6) ; Shader uniform type: ivec3 (3 int)
 (define SHADER_UNIFORM_IVEC4 7) ; Shader uniform type: ivec4 (4 int)
-(define SHADER_UNIFORM_SAMPLER2D 8) ; Shader uniform type: sampler2d
+(define SHADER_UNIFORM_UINT 8) ; Shader uniform type: unsigned int
+(define SHADER_UNIFORM_UIVEC2 9) ; Shader uniform type: uivec2 (2 unsigned int)
+(define SHADER_UNIFORM_UIVEC3 10) ; Shader uniform type: uivec3 (3 unsigned int)
+(define SHADER_UNIFORM_UIVEC4 11) ; Shader uniform type: uivec4 (4 unsigned int)
+(define SHADER_UNIFORM_SAMPLER2D 12) ; Shader uniform type: sampler2d
 
 ;; Shader attribute data types
 (define _ShaderAttributeDataType
@@ -567,7 +577,7 @@
            TEXTURE_FILTER_ANISOTROPIC_8X = 4
            TEXTURE_FILTER_ANISOTROPIC_16X = 5
            )))
-(define TEXTURE_FILTER_POINT 0) ; No filter, just pixel approximation
+(define TEXTURE_FILTER_POINT 0) ; No filter, pixel approximation
 (define TEXTURE_FILTER_BILINEAR 1) ; Linear filtering
 (define TEXTURE_FILTER_TRILINEAR 2) ; Trilinear filtering (linear with mipmaps)
 (define TEXTURE_FILTER_ANISOTROPIC_4X 3) ; Anisotropic filtering 4x
